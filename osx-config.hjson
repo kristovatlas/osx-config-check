@@ -1,0 +1,50 @@
+/* syntax:
+[
+    {
+        `type` is "exact match" or "regex match"
+        `command` is the command you want to verify the output of
+        `expected_stdout` is the stdout string to match if type is "exact match"
+        `expected_regex` is the regex to match against stdout if type is "regex match"
+        `fix` is the command to run if stdout does not match expected result
+        `case_sensitive` is "true" or "false"
+        `description` is a human-readable string describing the configuration being checked
+    }
+]
+/* samples:
+[
+    {
+        type: "exact match"
+        command: "defaults -currentHost read /Library/Preferences/com.apple.alf globalstate"
+        expected_stdout: "1"
+        fix: "defaults -currentHost write read /Library/Preferences/com.apple.alf globalstate -bool true"
+        case_sensitive: "false"
+        description: "The OSX application firewall is enabled."
+    },
+    {
+        type: "regex match"
+        command: "pmset -g"
+        expected_regex: ".*DestroyFVKeyOnStandby\\s+1.*"
+        fix: "sudo pmset -a destroyfvkeyonstandby 1"
+        case_sensitive: "false"
+        description: "The File Vault key is destroyed when going to standby mode."
+    }
+]
+*/
+[
+    {
+        type: "exact match"
+        command: "defaults -currentHost read /Library/Preferences/com.apple.alf globalstate"
+        expected_stdout: "1"
+        fix: "defaults -currentHost write read /Library/Preferences/com.apple.alf globalstate -bool true"
+        case_sensitive: "false"
+        description: "The OSX application firewall is enabled."
+    },
+    {
+        type: "regex match"
+        command: "pmset -g"
+        expected_regex: ".*destroyfvkeyonstandby\\s+1.*"
+        fix: "sudo pmset -a destroyfvkeyonstandby 1"
+        case_sensitive: "false"
+        description: "The File Vault key is destroyed when going to standby mode."
+    }
+]
