@@ -36,6 +36,14 @@
 [
     {
         type: "exact match"
+        command: "id -Gn | grep -c -w admin"
+        expected_stdout: "0"
+        fix: "# NO FIX AVAILABLE, you must create a new account in System Preferences"
+        case_sensitive: "false"
+        description: "Current user is a non-admin account. (Create a new account if this fails!)"
+    },
+    {
+        type: "exact match"
         command: "defaults -currentHost read /Library/Preferences/com.apple.alf globalstate"
         expected_stdout: "1"
         fix: "sudo defaults -currentHost write read /Library/Preferences/com.apple.alf globalstate -bool true"
