@@ -4,8 +4,8 @@ import time
 import sys
 import re
 from subprocess import Popen, PIPE, STDOUT
-import hjson
 from warnings import warn
+import hjson
 import const #const.py
 import prompt #prompt.py
 
@@ -173,7 +173,7 @@ def try_fix(config_check):
     """
     process = Popen(config_check.fix, stdout=PIPE, stderr=STDOUT,
                     shell=True)
-    stdout, _ = process.communicate()
+    process.communicate()
 
 def main():
     """Main function."""
