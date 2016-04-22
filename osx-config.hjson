@@ -38,6 +38,7 @@
         fix: "defaults -currentHost write read /Library/Preferences/com.apple.alf globalstate -bool true"
         case_sensitive: "false"
         description: "The OSX application firewall is enabled."
+        reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
     },
     {
         type: "regex match"
@@ -46,6 +47,7 @@
         fix: "sudo pmset -a destroyfvkeyonstandby 1"
         case_sensitive: "false"
         description: "The File Vault key is destroyed when going to standby mode."
+        reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
     },
     {
         type: "regex match"
@@ -54,5 +56,6 @@
         fix: "sudo pmset -a hibernatemode 25"
         case_sensitive: "false"
         description: "The system will store a copy of memory to persistent storage, and will remove power to memory."
+        reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
     }
 ]
