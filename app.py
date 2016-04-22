@@ -9,7 +9,7 @@ from warnings import warn
 import const #const.py
 import prompt #prompt.py
 
-const.ENABLE_DEBUG_PRINT = True
+const.ENABLE_DEBUG_PRINT = False
 const.DEFAULT_OUTPUT_LOCATION = "~/Documents/"
 const.DEFAULT_CONFIG_FILE = "osx-config.hjson"
 const.PROMPT_FOR_FIXES = True #TODO: allow user to pass command line arg
@@ -113,6 +113,9 @@ def run_check(config_check, last_attempt=False):
     stdout, _ = process.communicate()
 
     stdout = stdout.strip()
+
+    dprint(stdout)
+    dprint(config_check.expected)
 
     result = ""
     if config_check.comparison_type == 'exact match':

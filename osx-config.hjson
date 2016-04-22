@@ -30,14 +30,26 @@
     }
 ]
 */
+/* NOTES:
+    * back-slashes '\' must be escaped with a double black-slash, i.e. '\\'
+*/
 [
     {
         type: "exact match"
         command: "defaults -currentHost read /Library/Preferences/com.apple.alf globalstate"
         expected_stdout: "1"
-        fix: "defaults -currentHost write read /Library/Preferences/com.apple.alf globalstate -bool true"
+        fix: "sudo defaults -currentHost write read /Library/Preferences/com.apple.alf globalstate -bool true"
         case_sensitive: "false"
         description: "The OSX application firewall is enabled."
+        reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
+    },
+    {
+        type: "exact match"
+        command: "defaults -currentHost read /Library/Preferences/com.apple.alf loggingenabled"
+        expected_stdout: "1"
+        fix: "sudo defaults -currentHost write /Library/Preferences/com.apple.alf loggingenabled -bool true"
+        case_sensitive: "false"
+        description: "Logging is enabled for the operating system."
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
     },
     {
@@ -57,5 +69,14 @@
         case_sensitive: "false"
         description: "The system will store a copy of memory to persistent storage, and will remove power to memory."
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
+    },
+    {
+        type: "regex match"
+        command: "git --version"
+        expected_regex: ".*(command not found|2\\.8\\.1).*"
+        //This will make sure latest git is installed via homebrew and make make apple's version of git non-competitive
+        fix: "brew update && brew install git && brew upgrade git && sudo mv /usr/bin/git /usr/bin/git-apple"
+        case_sensitive: "false"
+        description: "git is up to date or is not installed"
     }
 ]
