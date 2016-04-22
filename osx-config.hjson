@@ -46,5 +46,13 @@
         fix: "sudo pmset -a destroyfvkeyonstandby 1"
         case_sensitive: "false"
         description: "The File Vault key is destroyed when going to standby mode."
+    },
+    {
+        type: "regex match"
+        command: "pmset -g"
+        expected_regex: ".*hibernatemode\\s+25.*"
+        fix: "sudo pmset -a hibernatemode 25"
+        case_sensitive: "false"
+        description: "The system will store a copy of memory to persistent storage, and will remove power to memory."
     }
 ]
