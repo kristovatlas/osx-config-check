@@ -107,6 +107,12 @@ def run_check(config_check, last_attempt=False):
     """
     assert isinstance(config_check, ConfigCheck)
 
+    if 'sudo' in config_check.command:
+        print(("About to execute this command to check configuration -- %smay "
+               "require administrator privileges%s: '%s'") %
+              (const.COLORS['BOLD'], const.COLORS['ENDC'],
+               config_check.command))
+
     #http://stackoverflow.com/questions/7129107/python-how-to-suppress-the-output-of-os-system
     process = Popen(config_check.command, stdout=PIPE, stderr=STDOUT,
                     shell=True)
