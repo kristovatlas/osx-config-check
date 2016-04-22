@@ -5,11 +5,14 @@ import sys
 import re
 from subprocess import Popen, PIPE, STDOUT
 import hjson
+from warnings import warn
 import const #const.py
+import prompt #prompt.py
 
 const.ENABLE_DEBUG_PRINT = True
 const.DEFAULT_OUTPUT_LOCATION = "~/Documents/"
 const.DEFAULT_CONFIG_FILE = "osx-config.hjson"
+const.PROMPT_FOR_FIXES = True #TODO: allow user to pass command line arg
 
 const.COLORS = {
     'HEADER': '\033[95m',
@@ -94,11 +97,13 @@ def read_config(config_filename):
 
     return config_checks
 
-def run_check(config_check):
+def run_check(config_check, last_attempt=False):
     """Perform the specified configuration check against the OS.
 
     Args:
         config_check (`ConfigCheck`): The check to perform.
+        last_attempt (bool): Is this the last time the script checks this
+            configuration, or will we check again during this run?
     """
     assert isinstance(config_check, ConfigCheck)
 
@@ -131,12 +136,41 @@ def run_check(config_check):
 
     print "%s... %s" % (config_check.description, result)
 
+    if result == const.FAILED_STR and last_attempt:
+        warn("Attempted fix %s" % const.FAILED_STR)
+
+    #TODO: write result of check to file
+    if result == const.PASSED_STR:
+        return True
+    elif result == const.FAILED_STR:
+        return False
+    else:
+        raise ValueError
+
+def try_fix(config_check):
+    """Attempt to fix a misconfiguration.
+
+    Args:
+        config_check (`ConfigCheck`): The check to perform.
+    """
+    process = Popen(config_check.fix, stdout=PIPE, stderr=STDOUT,
+                    shell=True)
+    stdout, _ = process.communicate()
+
 def main():
     """Main function."""
     config_checks = read_config(const.DEFAULT_CONFIG_FILE)
     for config_check in config_checks:
-        run_check(config_check)
-        #TODO: write results to a file
+        if not run_check(config_check):
+            if const.PROMPT_FOR_FIXES:
+                question = (("Apply the following fix? This will execute this "
+                             "command: '%s'") % config_check.fix)
+                if prompt.query_yes_no(question=question, default="yes"):
+                    try_fix(config_check)
+                    run_check(config_check, last_attempt=True)
+            else:
+                try_fix(config_check)
+                run_check(config_check, last_attempt=True)
 
 def dprint(msg):
     """Debug print statements."""
