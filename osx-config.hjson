@@ -52,6 +52,30 @@
         description: "Logging is enabled for the operating system."
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
     },
+    /* TODO: want to add stealth mode to this list, but it should probably be a "suggested" configuration rather than a required one.
+    {
+
+        type: "exact match"
+        command: "defaults -currentHost read /Library/Preferences/com.apple.alf stealthenabled"
+        expected_stdout: "1"
+        fix: "sudo defaults write /Library/Preferences/com.apple.alf stealthenabled -bool true"
+        case_sensitive: "false"
+        description: "Stealth mode is enabled for OSX: Computer does not respond to ICMP ping requests or connection attempts from a closed TCP/UDP port."
+        reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
+        suggested: "true"
+        undo: "sudo defaults write /Library/Preferences/com.apple.alf stealthenabled -bool false"
+    },
+    */
+    {
+        type: "exact match"
+        command: "defaults -currentHost read /Library/Preferences/com.apple.alf allowsignedenabled"
+        expected_stdout: "1"
+        fix: "sudo defaults -currentHost write /Library/Preferences/com.apple.alf allowsignedenabled -bool false"
+        case_sensitive: "false"
+        description: "Automatic whitelisting of Apple-signed applications for firewall is disabled."
+        reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
+        undo: "sudo defaults -currentHost write /Library/Preferences/com.apple.alf allowsignedenabled -bool true"
+    },
     {
         type: "regex match"
         command: "pmset -g"
@@ -78,5 +102,15 @@
         fix: "brew update && brew install git && brew upgrade git && sudo mv /usr/bin/git /usr/bin/git-apple"
         case_sensitive: "false"
         description: "git is up to date or is not installed"
+    },
+    {
+        type: "regex match"
+        command: "sudo launchctl list"
+        expected_regex: "^((?!com\\.apple\\.apsd).)*$"
+        fix: "sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.apsd.plist"
+        case_sensitive: "false"
+        description: "Apple Push Notifications are disabled."
+        reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
+        undo: "sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.apsd.plist"
     }
 ]
