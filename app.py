@@ -27,6 +27,11 @@ const.COLORS = {
 
 const.PASSED_STR = const.COLORS['OKGREEN'] + "PASSED!" + const.COLORS['ENDC']
 const.FAILED_STR = const.COLORS['FAIL'] + "FAILED!" + const.COLORS['ENDC']
+const.NO_SUDO_STR = ("%s%s%s" %
+                     (const.COLORS['WARNING'],
+                      ("Insufficient privileges to perform this check. "
+                       "Skipping."),
+                      const.COLORS['ENDC']))
 
 class ConfigCheck(object):
     """Encapsulates configuration to check in operating system."""
@@ -124,24 +129,28 @@ def run_check(config_check, last_attempt=False):
     dprint(config_check.expected)
 
     result = ""
-    if config_check.comparison_type == 'exact match':
-        if config_check.case_sensitive:
-            if stdout == config_check.expected:
-                result = const.PASSED_STR
+    if "is not in the sudoers file" in stdout:
+        #command required sudo permissions, but user isn't in sudoers list.
+        result = const.NO_SUDO_STR
+    else:
+        if config_check.comparison_type == 'exact match':
+            if config_check.case_sensitive:
+                if stdout == config_check.expected:
+                    result = const.PASSED_STR
+                else:
+                    result = const.FAILED_STR
             else:
-                result = const.FAILED_STR
-        else:
-            if stdout.lower() == str(config_check.expected).lower():
-                result = const.PASSED_STR
-            else:
-                result = const.FAILED_STR
+                if stdout.lower() == str(config_check.expected).lower():
+                    result = const.PASSED_STR
+                else:
+                    result = const.FAILED_STR
 
-    elif config_check.comparison_type == 'regex match':
-        if is_match(config_check.expected, stdout,
-                    ignore_case=(not config_check.case_sensitive)):
-            result = const.PASSED_STR
-        else:
-            result = const.FAILED_STR
+        elif config_check.comparison_type == 'regex match':
+            if is_match(config_check.expected, stdout,
+                        ignore_case=(not config_check.case_sensitive)):
+                result = const.PASSED_STR
+            else:
+                result = const.FAILED_STR
 
     print "%s... %s" % (config_check.description, result)
 
@@ -149,7 +158,7 @@ def run_check(config_check, last_attempt=False):
         warn("Attempted fix %s" % const.FAILED_STR)
 
     #TODO: write result of check to file
-    if result == const.PASSED_STR:
+    if result == const.PASSED_STR or result == const.NO_SUDO_STR:
         return True
     elif result == const.FAILED_STR:
         return False
