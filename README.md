@@ -29,6 +29,22 @@ python app.py
 
 This will take you through a series of interactive steps that checks your machine's configuration, and offers to fix mixconfigurations for you.
 
+## Sample Output
+
+```bash
+$ python app.py
+Current user is a non-admin account. (Create a new account if this fails!)... PASSED!
+The OSX application firewall is enabled.... PASSED!
+Logging is enabled for the operating system.... PASSED!
+Automatic whitelisting of Apple-signed applications for firewall is disabled.... PASSED!
+The File Vault key is destroyed when going to standby mode.... PASSED!
+The system will store a copy of memory to persistent storage, and will remove power to memory.... PASSED!
+git is up to date or is not installed... PASSED!
+About to execute this command to check configuration -- may require administrator privileges: 'sudo launchctl list'
+Password:
+Apple Push Notifications are disabled.... Insufficient privileges to perform this check. Skipping.
+```
+
 ## Primary Authors
 
 * [Kristov Atlas](https://twitter.com/kristovatlas/)
