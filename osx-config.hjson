@@ -2,6 +2,7 @@
 [
     {
         `type` is "exact match" or "regex match"
+        `confidence` indicates subjective estimation of negative side-effects. valid values: "required", "recommended", "experimental".
         `command` is the command you want to verify the output of
         `expected_stdout` is the stdout string to match if type is "exact match"
         `expected_regex` is the regex to match against stdout if type is "regex match"
@@ -14,6 +15,7 @@
 [
     {
         type: "exact match"
+        confidence: "required"
         command: "defaults -currentHost read /Library/Preferences/com.apple.alf globalstate"
         expected_stdout: "1"
         fix: "defaults -currentHost write read /Library/Preferences/com.apple.alf globalstate -bool true"
@@ -22,6 +24,7 @@
     },
     {
         type: "regex match"
+        confidence: "required"
         command: "pmset -g"
         expected_regex: ".*DestroyFVKeyOnStandby\\s+1.*"
         fix: "sudo pmset -a destroyfvkeyonstandby 1"
@@ -36,6 +39,7 @@
 [
     {
         type: "exact match"
+        confidence: "required"
         command: "id -Gn | grep -c -w admin"
         expected_stdout: "0"
         fix: "# NO FIX AVAILABLE, you must create a new account in System Preferences"
@@ -44,6 +48,7 @@
     },
     {
         type: "exact match"
+        confidence: "required"
         command: "defaults -currentHost read /Library/Preferences/com.apple.alf globalstate"
         expected_stdout: "1"
         fix: "sudo defaults -currentHost write read /Library/Preferences/com.apple.alf globalstate -bool true"
@@ -53,6 +58,7 @@
     },
     {
         type: "exact match"
+        confidence: "required"
         command: "defaults -currentHost read /Library/Preferences/com.apple.alf loggingenabled"
         expected_stdout: "1"
         fix: "sudo defaults -currentHost write /Library/Preferences/com.apple.alf loggingenabled -bool true"
@@ -60,10 +66,21 @@
         description: "Logging is enabled for the operating system."
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
     },
+    /*{
+        type: "exact match"
+        confidence: "required"
+        command: "echo $HOMEBREW_NO_ANALYTICS"
+        expected_stdout: "1"
+        fix: "export HOMEBREW_NO_ANALYTICS=1 ; grep -q 'export HOMEBREW_NO_ANALYTICS=1' ~/.profile || echo 'export HOMEBREW_NO_ANALYTICS=1' >> ~/.profile"
+        case_sensitive: "false"
+        description: "Homebrew analytics are disabled."
+        reference: "https://github.com/Homebrew/brew/blob/master/share/doc/homebrew/Analytics.md"
+    },*/
     /* TODO: want to add stealth mode to this list, but it should probably be a "suggested" configuration rather than a required one.
     {
 
         type: "exact match"
+        confidence: "recommended"
         command: "defaults -currentHost read /Library/Preferences/com.apple.alf stealthenabled"
         expected_stdout: "1"
         fix: "sudo defaults write /Library/Preferences/com.apple.alf stealthenabled -bool true"
@@ -76,6 +93,7 @@
     */
     {
         type: "exact match"
+        confidence: "required"
         command: "defaults -currentHost read /Library/Preferences/com.apple.alf allowsignedenabled"
         expected_stdout: "1"
         fix: "sudo defaults -currentHost write /Library/Preferences/com.apple.alf allowsignedenabled -bool false"
@@ -86,6 +104,7 @@
     },
     {
         type: "regex match"
+        confidence: "recommended"
         command: "pmset -g"
         expected_regex: ".*destroyfvkeyonstandby\\s+1.*"
         fix: "sudo pmset -a destroyfvkeyonstandby 1"
@@ -95,6 +114,7 @@
     },
     {
         type: "regex match"
+        confidence: "recommended"
         command: "pmset -g"
         expected_regex: ".*hibernatemode\\s+25.*"
         fix: "sudo pmset -a hibernatemode 25"
@@ -104,6 +124,7 @@
     },
     {
         type: "regex match"
+        confidence: "required"
         command: "git --version"
         expected_regex: ".*(command not found|2\\.8\\.1).*"
         //This will make sure latest git is installed via homebrew and make make apple's version of git non-competitive
@@ -113,6 +134,7 @@
     },
     {
         type: "regex match"
+        confidence: "recommended"
         command: "sudo launchctl list"
         expected_regex: "^((?!com\\.apple\\.apsd).)*$"
         fix: "sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.apsd.plist"

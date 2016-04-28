@@ -5,6 +5,7 @@ import sys
 import re
 from subprocess import Popen, PIPE, STDOUT
 from warnings import warn
+from enum import Enum
 import hjson
 import const #const.py
 import prompt #prompt.py
@@ -13,6 +14,10 @@ const.ENABLE_DEBUG_PRINT = False
 const.DEFAULT_OUTPUT_LOCATION = "~/Documents/"
 const.DEFAULT_CONFIG_FILE = "osx-config.hjson"
 const.PROMPT_FOR_FIXES = True #TODO: allow user to pass command line arg
+const.WARN_FOR_RECOMMENDED = True #TODO: command line flag
+const.WARN_FOR_EXPERIMENTAL = True #TODO: command line flag
+const.FIX_RECOMMENDED_BY_DEFAULT = True #TODO: command line flag
+const.FIX_EXPERIMENTAL_BY_DEFAULT = False #TODO: command line flag
 
 const.COLORS = {
     'HEADER': '\033[95m',
@@ -32,6 +37,22 @@ const.NO_SUDO_STR = ("%s%s%s" %
                       ("Insufficient privileges to perform this check. "
                        "Skipping."),
                       const.COLORS['ENDC']))
+const.RECOMMENDED_STR = ("%s%s%s" % (const.COLORS['BOLD'],
+                                     'RECOMMENDED',
+                                     const.COLORS['ENDC']))
+const.EXPERIMENTAL_STR = ("%s%s%s" % (const.COLORS['BOLD'],
+                                      'EXPERIMENTAL',
+                                      const.COLORS['ENDC']))
+
+class Confidence(Enum):
+    """Likelihood that a configuration will create negative side-effects.
+
+    A lower integer value indicates less likelihood that a configuration will
+    cause problems with applications.
+    """
+    required = 1
+    recommended = 2
+    experimental = 3
 
 class ConfigCheck(object):
     """Encapsulates configuration to check in operating system."""
@@ -39,7 +60,7 @@ class ConfigCheck(object):
     expected_stdout = ''
 
     def __init__(self, command, comparison_type, expected, fix, case_sensitive,
-                 description):
+                 description, confidence):
         """
         Args:
 
@@ -52,6 +73,7 @@ class ConfigCheck(object):
                 case-sensitive comparison.
             description (str): A human-readable description of the configuration
                 being checked.
+            confidence (str): "required", "recommended", or "experimental"
         """
         assert comparison_type in ('exact match', 'regex match')
         self.command = command
@@ -60,6 +82,15 @@ class ConfigCheck(object):
         self.fix = fix
         self.case_sensitive = case_sensitive
         self.description = description
+
+        if confidence == 'required':
+            self.confidence = Confidence.required
+        elif confidence == 'recommended':
+            self.confidence = Confidence.recommended
+        elif confidence == 'experimental':
+            self.confidence = Confidence.experimental
+        else:
+            raise ValueError
 
     def __str__(self):
         return str(self.__dict__)
@@ -97,7 +128,8 @@ def read_config(config_filename):
             fix=config_check_hjson['fix'],
             case_sensitive=(True if config_check_hjson['case_sensitive'] == \
                             'true' else False),
-            description=config_check_hjson['description'])
+            description=config_check_hjson['description'],
+            confidence=config_check_hjson['confidence'])
         config_checks.append(config_check)
 
     return config_checks
@@ -154,7 +186,7 @@ def run_check(config_check, last_attempt=False):
 
     print "%s... %s" % (config_check.description, result)
 
-    if result == const.FAILED_STR and last_attempt:
+    if result == const.FAILED_STR and last_attempt and do_warn(config_check):
         warn("Attempted fix %s" % const.FAILED_STR)
 
     #TODO: write result of check to file
@@ -164,6 +196,18 @@ def run_check(config_check, last_attempt=False):
         return False
     else:
         raise ValueError
+
+def do_warn(config_check):
+    """Determines whether the config failure merits warning."""
+    if config_check.confidence == Confidence.required:
+        return True
+    if (config_check.confidence == Confidence.recommended and
+            const.WARN_FOR_RECOMMENDED):
+        return True
+    if (config_check.confidence == Confidence.experimental and
+            const.WARN_FOR_EXPERIMENTAL):
+        return True
+    return False
 
 def try_fix(config_check):
     """Attempt to fix a misconfiguration.
@@ -180,15 +224,29 @@ def main():
     config_checks = read_config(const.DEFAULT_CONFIG_FILE)
     for config_check in config_checks:
         if not run_check(config_check):
+            #config failed check
             if const.PROMPT_FOR_FIXES:
-                question = (("Apply the following fix? This will execute this "
-                             "command: '%s'") % config_check.fix)
-                if prompt.query_yes_no(question=question, default="yes"):
+                prompt_default = True
+                descriptor = ''
+                if config_check.confidence == Confidence.recommended:
+                    prompt_default = const.FIX_RECOMMENDED_BY_DEFAULT
+                    descriptor = const.RECOMMENDED_STR + ' '
+                elif config_check.confidence == Confidence.experimental:
+                    prompt_default = const.FIX_EXPERIMENTAL_BY_DEFAULT
+                    descriptor = const.EXPERIMENTAL_STR + ' '
+                question = (("Apply the following %s fix? This will execute "
+                             "this command: '%s'") %
+                            (descriptor, config_check.fix))
+                if prompt.query_yes_no(question=question,
+                                       default=_bool_to_yes_no(prompt_default)):
                     try_fix(config_check)
                     run_check(config_check, last_attempt=True)
             else:
                 try_fix(config_check)
                 run_check(config_check, last_attempt=True)
+
+def _bool_to_yes_no(boolean):
+    return 'yes' if boolean else 'no'
 
 def dprint(msg):
     """Debug print statements."""
