@@ -76,7 +76,6 @@
         description: "Homebrew analytics are disabled."
         reference: "https://github.com/Homebrew/brew/blob/master/share/doc/homebrew/Analytics.md"
     },*/
-    /* TODO: want to add stealth mode to this list, but it should probably be a "suggested" configuration rather than a required one.
     {
 
         type: "exact match"
@@ -90,7 +89,6 @@
         suggested: "true"
         undo: "sudo defaults write /Library/Preferences/com.apple.alf stealthenabled -bool false"
     },
-    */
     {
         type: "exact match"
         confidence: "required"
