@@ -29,6 +29,15 @@ python app.py
 
 This will take you through a series of interactive steps that checks your machine's configuration, and offers to fix mixconfigurations for you.
 
+If you run the program and get an error message such as: `-bash: pip: command not found` or `ImportError: No module named enum` or `ImportError: No module named hjson`
+
+In this case, you are missing some libraries you need to run this app. Try pasting these commands into Terminal and pressing [enter] to run them:
+```bash
+sudo easy_install pip
+sudo pip install enum34
+sudo pip install hjson
+```
+
 ## Sample Output
 
 ```bash
