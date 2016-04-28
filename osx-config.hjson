@@ -66,16 +66,18 @@
         description: "Logging is enabled for the operating system."
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
     },
-    /*{
+    {
         type: "exact match"
         confidence: "required"
-        command: "echo $HOMEBREW_NO_ANALYTICS"
+        //test based on: https://github.com/Homebrew/brew/blob/master/Library/Homebrew/utils/analytics.sh
+        command: "[[ -n $HOMEBREW_NO_ANALYTICS ]] && echo 1 || echo 0"
         expected_stdout: "1"
-        fix: "export HOMEBREW_NO_ANALYTICS=1 ; grep -q 'export HOMEBREW_NO_ANALYTICS=1' ~/.profile || echo 'export HOMEBREW_NO_ANALYTICS=1' >> ~/.profile"
+        //TODO: This fix works if you login/logout, but I haven't been able to get a fix working that doesn't require login/logout. The enironment variable is context dependent, and it's not clear how to set the variable in the parent-most environment without this action.
+        fix: "grep -q 'export HOMEBREW_NO_ANALYTICS=1' ~/.profile || echo 'export HOMEBREW_NO_ANALYTICS=1' >> ~/.profile ; source ~/.profile"
         case_sensitive: "false"
-        description: "Homebrew analytics are disabled."
+        description: "Homebrew analytics are disabled. (NOTE: Fix requires you to login/logout.)"
         reference: "https://github.com/Homebrew/brew/blob/master/share/doc/homebrew/Analytics.md"
-    },*/
+    },
     {
 
         type: "exact match"
