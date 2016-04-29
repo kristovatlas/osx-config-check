@@ -34,7 +34,6 @@ If you run the program and get an error message such as: `-bash: pip: command no
 In this case, you are missing some libraries you need to run this app. Try pasting these commands into Terminal and pressing [enter] to run them:
 ```bash
 sudo easy_install pip
-sudo pip install enum34
 sudo pip install hjson
 ```
 
