@@ -103,6 +103,17 @@
         undo: "sudo defaults -currentHost write /Library/Preferences/com.apple.alf allowsignedenabled -bool true"
     },
     {
+        type: "exact match"
+        confidence: "required"
+        command: "defaults -currentHost read /Library/Preferences/SystemConfiguration/com.apple.captive.control Active"
+        expected_stdout: "0"
+        fix: "sudo defaults -currentHost write /Library/Preferences/SystemConfiguration/com.apple.captive.control Active -bool false"
+        case_sensitive: "false"
+        description: "Captive portal for connecting to new networks is disabled to prevent MITM attacks."
+        reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
+        undo: "sudo defaults -currentHost write /Library/Preferences/SystemConfiguration/com.apple.captive.control Active -bool true"
+    }
+    {
         type: "regex match"
         confidence: "recommended"
         command: "pmset -g"
