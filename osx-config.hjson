@@ -173,5 +173,15 @@
         fix: "networksetup listallnetworkservices | grep -v 'An asterisk' | xargs -I{} networksetup -setdnsservers '{}' 8.8.8.8 8.8.4.4"
         case_sensitive: "false"
         description: "Google DNS servers are used by default on all network interfaces."
+    },
+    {
+        type: "regex match"
+        confidence: "required"
+        command: "curl --version"
+        expected_regex: ".*(command not found|7\\.48\\.0).*"
+        fix: "brew update ; brew install curl ; brew upgrade curl ; brew link curl --force"
+        case_sensitive: false"
+        description: "The curl utility is up to date or absent from the system."
+        undo: "brew unlink curl"
     }
 ]
