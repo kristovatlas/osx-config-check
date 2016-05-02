@@ -112,7 +112,18 @@
         description: "Captive portal for connecting to new networks is disabled to prevent MITM attacks."
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
         undo: "sudo defaults -currentHost write /Library/Preferences/SystemConfiguration/com.apple.captive.control Active -bool true"
-    }
+    },
+    {
+        type: "exact match"
+        confidence: "required"
+        command: "openssl version"
+        expected_stdout: "OpenSSL 1.0.2g  1 Mar 2016"
+        fix: "brew update ; brew install openssl ; brew upgrade openssl ; brew link openssl --force ; sudo mv /usr/bin/openssl /usr/in/openssl-apple"
+        case_sensitive: "false"
+        description: "OpenSSL is up-to-date."
+        reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
+        undo: "sudo mv /usr/bin/openssl-apple /usr/bin/openssl && brew unlink openssl"
+    },
     {
         type: "regex match"
         confidence: "recommended"
