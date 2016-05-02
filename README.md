@@ -53,6 +53,10 @@ Password:
 Apple Push Notifications are disabled.... Insufficient privileges to perform this check. Skipping.
 ```
 
+## Similar Projects
+
+* https://github.com/SummitRoute/osxlockdown
+
 ## Primary Authors
 
 * [Kristov Atlas](https://twitter.com/kristovatlas/)
