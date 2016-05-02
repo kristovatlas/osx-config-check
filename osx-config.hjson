@@ -142,5 +142,14 @@
         description: "Apple Push Notifications are disabled."
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
         undo: "sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.apsd.plist"
+    },
+    {
+        type: "regex match"
+        confidence: "recommended"
+        command: "nslookup google.com"
+        expected_regex: "^.*Server:\\s+8\\.8\\.8\\.8.*"
+        fix: "networksetup listallnetworkservices | grep -v 'An asterisk' | xargs -I{} networksetup -setdnsservers '{}' 8.8.8.8 8.8.4.4"
+        case_sensitive: "false"
+        description: "Google DNS servers are used by default on all network interfaces."
     }
 ]
