@@ -251,7 +251,7 @@ def _try_fix(config_check, use_sudo=False):
     command = config_check.sudo_fix if use_sudo else config_check.fix
     if use_sudo:
         print(("Attempting configuration fix with elevated privileges; %syou "
-              "may be prompted for your OS X login password%s...") %
+               "may be prompted for your OS X login password%s...") %
               (const.COLORS['BOLD'], const.COLORS['ENDC']))
     if command is not None:
         process = Popen(command, stdout=PIPE, stderr=STDOUT, shell=True)
