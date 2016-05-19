@@ -124,7 +124,7 @@
         type: "exact match"
         confidence: "required"
         command: "openssl version"
-        expected_stdout: "OpenSSL 1.0.2g  1 Mar 2016"
+        expected_stdout: "OpenSSL 1.0.2h  3 May 2016"
         fix: "brew update ; brew install openssl ; brew upgrade openssl ; brew link openssl --force ; mv /usr/bin/openssl /usr/in/openssl-apple"
         sudo_fix: "brew update ; brew install openssl ; brew upgrade openssl ; brew link openssl --force ; sudo mv /usr/bin/openssl /usr/in/openssl-apple"
         case_sensitive: "false"
