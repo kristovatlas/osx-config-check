@@ -44,6 +44,8 @@ const.EXPERIMENTAL_STR = ("%s%s%s" % (const.COLORS['BOLD'],
                                       'EXPERIMENTAL',
                                       const.COLORS['ENDC']))
 
+glob_check_num = 1
+
 class Confidence(Enum):
     """Likelihood that a configuration will create negative side-effects.
 
@@ -183,7 +185,8 @@ def run_check(config_check, last_attempt=False, quiet_fail=False):
                                 config_check.case_sensitive)
 
     if passed or not quiet_fail:
-        print "%s... %s" % (config_check.description, _get_result_str(passed))
+        print("CHECK #%d: %s... %s" % (glob_check_num, config_check.description,
+                                       _get_result_str(passed)))
         #TODO: write result of check to file
 
     if not passed and last_attempt and do_warn(config_check):
@@ -250,7 +253,7 @@ def _try_fix(config_check, use_sudo=False):
     """
     command = config_check.sudo_fix if use_sudo else config_check.fix
     if use_sudo:
-        print(("Attempting configuration fix with elevated privileges; %syou "
+        print(("\tAttempting configuration fix with elevated privileges; %syou "
                "may be prompted for your OS X login password%s...") %
               (const.COLORS['BOLD'], const.COLORS['ENDC']))
     if command is not None:
@@ -277,6 +280,8 @@ def do_fix_and_test(config_check):
 
 def main():
     """Main function."""
+    global glob_check_num
+
     config_checks = read_config(const.DEFAULT_CONFIG_FILE)
     for config_check in config_checks:
         if not run_check(config_check):
@@ -290,14 +295,15 @@ def main():
                 elif config_check.confidence == Confidence.experimental:
                     prompt_default = const.FIX_EXPERIMENTAL_BY_DEFAULT
                     descriptor = const.EXPERIMENTAL_STR + ' '
-                question = (("Apply the following %s fix? This will execute "
-                             "this command: '%s'") %
+                question = (("\tApply the following %s fix? This will execute "
+                             "this command:\n\t\t'%s'") %
                             (descriptor, config_check.fix))
                 if prompt.query_yes_no(question=question,
                                        default=_bool_to_yes_no(prompt_default)):
                     do_fix_and_test(config_check)
             else:
                 do_fix_and_test(config_check)
+        glob_check_num += 1
 
 def _bool_to_yes_no(boolean):
     return 'yes' if boolean else 'no'
