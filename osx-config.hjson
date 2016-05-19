@@ -3,10 +3,12 @@
     {
         `type` is "exact match" or "regex match"
         `confidence` indicates subjective estimation of negative side-effects. valid values: "required", "recommended", "experimental".
-        `command` is the command you want to verify the output of
+        `command` is the command you want to verify the output of. should not contain sudo.
+        `sudo_command` a version of the command that requires elevated privileges should the `command` version fail to pass.
         `expected_stdout` is the stdout string to match if type is "exact match"
         `expected_regex` is the regex to match against stdout if type is "regex match"
-        `fix` is the command to run if stdout does not match expected result
+        `fix` is the command to run if stdout does not match expected result. should not contain sudo.
+        `sudo_fix` is the command to run if stdout does not match expected result and `fix` does not resolve the failure.
         `case_sensitive` is "true" or "false"
         `description` is a human-readable string describing the configuration being checked
     }
@@ -18,7 +20,7 @@
         confidence: "required"
         command: "defaults -currentHost read /Library/Preferences/com.apple.alf globalstate"
         expected_stdout: "1"
-        fix: "defaults -currentHost write read /Library/Preferences/com.apple.alf globalstate -bool true"
+        fix: "defaults -currentHost write /Library/Preferences/com.apple.alf globalstate -bool true"
         case_sensitive: "false"
         description: "The OSX application firewall is enabled."
     },
@@ -27,7 +29,8 @@
         confidence: "required"
         command: "pmset -g"
         expected_regex: ".*DestroyFVKeyOnStandby\\s+1.*"
-        fix: "sudo pmset -a destroyfvkeyonstandby 1"
+        fix: "pmset -a destroyfvkeyonstandby 1"
+        sudo_fix: "sudo pmset -a destroyfvkeyonstandby 1"
         case_sensitive: "false"
         description: "The File Vault key is destroyed when going to standby mode."
     }
@@ -51,7 +54,8 @@
         confidence: "required"
         command: "defaults -currentHost read /Library/Preferences/com.apple.alf globalstate"
         expected_stdout: "1"
-        fix: "sudo defaults -currentHost write read /Library/Preferences/com.apple.alf globalstate -bool true"
+        fix: "defaults -currentHost write /Library/Preferences/com.apple.alf globalstate -bool true"
+        sudo_fix: "sudo defaults -currentHost write /Library/Preferences/com.apple.alf globalstate -bool true"
         case_sensitive: "false"
         description: "The OSX application firewall is enabled."
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
@@ -61,7 +65,8 @@
         confidence: "required"
         command: "defaults -currentHost read /Library/Preferences/com.apple.alf loggingenabled"
         expected_stdout: "1"
-        fix: "sudo defaults -currentHost write /Library/Preferences/com.apple.alf loggingenabled -bool true"
+        fix: "defaults -currentHost write /Library/Preferences/com.apple.alf loggingenabled -bool true"
+        sudo_fix: "sudo defaults -currentHost write /Library/Preferences/com.apple.alf loggingenabled -bool true"
         case_sensitive: "false"
         description: "Logging is enabled for the operating system."
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
@@ -84,7 +89,8 @@
         confidence: "recommended"
         command: "defaults -currentHost read /Library/Preferences/com.apple.alf stealthenabled"
         expected_stdout: "1"
-        fix: "sudo defaults write /Library/Preferences/com.apple.alf stealthenabled -bool true"
+        fix: "defaults write /Library/Preferences/com.apple.alf stealthenabled -bool true"
+        sudo_fix: "sudo defaults write /Library/Preferences/com.apple.alf stealthenabled -bool true"
         case_sensitive: "false"
         description: "Stealth mode is enabled for OSX: Computer does not respond to ICMP ping requests or connection attempts from a closed TCP/UDP port."
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
@@ -95,7 +101,8 @@
         confidence: "required"
         command: "defaults -currentHost read /Library/Preferences/com.apple.alf allowsignedenabled"
         expected_stdout: "1"
-        fix: "sudo defaults -currentHost write /Library/Preferences/com.apple.alf allowsignedenabled -bool false"
+        fix: "defaults -currentHost write /Library/Preferences/com.apple.alf allowsignedenabled -bool false"
+        sudo_fix: "sudo defaults -currentHost write /Library/Preferences/com.apple.alf allowsignedenabled -bool false"
         case_sensitive: "false"
         description: "Automatic whitelisting of Apple-signed applications for firewall is disabled."
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
@@ -106,7 +113,8 @@
         confidence: "required"
         command: "defaults -currentHost read /Library/Preferences/SystemConfiguration/com.apple.captive.control Active"
         expected_stdout: "0"
-        fix: "sudo defaults -currentHost write /Library/Preferences/SystemConfiguration/com.apple.captive.control Active -bool false"
+        fix: "defaults -currentHost write /Library/Preferences/SystemConfiguration/com.apple.captive.control Active -bool false"
+        sudo_fix: "sudo defaults -currentHost write /Library/Preferences/SystemConfiguration/com.apple.captive.control Active -bool false"
         case_sensitive: "false"
         description: "Captive portal for connecting to new networks is disabled to prevent MITM attacks."
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
@@ -117,18 +125,20 @@
         confidence: "required"
         command: "openssl version"
         expected_stdout: "OpenSSL 1.0.2g  1 Mar 2016"
-        fix: "brew update ; brew install openssl ; brew upgrade openssl ; brew link openssl --force ; sudo mv /usr/bin/openssl /usr/in/openssl-apple"
+        fix: "brew update ; brew install openssl ; brew upgrade openssl ; brew link openssl --force ; mv /usr/bin/openssl /usr/in/openssl-apple"
+        sudo_fix: "brew update ; brew install openssl ; brew upgrade openssl ; brew link openssl --force ; sudo mv /usr/bin/openssl /usr/in/openssl-apple"
         case_sensitive: "false"
         description: "OpenSSL is up-to-date."
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
-        undo: "sudo mv /usr/bin/openssl-apple /usr/bin/openssl && brew unlink openssl"
+        undo: "sudo mv /usr/bin/openssl-apple /usr/bin/openssl ; brew unlink openssl"
     },
     {
         type: "regex match"
         confidence: "recommended"
         command: "pmset -g"
         expected_regex: ".*destroyfvkeyonstandby\\s+1.*"
-        fix: "sudo pmset -a destroyfvkeyonstandby 1"
+        fix: "pmset -a destroyfvkeyonstandby 1"
+        sudo_fix: "sudo pmset -a destroyfvkeyonstandby 1"
         case_sensitive: "false"
         description: "The File Vault key is destroyed when going to standby mode."
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
@@ -138,7 +148,8 @@
         confidence: "recommended"
         command: "pmset -g"
         expected_regex: ".*hibernatemode\\s+25.*"
-        fix: "sudo pmset -a hibernatemode 25"
+        fix: "pmset -a hibernatemode 25"
+        sudo_fix: "sudo pmset -a hibernatemode 25"
         case_sensitive: "false"
         description: "The system will store a copy of memory to persistent storage, and will remove power to memory."
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
@@ -149,16 +160,19 @@
         command: "git --version"
         expected_regex: ".*(command not found|2\\.8\\.1).*"
         //This will make sure latest git is installed via homebrew and make make apple's version of git non-competitive
-        fix: "brew update && brew install git && brew upgrade git && sudo mv /usr/bin/git /usr/bin/git-apple"
+        fix: "brew update && brew install git && brew upgrade git && mv /usr/bin/git /usr/bin/git-apple"
+        sudo_fix: "brew update && brew install git && brew upgrade git && sudo mv /usr/bin/git /usr/bin/git-apple"
         case_sensitive: "false"
         description: "git is up to date or is not installed"
     },
     {
         type: "regex match"
         confidence: "recommended"
-        command: "sudo launchctl list"
+        command: "launchctl list"
+        sudo_command: "sudo launchctl list"
         expected_regex: "^((?!com\\.apple\\.apsd).)*$"
-        fix: "sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.apsd.plist"
+        fix: "launchctl unload -w /System/Library/LaunchDaemons/com.apple.apsd.plist"
+        sudo_fix: "sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.apsd.plist"
         case_sensitive: "false"
         description: "Apple Push Notifications are disabled."
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
