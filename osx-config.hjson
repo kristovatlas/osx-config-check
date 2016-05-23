@@ -208,5 +208,27 @@
         case_sensitive: false"
         description: "The curl utility is up to date or absent from the system."
         undo: "brew unlink curl"
+    },
+    {
+        type: "regex match"
+        confidence: "required"
+        command: "fdesetup status -verbose"
+        expected_regex: "^.*FileVault is On.*$"
+        fix: "fdesetup enable"
+        sudo_fix: "sudo fdesetup enable"
+        case_sensitive: "false"
+        description: "FileVault file system encryption is enabled."
+        reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
+        undo: ""
+    },
+    {
+        type: "regex match"
+        confidence: "required"
+        command: "fdesetup status -verbose"
+        expected_regex: "^.*device path \\=\\s+.*$"
+        fix: "#TODO: None"
+        case_sensitive: "false"
+        description: "FileVault file system encrption is enabled at the root directory."
+        reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
     }
 ]
