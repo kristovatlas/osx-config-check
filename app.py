@@ -6,13 +6,13 @@ import re
 from subprocess import Popen, PIPE, STDOUT
 from warnings import warn
 from enum import Enum
-import hjson
+import json
 import const #const.py
 import prompt #prompt.py
 
 const.ENABLE_DEBUG_PRINT = False
 const.DEFAULT_OUTPUT_LOCATION = "~/Documents/"
-const.DEFAULT_CONFIG_FILE = "osx-config.hjson"
+const.DEFAULT_CONFIG_FILE = "osx-config.json"
 const.PROMPT_FOR_FIXES = True #TODO: allow user to pass command line arg
 const.WARN_FOR_RECOMMENDED = True #TODO: command line flag
 const.WARN_FOR_EXPERIMENTAL = True #TODO: command line flag
@@ -120,36 +120,38 @@ def read_config(config_filename):
 
     config = None
     with open(config_filename, 'r') as config_file:
-        config = hjson.loads(config_file.read())
+        config = json.loads(config_file.read())
 
     config_checks = []
 
-    for config_check_hjson in config:
+    for config_check_json in config:
+        if '_comment' in config_check_json:
+            continue
         expected = None
-        if config_check_hjson['type'] == 'exact match':
-            expected = config_check_hjson['expected_stdout']
-        elif config_check_hjson['type'] == 'regex match':
-            expected = config_check_hjson['expected_regex']
+        if config_check_json['type'] == 'exact match':
+            expected = config_check_json['expected_stdout']
+        elif config_check_json['type'] == 'regex match':
+            expected = config_check_json['expected_regex']
         else:
             sys.exit("Expected comparison string does not match 'type' field.")
 
         sudo_command = None
-        if 'sudo_command' in config_check_hjson:
-            sudo_command = config_check_hjson['sudo_command']
+        if 'sudo_command' in config_check_json:
+            sudo_command = config_check_json['sudo_command']
 
         sudo_fix = None
-        if 'sudo_fix' in config_check_hjson:
-            sudo_fix = config_check_hjson['sudo_fix']
+        if 'sudo_fix' in config_check_json:
+            sudo_fix = config_check_json['sudo_fix']
 
         config_check = ConfigCheck(
-            command=config_check_hjson['command'],
-            comparison_type=config_check_hjson['type'],
+            command=config_check_json['command'],
+            comparison_type=config_check_json['type'],
             expected=expected,
-            fix=config_check_hjson['fix'],
-            case_sensitive=(True if config_check_hjson['case_sensitive'] == \
+            fix=config_check_json['fix'],
+            case_sensitive=(True if config_check_json['case_sensitive'] == \
                             'true' else False),
-            description=config_check_hjson['description'],
-            confidence=config_check_hjson['confidence'],
+            description=config_check_json['description'],
+            confidence=config_check_json['confidence'],
             sudo_command=sudo_command,
             sudo_fix=sudo_fix)
         config_checks.append(config_check)
