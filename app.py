@@ -7,8 +7,8 @@ import sys
 import re
 from subprocess import Popen, PIPE, STDOUT
 from warnings import warn
-from enum import Enum
 import json
+from enum import Enum
 import const #const.py
 import prompt #prompt.py
 
