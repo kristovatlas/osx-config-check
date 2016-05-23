@@ -1,0 +1,4 @@
+#!/bin/sh
+#Compile Hjson configuration into JSON format so non-developers do not require the hjson library.
+/usr/local/bin/python hjson_to_json.py
+
