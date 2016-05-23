@@ -133,6 +133,18 @@
         undo: "sudo mv /usr/bin/openssl-apple /usr/bin/openssl ; brew unlink openssl"
     },
     {
+        type: "exact match"
+        confidence: "recommended"
+        command: "defaults -currentHost read /Library/Preferences/SystemConfiguration/com.apple.finder AppleShowAllFiles"
+        expected_stdout: "1"
+        fix: "defaults -currentHost write /Library/Preferences/SystemConfiguration/com.apple.finder AppleShowAllFiles -bool true && killall Dock"
+        sudo_fix: "sudo defaults -currentHost write /Library/Preferences/SystemConfiguration/com.apple.finder AppleShowAllFiles -bool true && killall Dock"
+        case_sensitive: "false"
+        description: "Hidden files are displayed in Finder."
+        reference: "http://lifehacker.com/the-best-hidden-settings-you-can-unlock-with-os-xs-ter-1476627111"
+        undo: "defaults -currentHost write /Library/Preferences/SystemConfiguration/com.apple.finder AppleShowAllFiles -bool false && killall Dock"
+    },
+    {
         type: "regex match"
         confidence: "recommended"
         command: "pmset -g"
