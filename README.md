@@ -53,6 +53,10 @@ Password:
 Apple Push Notifications are disabled.... Insufficient privileges to perform this check. Skipping.
 ```
 
+## Developers
+
+If you would like to propose changes to the default configuration file included with this project, please edit the `osx-config.hjson` file. You MUST include the JSON version of the modified file along with your change by executing the `hjson_to_json.py` script. You can use the pre-commit hook included in `hooks/pre-commit` to do this automatically.
+
 ## Similar Projects
 
 * https://github.com/SummitRoute/osxlockdown
