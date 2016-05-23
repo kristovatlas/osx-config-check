@@ -1,17 +1,20 @@
 """Checks the configuration of various osx options."""
 
 import time
+import datetime
+from os.path import expanduser
 import sys
 import re
 from subprocess import Popen, PIPE, STDOUT
 from warnings import warn
-from enum import Enum
 import json
+from enum import Enum
 import const #const.py
 import prompt #prompt.py
 
 const.ENABLE_DEBUG_PRINT = False
 const.DEFAULT_OUTPUT_LOCATION = "~/Documents/"
+const.WRITE_TO_LOG_FILE = True #TODO: Allow user to pass command line arg
 const.DEFAULT_CONFIG_FILE = "osx-config.json"
 const.PROMPT_FOR_FIXES = True #TODO: allow user to pass command line arg
 const.WARN_FOR_RECOMMENDED = True #TODO: command line flag
@@ -43,6 +46,15 @@ const.RECOMMENDED_STR = ("%s%s%s" % (const.COLORS['BOLD'],
 const.EXPERIMENTAL_STR = ("%s%s%s" % (const.COLORS['BOLD'],
                                       'EXPERIMENTAL',
                                       const.COLORS['ENDC']))
+
+def get_timestamp():
+    """Genereate a current timestamp that won't break a filename."""
+    timestamp_format = '%Y-%m-%d_%H-%M-%S'
+    timestamp = datetime.datetime.fromtimestamp(time.time()).strftime(timestamp_format)
+    return timestamp
+
+const.LOG_FILE_NAME = 'osx-config-check_%s.log' % get_timestamp()
+const.LOG_FILE_LOC = const.DEFAULT_OUTPUT_LOCATION + const.LOG_FILE_NAME
 
 glob_check_num = 1
 
@@ -187,14 +199,30 @@ def run_check(config_check, last_attempt=False, quiet_fail=False):
                                 config_check.case_sensitive)
 
     if passed or not quiet_fail:
-        print("CHECK #%d: %s... %s" % (glob_check_num, config_check.description,
-                                       _get_result_str(passed)))
-        #TODO: write result of check to file
+        msg = ("CHECK #%d: %s... %s" % (glob_check_num,
+                                        config_check.description,
+                                        _get_result_str(passed)))
+        print msg
+        if const.WRITE_TO_LOG_FILE:
+            log_to_file(msg)
 
     if not passed and last_attempt and do_warn(config_check):
         warn("Attempted fix %s" % const.FAILED_STR)
 
     return passed
+
+def log_to_file(string):
+    """Append string, followed by newline character, to log file.
+
+    Color codes will be stripped out of the string non-destructively before
+    writing.
+    """
+    string = re.sub(r"\033\[\d{1,2}m", "", string)
+    log_file_loc = const.LOG_FILE_LOC
+    if log_file_loc.startswith('~'):
+        log_file_loc = expanduser(log_file_loc)
+    with open(log_file_loc, 'a+') as log_file:
+        log_file.write("%s\n" % string)
 
 def _get_result_str(result_bool):
     return const.PASSED_STR if result_bool else const.FAILED_STR
@@ -306,6 +334,10 @@ def main():
             else:
                 do_fix_and_test(config_check)
         glob_check_num += 1
+
+    if const.WRITE_TO_LOG_FILE:
+        print("Wrote results to %s'%s'%s." %
+              (const.COLORS['BOLD'], const.LOG_FILE_LOC, const.COLORS['ENDC']))
 
 def _bool_to_yes_no(boolean):
     return 'yes' if boolean else 'no'
