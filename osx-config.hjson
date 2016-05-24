@@ -145,6 +145,18 @@
         undo: "defaults -currentHost write /Library/Preferences/SystemConfiguration/com.apple.finder AppleShowAllFiles -bool false && killall Dock"
     },
     {
+        type: "exact match"
+        confidence: "required"
+        command:
+            LASTUPDATE=$(defaults read /Library/Preferences/com.apple.SoftwareUpdate | grep LastSuccessfulDate | sed -e 's@^.* "\([0-9\\-]*\) .*$@\1@'); if [ "$LASTUPDATE" = "$(date +%Y-%m-%d)" ];then echo 1 && exit; fi; exit 0 && exit
+        expected_stdout: "1"
+        fix: "softwareupdate -i -a"
+        sudo_fix: "sudo softwareupdate -i -a"
+        case_sensitive: "false"
+        description: "All application software is currently up to date."
+        reference: "https://github.com/SummitRoute/osxlockdown/"
+    },
+    {
         type: "regex match"
         confidence: "recommended"
         command: "pmset -g"
