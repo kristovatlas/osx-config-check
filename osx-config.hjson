@@ -157,6 +157,19 @@
         reference: "https://github.com/SummitRoute/osxlockdown/"
     },
     {
+        //System Preferences: App Store: Automatically check for updates
+        type: "exact match"
+        confidence: "required"
+        command: "softwareupdate --schedule | grep 'Automatic check is on'"
+        sudo_command: "sudo softwareupdate --schedule | grep 'Automatic check is on'"
+        expected_stdout: "Automatic check is on"
+        fix: "softwareupdate --schedule on"
+        sudo_fix: "sudo softwareupdate --schedule on"
+        case_sensitive: "false"
+        description: "Automatic check for software updates is enabled."
+        reference: "https://github.com/SummitRoute/osxlockdown/"
+    },
+    {
         type: "regex match"
         confidence: "recommended"
         command: "pmset -g"
