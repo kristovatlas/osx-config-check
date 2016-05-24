@@ -239,8 +239,15 @@
         confidence: "required"
         command: "fdesetup status -verbose"
         expected_regex: "^.*FileVault is On.*$"
-        fix: "fdesetup enable"
-        sudo_fix: "sudo fdesetup enable"
+        /*
+         * I'm disabling the fixes below for now, because the decryption key
+         * that the user should back up is printed to STDOUT. See:
+         * https://derflounder.wordpress.com/2013/10/22/managing-mavericks-filevault-2-with-fdesetup/
+         * https://github.com/SummitRoute/osxlockdown/blob/master/commands.yaml
+         */
+        fix: "#"
+        //fix: "fdesetup enable"
+        //sudo_fix: "sudo fdesetup enable"
         case_sensitive: "false"
         description: "FileVault file system encryption is enabled."
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
