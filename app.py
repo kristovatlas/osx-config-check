@@ -27,6 +27,7 @@ const.COLORS = {
     'OKBLUE': '\033[94m',
     'OKGREEN': '\033[92m',
     'WARNING': '\033[93m',
+    'RED': '\033[91m',
     'FAIL': '\033[91m',
     'ENDC': '\033[0m',
     'BOLD': '\033[1m',
@@ -193,6 +194,16 @@ def run_check(config_check, last_attempt=False, quiet_fail=False):
                             config_check.expected, config_check.case_sensitive)
 
     if not passed and config_check.sudo_command is not None:
+        fancy_sudo_command = re.sub("sudo",
+                                    ("%s%ssudo%s" % (const.COLORS['BOLD'],
+                                                     const.COLORS['RED'],
+                                                     const.COLORS['ENDC'])),
+                                    config_check.sudo_command)
+        print(("The next configuration check requires elevated privileges; %s"
+               "you may be prompted for your current OS X user's password "
+               "below%s. The command to be executed is: '%s'") %
+              (const.COLORS['BOLD'], const.COLORS['ENDC'],
+               fancy_sudo_command))
         passed = _execute_check(config_check.sudo_command,
                                 config_check.comparison_type,
                                 config_check.expected,

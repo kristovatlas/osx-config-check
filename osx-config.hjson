@@ -230,7 +230,7 @@
         command: "curl --version"
         expected_regex: ".*(command not found|7\\.48\\.0).*"
         fix: "brew update ; brew install curl ; brew upgrade curl ; brew link curl --force"
-        case_sensitive: false"
+        case_sensitive: "false"
         description: "The curl utility is up to date or absent from the system."
         undo: "brew unlink curl"
     },
@@ -256,4 +256,16 @@
         description: "FileVault file system encrption is enabled at the root directory."
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
     }
+    /* useful for debugging `sudo_command`
+    {
+        type: "regex match"
+        confidence: "required"
+        command: "ls /private/var/root"
+        sudo_command: "sudo ls /private/var/root"
+        expected_regex: ".*Library.*"
+        fix: "#"
+        case_sensitive: true
+        description: "Can read /private/var/root"
+    }
+    */
 ]
