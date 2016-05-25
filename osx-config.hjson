@@ -170,6 +170,17 @@
         reference: "https://github.com/SummitRoute/osxlockdown/"
     },
     {
+        type: "exact match"
+        confidence: "required"
+        command: "spctl --status | grep 'assessments enabled'"
+        expected_stdout: "assessments enabled"
+        fix: "spctl --master-enable"
+        sudo_fix: "sudo spctl --master-enable"
+        case_sensitive: "false"
+        description: "GateKeeper protection against untrusted applications is enabled."
+        undo: "sudo spctl --master-disable"
+    },
+    {
         type: "regex match"
         confidence: "recommended"
         command: "pmset -g"
