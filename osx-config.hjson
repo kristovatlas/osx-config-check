@@ -193,6 +193,18 @@
         undo: "defaults write /Library/Preferences/com.apple.Bluetooth ControllerPowerState -bool true; killall -HUP blued"
     },
     {
+        type: "exact match"
+        confidence: "required"
+        command: "defaults read /Library/Preferences/com.apple.driver.AppleIRController DeviceEnabled"
+        sudo_command: "sudo defaults read /Library/Preferences/com.apple.driver.AppleIRController DeviceEnabled"
+        expected_stdout: "0"
+        fix: "defaults write /Library/Preferences/com.apple.driver.AppleIRController DeviceEnabled -bool false"
+        sudo_fix: "sudo defaults write /Library/Preferences/com.apple.driver.AppleIRController DeviceEnabled -bool false"
+        case_sensitive: "false"
+        description: "The infrared receiver is disabled."
+        undo: "defaults write /Library/Preferences/com.apple.driver.AppleIRController DeviceEnabled -bool true"
+    },
+    {
         type: "regex match"
         confidence: "recommended"
         command: "pmset -g"
