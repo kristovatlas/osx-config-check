@@ -181,6 +181,18 @@
         undo: "sudo spctl --master-disable"
     },
     {
+        type: "exact match"
+        confidence: "experimental"
+        command: "defaults read /Library/Preferences/com.apple.Bluetooth ControllerPowerState"
+        sudo_command: "sudo defaults read /Library/Preferences/com.apple.Bluetooth ControllerPowerState"
+        expected_stdout: "0"
+        fix: "defaults write /Library/Preferences/com.apple.Bluetooth ControllerPowerState -bool false; killall -HUP blued"
+        sudo_fix: "sudo defaults write /Library/Preferences/com.apple.Bluetooth ControllerPowerState -bool false; sudo killall -HUP blued"
+        case_sensitive: "false"
+        description: "Bluetooth is disabled."
+        undo: "defaults write /Library/Preferences/com.apple.Bluetooth ControllerPowerState -bool true; killall -HUP blued"
+    },
+    {
         type: "regex match"
         confidence: "recommended"
         command: "pmset -g"
