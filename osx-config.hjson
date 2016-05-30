@@ -253,6 +253,18 @@
         undo: "defaults write /Library/Preferences/com.apple.NetworkBrowser DisableAirDrop -bool false"
     },
     {
+        type: "exact match"
+        confidence: "required"
+        command: "systemsetup -getremotelogin"
+        sudo_command: "sudo systemsetup -getremotelogin"
+        expected_stdout: "Remote Login: Off"
+        fix: "systemsetup -f -setremotelogin off"
+        sudo_fix: "sudo systemsetup -f -setremotelogin off"
+        case_sensitive: "false"
+        description: "Remote login is disabled."
+        undo: "sudo systemsetup -f -setremotelogin on"
+    },
+    {
         type: "regex match"
         confidence: "recommended"
         command: "pmset -g"
