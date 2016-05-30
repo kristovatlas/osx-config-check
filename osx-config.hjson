@@ -50,6 +50,7 @@
         description: "Current user is a non-admin account. (Create a new account if this fails!)"
     },
     {
+        //Note: This seems to get overwritten logging out/in. See following, user-specific version.
         type: "exact match"
         confidence: "required"
         command: "defaults -currentHost read /Library/Preferences/com.apple.alf globalstate"
@@ -57,7 +58,18 @@
         fix: "defaults -currentHost write /Library/Preferences/com.apple.alf globalstate -bool true"
         sudo_fix: "sudo defaults -currentHost write /Library/Preferences/com.apple.alf globalstate -bool true"
         case_sensitive: "false"
-        description: "The OSX application firewall is enabled."
+        description: "The OSX application firewall is enabled (system-wide)."
+        reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
+    },
+    {
+        type: "exact match"
+        confidence: "required"
+        command: "defaults -currentHost read ~/Library/Preferences/com.apple.alf globalstate"
+        expected_stdout: "1"
+        fix: "defaults -currentHost write ~/Library/Preferences/com.apple.alf globalstate -bool true"
+        sudo_fix: "sudo defaults -currentHost write ~/Library/Preferences/com.apple.alf globalstate -bool true"
+        case_sensitive: "false"
+        description: "The OSX application firewall is enabled (current user only)."
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
     },
     {
