@@ -301,8 +301,8 @@
     {
         type: "regex match"
         confidence: "recommended"
-        command: "nslookup google.com"
-        expected_regex: "^.*Server:\\s+8\\.8\\.8\\.8.*"
+        command: "networksetup listallnetworkservices | grep -v 'An asterisk' | xargs -I{} networksetup -getdnsservers '{}' "
+        expected_regex: "^(8\\.8\\.8\\.8\\n8\\.8\\.4\\.4\n*)+$"
         fix: "networksetup listallnetworkservices | grep -v 'An asterisk' | xargs -I{} networksetup -setdnsservers '{}' 8.8.8.8 8.8.4.4"
         case_sensitive: "false"
         description: "Google DNS servers are used by default on all network interfaces."
