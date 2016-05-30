@@ -265,6 +265,17 @@
         undo: "sudo systemsetup -f -setremotelogin on"
     },
     {
+        type: "exact match"
+        confidence: "required"
+        command:
+            if [ -n "$(ps -ef | egrep "/System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/MacOS/[A]RDAgent")" ]; then echo 1; exit; fi; echo 0; exit
+        expected_stdout: "0"
+        fix: "/System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -deactivate -stop"
+        sudo_fix: "sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -deactivate -stop"
+        case_sensitive: "false"
+        description: "Remote Management is disabled."
+    },
+    {
         type: "regex match"
         confidence: "recommended"
         command: "pmset -g"
