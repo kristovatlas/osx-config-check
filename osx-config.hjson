@@ -41,6 +41,18 @@
 */
 [
     {
+        //Check if the System Preferences app is closed -- otherwise, it may override changes this app makes.
+        type: "exact match"
+        confidence: "required"
+        command: "ps ax | grep -c '/Applications/System Preferences.app/Contents/MacOS/System Preferences'"
+        expected_stdout: "2" //a value of "3" means it's running -- the other 2 are `/bin/sh` and the `grep` command.
+        fix:
+            killall "System Preferences"
+        case_sensitive: "false"
+        description: "The System Preferences application is currently closed."
+        reference: "https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man1/defaults.1.html"
+    },
+    {
         type: "exact match"
         confidence: "required"
         command: "id -Gn | grep -c -w admin"
