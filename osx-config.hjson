@@ -108,7 +108,7 @@
         reference: "https://github.com/Homebrew/brew/blob/master/share/doc/homebrew/Analytics.md"
     },
     {
-
+        //Note: This seems to get overwritten logging out/in. See following, user-specific version.
         type: "exact match"
         confidence: "recommended"
         command: "defaults -currentHost read /Library/Preferences/com.apple.alf stealthenabled"
@@ -116,9 +116,21 @@
         fix: "defaults write /Library/Preferences/com.apple.alf stealthenabled -bool true"
         sudo_fix: "sudo defaults write /Library/Preferences/com.apple.alf stealthenabled -bool true"
         case_sensitive: "false"
-        description: "Stealth mode is enabled for OSX: Computer does not respond to ICMP ping requests or connection attempts from a closed TCP/UDP port."
+        description: "Stealth mode is enabled for OSX: Computer does not respond to ICMP ping requests or connection attempts from a closed TCP/UDP port. (system-wide)"
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
         undo: "sudo defaults write /Library/Preferences/com.apple.alf stealthenabled -bool false"
+    },
+    {
+        type: "exact match"
+        confidence: "recommended"
+        command: "defaults -currentHost read ~/Library/Preferences/com.apple.alf stealthenabled"
+        expected_stdout: "1"
+        fix: "defaults write ~/Library/Preferences/com.apple.alf stealthenabled -bool true"
+        sudo_fix: "sudo defaults write /Library/Preferences/com.apple.alf stealthenabled -bool true"
+        case_sensitive: "false"
+        description: "Stealth mode is enabled for OSX: Computer does not respond to ICMP ping requests or connection attempts from a closed TCP/UDP port. (current user only)"
+        reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
+        undo: "defaults write ~/Library/Preferences/com.apple.alf stealthenabled -bool false"
     },
     {
         type: "exact match"
