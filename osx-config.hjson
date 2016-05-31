@@ -336,6 +336,20 @@
         undo: "sudo systemsetup setusingnetworktime on"
     },
     {
+        //See: https://support.apple.com/kb/PH18721?locale=en_US
+        type: "exact match"
+        confidence: "required"
+        command: "systemsetup -getremoteappleevents"
+        sudo_command: "sudo systemsetup -getremoteappleevents"
+        expected_stdout: "Remote Apple Events: Off"
+        fix: "systemsetup -setremoteappleevents off"
+        sudo_fix: "systemsetup -setremoteappleevents off"
+        case_sensitive: "false"
+        description: "Remote Apple events are disabled."
+        undo: "sudo systemsetup -setremoteappleevents on"
+        reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
+    },
+    {
         type: "exact match"
         confidence: "required"
         command:
