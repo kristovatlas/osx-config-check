@@ -277,6 +277,19 @@
         undo: "sudo systemsetup -setwakeonnetworkaccess on"
     },
     {
+        //Disables NTPd. There are definitely some downsides to this; some security software requires synchronized clocks, so this increases the risk of getting out of sync. I think most of this software will fail-safe, though. Disabling this has various benefits. See discussion here: https://github.com/SummitRoute/osxlockdown/issues/18
+        type: "exact match"
+        confidence: "recommended"
+        command: "systemsetup getusingnetworktime"
+        sudo_command: "sudo systemsetup getusingnetworktime"
+        expected_stdout: "Network Time: Off"
+        fix: "systemsetup setusingnetworktime off"
+        sudo_fix: "sudo systemsetup setusingnetworktime off"
+        case_sensitive: "false"
+        description: "Automatic setting of time and date is disabled."
+        undo: "sudo systemsetup setusingnetworktime on"
+    },
+    {
         type: "exact match"
         confidence: "required"
         command:
