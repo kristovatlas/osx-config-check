@@ -182,11 +182,22 @@
         type: "exact match"
         confidence: "required"
         command: "defaults -currentHost read /Library/Preferences/com.apple.alf allowsignedenabled"
-        expected_stdout: "1"
+        expected_stdout: "0"
         fix: "defaults -currentHost write /Library/Preferences/com.apple.alf allowsignedenabled -bool false"
         sudo_fix: "sudo defaults -currentHost write /Library/Preferences/com.apple.alf allowsignedenabled -bool false"
         case_sensitive: "false"
-        description: "Automatic whitelisting of Apple-signed applications for firewall is disabled."
+        description: "Automatic whitelisting of Apple-signed applications for firewall is disabled (system-wide)."
+        reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
+        undo: "sudo defaults -currentHost write /Library/Preferences/com.apple.alf allowsignedenabled -bool true"
+    },
+    {
+        type: "exact match"
+        confidence: "required"
+        command: "defaults -currentHost read ~/Library/Preferences/com.apple.alf allowsignedenabled"
+        expected_stdout: "0"
+        fix: "defaults -currentHost write ~/Library/Preferences/com.apple.alf allowsignedenabled -bool false"
+        case_sensitive: "false"
+        description: "Automatic whitelisting of Apple-signed applications for firewall is disabled (current user only)."
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
         undo: "sudo defaults -currentHost write /Library/Preferences/com.apple.alf allowsignedenabled -bool true"
     },
@@ -405,6 +416,19 @@
         case_sensitive: "false"
         description: "Internet Sharing is disabled on all network interfaces."
         reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
+    },
+    {
+        type: "exact match"
+        confidence: "recommended"
+        command: "defaults read /Library/Preferences/com.apple.alf allowsignedenabled"
+        sudo_command: "sudo defaults read /Library/Preferences/com.apple.alf allowsignedenabled"
+        expected_stdout: "0"
+        fix: "defaults write /Library/Preferences/com.apple.alf allowsignedenabled -bool false"
+        sudo_fix: "sudo defaults write /Library/Preferences/com.apple.alf allowsignedenabled -bool false"
+        case_sensitive: "false"
+        description: "Signed applications are not automatically whitelisted by the application firewall."
+        reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
+        undo: "sudo defaults write /Library/Preferences/com.apple.alf allowsignedenabled -bool true"
     },
     {
         type: "exact match"
