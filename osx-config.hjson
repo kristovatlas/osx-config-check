@@ -267,6 +267,18 @@
     {
         type: "exact match"
         confidence: "required"
+        command: "systemsetup getwakeonnetworkaccess"
+        sudo_command: "sudo systemsetup getwakeonnetworkaccess"
+        expected_stdout: "Wake On Network Access: Off"
+        fix: "systemsetup -setwakeonnetworkaccess off"
+        sudo_fix: "sudo systemsetup -setwakeonnetworkaccess off"
+        case_sensitive: "false"
+        description: "Wake on Network Access feature is disabled."
+        undo: "sudo systemsetup -setwakeonnetworkaccess on"
+    },
+    {
+        type: "exact match"
+        confidence: "required"
         command:
             if [ -n "$(ps -ef | egrep "/System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/MacOS/[A]RDAgent")" ]; then echo 1; exit; fi; echo 0; exit
         expected_stdout: "0"
