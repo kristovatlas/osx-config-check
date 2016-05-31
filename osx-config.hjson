@@ -288,6 +288,17 @@
         description: "Remote Management is disabled."
     },
     {
+        type: "exact match"
+        confidence: "recommended"
+        command:
+            if [ -n "$(launchctl list | egrep AppleFileServer)" ]; then exit 1; fi; if [ -n "$(grep -i array /Library/Preferences/SystemConfiguration/com.apple.smb.server.plist)" ]; then echo 1; exit; fi; echo 0; exit
+        expected_stdout: "0"
+        fix: "launchctl unload -w /System/Library/LaunchDaemons/com.apple.AppleFileServer.plist; launchctl unload -w /System/Library/LaunchDaemons/com.apple.smbd.plist"
+        case_sensitive: "false"
+        description: "File sharing is disabled."
+        reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
+    },
+    {
         type: "regex match"
         confidence: "recommended"
         command: "pmset -g"
