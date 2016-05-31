@@ -310,6 +310,19 @@
         reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
     },
     {
+        //There are a number of attacks based on IPv6 use. For the sake of simplicity, it's best to disable it entirely unless it is requried. See: https://www.ernw.de/download/ERNW_Hardening_IPv6_MacOS-X_v1_0.pdf
+        type: "exact match"
+        confidence: "recommended"
+        command:
+            networksetup -listallnetworkservices | while read i; do SUPPORT=$(networksetup -getinfo "$i" | grep "IPv6: Automatic") && if [ -n "$SUPPORT" ]; then echo 1; fi; done; echo 0; exit
+        expected_stdout: "0"
+        fix:
+            networksetup -listallnetworkservices | while read i; do SUPPORT=$(networksetup -getinfo "$i" | grep "IPv6: Automatic") && if [ -n "$SUPPORT" ]; then networksetup -setv6off "$i"; fi; done;
+        case_sensitive: "false"
+        description: "IPv6 is disabled on all network interfaces."
+        reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
+    },
+    {
         type: "regex match"
         confidence: "recommended"
         command: "pmset -g"
