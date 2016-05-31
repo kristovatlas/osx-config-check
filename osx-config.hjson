@@ -299,6 +299,17 @@
         reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
     },
     {
+        type: "exact match"
+        confidence: "required"
+        command:
+            if [ -n "$(system_profiler SPPrintersDataType | grep Shared | grep Yes)" ]; then echo 1; exit; fi; if [ -n "$(system_profiler SPPrintersDataType | grep 'System Printer Sharing: Yes')" ]; then echo 1; exit; fi; echo 0; exit
+        expected_stdout: "0"
+        fix: "cupsctl --no-share-printers"
+        case_sensitive: "false"
+        description: "Printer sharing is disabled."
+        reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
+    },
+    {
         type: "regex match"
         confidence: "recommended"
         command: "pmset -g"
