@@ -347,6 +347,19 @@
         reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
     },
     {
+        type: "exact match"
+        confidence: "required"
+        command:
+            if [ -n "$(security authorizationdb read system.preferences 2> /dev/null | grep -A1 shared | grep -E '(true|false)' | grep 'false')" ]; then echo 0; else echo 1; fi
+        expected_stdout: "0"
+        fix:
+            security authorizationdb read system.preferences > /tmp/system.preferences.plist &&/usr/libexec/PlistBuddy -c "Set :shared false" /tmp/system.preferences.plist && security authorizationdb write system.preferences < /tmp/system.preferences.plist
+        case_sensitive: "false"
+        description: "An administrator password is required to change system-wide preferences."
+        reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
+        //TODO: Add warning to user before fix command is run that she will be prompted for her admin credentials.
+    },
+    {
         type: "regex match"
         confidence: "recommended"
         command: "pmset -g"
