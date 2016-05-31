@@ -109,6 +109,30 @@
     {
         type: "exact match"
         confidence: "required"
+        command: "defaults -currentHost read /Library/Preferences/com.apple.screensaver askForPasswordDelay"
+        sudo_command: "sudo defaults -currentHost read /Library/Preferences/com.apple.screensaver askForPasswordDelay"
+        expected_stdout: "0"
+        fix: "defaults -currentHost write /Library/Preferences/com.apple.screensaver askForPasswordDelay -bool false"
+        sudo_fix: "sudo defaults -currentHost write /Library/Preferences/com.apple.screensaver askForPasswordDelay -bool false"
+        case_sensitive: "false"
+        description: "There is no delay between starting the screen saver and locking the machine (system-wide)."
+        undo: "defaults -currentHost write /Library/Preferences/com.apple.screensaver askForPasswordDelay -bool true"
+        reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
+    },
+    {
+        type: "exact match"
+        confidence: "required"
+        command: "defaults -currentHost read ~/Library/Preferences/com.apple.screensaver askForPasswordDelay"
+        expected_stdout: "0"
+        fix: "defaults -currentHost write ~/Library/Preferences/com.apple.screensaver askForPasswordDelay -bool false"
+        case_sensitive: "false"
+        description: "There is no delay between starting the screen saver and locking the machine (current user only)."
+        undo: "defaults -currentHost write ~/Library/Preferences/com.apple.screensaver askForPasswordDelay -bool true"
+        reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
+    },
+    {
+        type: "exact match"
+        confidence: "required"
         command: "defaults -currentHost read /Library/Preferences/com.apple.alf loggingenabled"
         expected_stdout: "1"
         fix: "defaults -currentHost write /Library/Preferences/com.apple.alf loggingenabled -bool true"
