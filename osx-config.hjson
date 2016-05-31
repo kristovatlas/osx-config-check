@@ -452,6 +452,20 @@
         case_sensitive: "false"
         description: "FileVault file system encrption is enabled at the root directory."
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
+    },
+    {
+        //System Preferences->Desktop & Screen Saver->Start after
+        type: "regex match"
+        confidence: "recommended"
+        //This is a clever way for polling settings for multiple users from the current logged in user :-)
+        command:
+            UUID=`ioreg -rd1 -c IOPlatformExpertDevice | grep "IOPlatformUUID" | sed -e 's/^.*"\(.*\)"$/\1/'`; for i in $(find /Users -type d -maxdepth 1); do PREF=$i/Library/Preferences/ByHost/com.apple.screensaver.$UUID; if [ -e $PREF.plist ]; then TIMEOUT=$(defaults read $PREF.plist idleTime) && if [ $TIMEOUT -eq 0 ] || [ $TIMEOUT -gt 600 ]; then echo 1; fi; else echo 0; fi; done;
+        expected_regex: "^(0\n*)+$" //all zeroes
+        fix:
+            UUID=`ioreg -rd1 -c IOPlatformExpertDevice | grep "IOPlatformUUID" | sed -e 's/^.*"\(.*\)"$/\1/'`; for i in $(find /Users -type d -maxdepth 1); do PREF=$i/Library/Preferences/ByHost/com.apple.screensaver.$UUID; if [ -e $PREF.plist ]; then defaults -currentHost write $PREF.plist idleTime -int 600; fi; done
+        case_sensitive: "false"
+        description: "The idle timer for screen saver activation is set to 10 minutes or less."
+        reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
     }
     /* useful for debugging `sudo_command`
     {
