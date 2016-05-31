@@ -323,6 +323,17 @@
         reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
     },
     {
+        type: "exact match"
+        confidence: "required"
+        command: "defaults read /Library/Preferences/SystemConfiguration/com.apple.nat NAT | grep -c 'Enabled = 1'"
+        expected_stdout: "0"
+        fix: "defaults write /Library/Preferences/SystemConfiguration/com.apple.nat NAT -dict-add Enabled -bool false"
+        sudo_fix: "sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.nat NAT -dict-add Enabled -bool false"
+        case_sensitive: "false"
+        description: "Internet Sharing is disabled on all network interfaces."
+        reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
+    },
+    {
         type: "regex match"
         confidence: "recommended"
         command: "pmset -g"
