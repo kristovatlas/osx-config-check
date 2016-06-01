@@ -40,6 +40,7 @@
     * back-slashes '\' must be escaped with a double black-slash, i.e. '\\'
 */
 [
+    /* --- BEGIN SYSTEM SETTINGS --- */
     {
         //Check if the System Preferences app is closed -- otherwise, it may override changes this app makes.
         type: "exact match"
@@ -561,7 +562,64 @@
         case_sensitive: "false"
         description: "The idle timer for screen saver activation is set to 10 minutes or less."
         reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
-    }
+    },
+    /* ---- END SYSTEM SETTINGS ---- */
+
+    /* ---BEGIN SAFARI BROWSER SETTINGS--- */
+    {
+        //Check if the Safari app is closed -- otherwise, it may override changes this app makes.
+        type: "exact match"
+        confidence: "required"
+        command: "ps ax | grep -c '/Applications/Safari.app/Contents/MacOS/Safari'"
+        expected_stdout: "2" //a value of "3" means it's running -- the other 2 are `/bin/sh` and the `grep` command.
+        fix:
+            killall "Safari"
+        case_sensitive: "false"
+        description: "The Safari application is currently closed."
+        reference: "https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man1/defaults.1.html"
+    },
+    {
+        //Safari->Preferences->AutoFill->Credit cards
+        type: "exact match"
+        confidence: "recommended"
+        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari AutoFillCreditCardData"
+        expected_stdout: "0"
+        fix: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari AutoFillCreditCardData -bool false"
+        case_sensitive: "false"
+        description: "Safari will not auto-fill credit card data."
+    },
+    {
+        //Safari->Preferences->AutoFill->Using info from my Contacts card
+        type: "exact match"
+        confidence: "recommended"
+        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari AutoFillFromAddressBook"
+        expected_stdout: "0"
+        fix: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari AutoFillFromAddressBook -bool false"
+        case_sensitive: "false"
+        description: "Safari will not auto-fill your contact data."
+    },
+    {
+        //Safari->Preferences->AutoFill->Other forms
+        type: "exact match"
+        confidence: "recommended"
+        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari AutoFillMiscellaneousForms"
+        expected_stdout: "0"
+        fix: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari AutoFillMiscellaneousForms -bool false"
+        case_sensitive: "false"
+        description: "Safari will not auto-fill miscellaneous forms."
+    },
+    {
+        //Safari->Preferences->AutoFill->User names and passwords
+        type: "exact match"
+        confidence: "recommended"
+        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari AutoFillPasswords"
+        expected_stdout: "0"
+        fix: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari AutoFillPasswords -bool false"
+        case_sensitive: "false"
+        description: "Safari will not auto-fill usernames or passwords."
+    },
+    /* ----END SAFARI BROWSER SETTINGS---- */
+
     /* useful for debugging `sudo_command`
     {
         type: "regex match"
