@@ -444,6 +444,17 @@
         //TODO: Add warning to user before fix command is run that she will be prompted for her admin credentials.
     },
     {
+        type: "exact match"
+        confidence: "required"
+        command: "defaults read NSGlobalDomain NSDocumentSaveNewDocumentsToCloud"
+        expected_stdout: "0"
+        fix: "defaults write NSGlobalDomain NSDocumentSaveNewDocumentsToCloud -bool false"
+        case_sensitive: "false"
+        description: "Documents are not stored to iCloud Drive by default. (May be mistaken if iCloud is disabled)"
+        reference: "http://mjtsai.com/blog/2014/10/26/yosemite-uploads-unsaved-documents-and-recent-addresses-to-icloud/"
+        undo: "defaults write NSGlobalDomain NSDocumentSaveNewDocumentsToCloud -bool true"
+    },
+    {
         type: "regex match"
         confidence: "recommended"
         command: "pmset -g"
