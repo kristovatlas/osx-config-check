@@ -628,6 +628,16 @@
         case_sensitive: "false"
         description: "Files downloaded in Safari are not automatically opened."
     },
+    {
+        //Safari->Preferences->Privacy->Cookies and website data->Always block
+        type: "exact match"
+        confidence: "recommended"
+        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari BlockStoragePolicy"
+        expected_stdout: "0"
+        fix: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari BlockStoragePolicy -bool false"
+        case_sensitive: "false"
+        description: "Cookies and local storage are always blocked in Safari."
+    },
     /* ----END SAFARI BROWSER SETTINGS---- */
 
     /* useful for debugging `sudo_command`
