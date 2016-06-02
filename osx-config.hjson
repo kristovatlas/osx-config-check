@@ -638,6 +638,17 @@
         case_sensitive: "false"
         description: "Cookies and local storage are always blocked in Safari."
     },
+    {
+        //Safari->Develop->Disable Extensions
+        //Note: Extensions are often a persistence mechanism for browser-based malware.
+        type: "exact match"
+        confidence: "required"
+        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari ExtensionsEnabled"
+        expected_stdout: "0"
+        fix: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari ExtensionsEnabled -bool false"
+        case_sensitive: "false"
+        description: "Safari extensions are disabled."
+    },
     /* ----END SAFARI BROWSER SETTINGS---- */
 
     /* useful for debugging `sudo_command`
