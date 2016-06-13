@@ -649,6 +649,17 @@
         case_sensitive: "false"
         description: "Safari extensions are disabled."
     },
+    {
+        //Safari->Preferences->Security->Web Content->Enable JavaScript
+        type: "exact match"
+        confidence: "recommended"
+        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaScriptEnabled"
+        expected_stdout: "0"
+        fix: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaScriptEnabled -bool false"
+        case_sensitive: "false"
+        description: "JavaScript disabled in the Safari web browser."
+        undo: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaScriptEnabled -bool true"
+    },
     /* ----END SAFARI BROWSER SETTINGS---- */
 
     /* useful for debugging `sudo_command`
