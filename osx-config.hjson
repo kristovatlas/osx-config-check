@@ -692,6 +692,7 @@
         undo: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari WebKitPluginsEnabled -bool true"
     },
     {
+        //Safari->Develop->Treat SHA-1 Certificates as Insecure
         type: "exact match"
         confidence: "recommended"
         command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari TreatSHA1CertificatesAsInsecure"
