@@ -700,7 +700,7 @@
         fix: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari TreatSHA1CertificatesAsInsecure -bool true"
         case_sensitive: "false"
         description: "The Safari web browser is configured to treat SHA-1 certficiates as insecure."
-        undo: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari WebKitPluginsEnabled -bool false"
+        undo: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari TreatSHA1CertificatesAsInsecure -bool false"
     },
     {
         //Safari->Preferences->Search->Preload Top Hit in the background
@@ -711,7 +711,7 @@
         fix: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari PreloadTopHit -bool false"
         case_sensitive: "false"
         description: "The Safari web browser will not pre-load webpages that rank highly as search matches."
-        undo: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari WebKitPluginsEnabled -bool true"
+        undo: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari PreloadTopHit -bool true"
     },
     {
         //Safari->Preferences->Privacy->Website tracking->Ask websites not to track me
