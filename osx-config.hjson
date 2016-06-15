@@ -691,6 +691,16 @@
         description: "Plug-ins are disabled in the Safari web browser (Legacy version)."
         undo: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari WebKitPluginsEnabled -bool true"
     },
+    {
+        type: "exact match"
+        confidence: "recommended"
+        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari TreatSHA1CertificatesAsInsecure"
+        expected_stdout: "1"
+        fix: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari TreatSHA1CertificatesAsInsecure -bool true"
+        case_sensitive: "false"
+        description: "The Safari web browser is configured to treat SHA-1 certficiates as insecure."
+        undo: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari WebKitPluginsEnabled -bool false"
+    },
     /* ----END SAFARI BROWSER SETTINGS---- */
 
     /* useful for debugging `sudo_command`
