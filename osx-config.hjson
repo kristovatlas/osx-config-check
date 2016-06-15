@@ -725,6 +725,17 @@
         undo: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari SuppressSearchSuggestions -bool false"
     },
     {
+        //Safari->Preferences->Search->Smart Search Field->Include Safari Suggestions
+        type: "exact match"
+        confidence: "required"
+        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari UniversalSearchEnabled"
+        expected_stdout: "0"
+        fix: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari UniversalSearchEnabled -bool false"
+        case_sensitive: "false"
+        description: "The Safari web browser's search suggestions are disabled."
+        undo: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari UniversalSearchEnabled -bool true"
+    },
+    {
         //Safari->Preferences->Privacy->Website tracking->Ask websites not to track me
         type: "exact match"
         confidence: "recommended"
