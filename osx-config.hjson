@@ -714,6 +714,17 @@
         undo: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari PreloadTopHit -bool true"
     },
     {
+        //Safari->Preferences->Search->Search engine->Include search engine suggestions
+        type: "exact match"
+        confidence: "required"
+        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari SuppressSearchSuggestions"
+        expected_stdout: "1"
+        fix: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari SuppressSearchSuggestions -bool true"
+        case_sensitive: "false"
+        description: "The Safari web browser will not include search engine suggestions for text typed in the location bar."
+        undo: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari SuppressSearchSuggestions -bool false"
+    },
+    {
         //Safari->Preferences->Privacy->Website tracking->Ask websites not to track me
         type: "exact match"
         confidence: "recommended"
