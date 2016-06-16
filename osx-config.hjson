@@ -726,6 +726,17 @@
         undo: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaEnabled -bool true"
     },
     {
+        //This appears to be an old method circa 2009 for disabling Java. See: http://alblue.bandlem.com/2009/05/disabling-java-in-webkit.html
+        type: "exact match"
+        confidence: "required"
+        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari WebKitJavaEnabled"
+        expected_stdout: "0"
+        fix: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari WebKitJavaEnabled -bool false"
+        case_sensitive: "false"
+        description: "The Java plug-in is disabled in the Safari web browser (Legacy version)."
+        undo: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari WebKitJavaEnabled -bool true"
+    },
+    {
         //Safari->Develop->Treat SHA-1 Certificates as Insecure
         type: "exact match"
         confidence: "recommended"
