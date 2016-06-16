@@ -671,6 +671,17 @@
         undo: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari WebKitJavaScriptEnabled -bool true"
     },
     {
+        //Safari->Preferences->Security->Web Content->Allow WebGL
+        type: "exact match"
+        confidence: "recommended"
+        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2WebGLEnabled"
+        expected_stdout: "0"
+        fix: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2WebGLEnabled -bool false"
+        case_sensitive: "false"
+        description: "The WebGL plug-in is disabled in the Safari web browser."
+        undo: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2WebGLEnabled -bool true"
+    },
+    {
         //Safari->Preferences->Security->Internet plug-ins->Allow Plug-ins
         type: "exact match"
         confidence: "recommended"
