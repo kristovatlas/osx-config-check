@@ -683,6 +683,28 @@
         undo: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari WebKitJavaScriptEnabled -bool true"
     },
     {
+        //Safari->Preferences->Security->Web Content->Block pop-up windows
+        type: "exact match"
+        confidence: "required"
+        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaScriptCanOpenWindowsAutomatically"
+        expected_stdout: "0"
+        fix: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaScriptCanOpenWindowsAutomatically -bool false"
+        case_sensitive: "false"
+        description: "Pop-up windows are blocked in the Safari web browser."
+        undo: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaScriptCanOpenWindowsAutomatically -bool true"
+    },
+    {
+        //Safari->Preferences->Security->Web Content->Block pop-up windows
+        type: "exact match"
+        confidence: "required"
+        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari WebKitJavaScriptCanOpenWindowsAutomatically"
+        expected_stdout: "0"
+        fix: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari WebKitJavaScriptCanOpenWindowsAutomatically -bool false"
+        case_sensitive: "false"
+        description: "Pop-up windows are blocked in the Safari web browser (Legacy version)."
+        undo: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari WebKitJavaScriptCanOpenWindowsAutomatically -bool true"
+    },
+    {
         //Safari->Preferences->Security->Web Content->Allow WebGL
         type: "exact match"
         confidence: "recommended"
