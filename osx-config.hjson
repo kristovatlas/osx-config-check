@@ -846,6 +846,18 @@
         description: "PDF viewing is disabled in the Safari web browser."
         undo: ""
     },
+    {
+        //Safari->Preferences->Advanced->Smart Search Field->Show full website address
+        //This might help prevent phishing attacks
+        type: "exact match"
+        confidence: "required"
+        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari ShowFullURLInSmartSearchField"
+        expected_stdout: "1"
+        fix: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari ShowFullURLInSmartSearchField -bool true"
+        case_sensitive: "false"
+        description: "Full website addresses are disabled in the location bar of the Safari web browser."
+        undo: defaults -currentHost write ~/Library/Preferences/com.apple.Safari ShowFullURLInSmartSearchField -bool false"
+    },
     /* ----END SAFARI BROWSER SETTINGS---- */
 
     /* useful for debugging `sudo_command`
