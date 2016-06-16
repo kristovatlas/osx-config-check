@@ -322,6 +322,32 @@
         description: "AirDrop file sharing is disabled."
         undo: "defaults write /Library/Preferences/com.apple.NetworkBrowser DisableAirDrop -bool false"
     },
+
+        /* Begin: System Preferences->Sharing */
+    {
+        //System Preferences->Sharing->File Sharing
+        type: "exact match"
+        confidence: "recommended"
+        command:
+            if [ -n "$(launchctl list | egrep AppleFileServer)" ]; then exit 1; fi; if [ -n "$(grep -i array /Library/Preferences/SystemConfiguration/com.apple.smb.server.plist)" ]; then echo 1; exit; fi; echo 0; exit
+        expected_stdout: "0"
+        fix: "launchctl unload -w /System/Library/LaunchDaemons/com.apple.AppleFileServer.plist; launchctl unload -w /System/Library/LaunchDaemons/com.apple.smbd.plist"
+        case_sensitive: "false"
+        description: "File sharing is disabled."
+        reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
+    },
+    {
+        //System Preferences->Sharing->Printer Sharing
+        type: "exact match"
+        confidence: "required"
+        command:
+            if [ -n "$(system_profiler SPPrintersDataType | grep Shared | grep Yes)" ]; then echo 1; exit; fi; if [ -n "$(system_profiler SPPrintersDataType | grep 'System Printer Sharing: Yes')" ]; then echo 1; exit; fi; echo 0; exit
+        expected_stdout: "0"
+        fix: "cupsctl --no-share-printers"
+        case_sensitive: "false"
+        description: "Printer sharing is disabled."
+        reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
+    },
     {
         //System Preferences->Sharing->Remote Login
         type: "exact match"
@@ -335,6 +361,46 @@
         description: "Remote login is disabled."
         undo: "sudo systemsetup -f -setremotelogin on"
     },
+    {
+        //System Preferences->Sharing->Remote Management
+        type: "exact match"
+        confidence: "required"
+        command:
+            if [ -n "$(ps -ef | egrep "/System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/MacOS/[A]RDAgent")" ]; then echo 1; exit; fi; echo 0; exit
+        expected_stdout: "0"
+        fix: "/System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -deactivate -stop"
+        sudo_fix: "sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -deactivate -stop"
+        case_sensitive: "false"
+        description: "Remote Management is disabled."
+    },
+    {
+        //System Preferences->Sharing->Remote Apple Events
+        //See: https://support.apple.com/kb/PH18721?locale=en_US
+        type: "exact match"
+        confidence: "required"
+        command: "systemsetup -getremoteappleevents"
+        sudo_command: "sudo systemsetup -getremoteappleevents"
+        expected_stdout: "Remote Apple Events: Off"
+        fix: "systemsetup -setremoteappleevents off"
+        sudo_fix: "systemsetup -setremoteappleevents off"
+        case_sensitive: "false"
+        description: "Remote Apple events are disabled."
+        undo: "sudo systemsetup -setremoteappleevents on"
+        reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
+    },
+    {
+        //System Preferences->Sharing->Internet Sharing
+        type: "exact match"
+        confidence: "required"
+        command: "defaults read /Library/Preferences/SystemConfiguration/com.apple.nat NAT | grep -c 'Enabled = 1'"
+        expected_stdout: "0"
+        fix: "defaults write /Library/Preferences/SystemConfiguration/com.apple.nat NAT -dict-add Enabled -bool false"
+        sudo_fix: "sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.nat NAT -dict-add Enabled -bool false"
+        case_sensitive: "false"
+        description: "Internet Sharing is disabled on all network interfaces."
+        reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
+    },
+        /* End: System Preferences->Sharing */
     {
         //System Preferences->Energy Saver->Wake for network access
         type: "exact match"
@@ -362,56 +428,6 @@
         undo: "sudo systemsetup setusingnetworktime on"
     },
     {
-        //See: https://support.apple.com/kb/PH18721?locale=en_US
-        type: "exact match"
-        confidence: "required"
-        command: "systemsetup -getremoteappleevents"
-        sudo_command: "sudo systemsetup -getremoteappleevents"
-        expected_stdout: "Remote Apple Events: Off"
-        fix: "systemsetup -setremoteappleevents off"
-        sudo_fix: "systemsetup -setremoteappleevents off"
-        case_sensitive: "false"
-        description: "Remote Apple events are disabled."
-        undo: "sudo systemsetup -setremoteappleevents on"
-        reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
-    },
-    {
-        //System Preferences->Sharing->Remote Management
-        type: "exact match"
-        confidence: "required"
-        command:
-            if [ -n "$(ps -ef | egrep "/System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/MacOS/[A]RDAgent")" ]; then echo 1; exit; fi; echo 0; exit
-        expected_stdout: "0"
-        fix: "/System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -deactivate -stop"
-        sudo_fix: "sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -deactivate -stop"
-        case_sensitive: "false"
-        description: "Remote Management is disabled."
-    },
-    {
-        //System Preferences->Sharing->File Sharing
-        type: "exact match"
-        confidence: "recommended"
-        command:
-            if [ -n "$(launchctl list | egrep AppleFileServer)" ]; then exit 1; fi; if [ -n "$(grep -i array /Library/Preferences/SystemConfiguration/com.apple.smb.server.plist)" ]; then echo 1; exit; fi; echo 0; exit
-        expected_stdout: "0"
-        fix: "launchctl unload -w /System/Library/LaunchDaemons/com.apple.AppleFileServer.plist; launchctl unload -w /System/Library/LaunchDaemons/com.apple.smbd.plist"
-        case_sensitive: "false"
-        description: "File sharing is disabled."
-        reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
-    },
-    {
-        //System Preferences->Sharing->Printer Sharing
-        type: "exact match"
-        confidence: "required"
-        command:
-            if [ -n "$(system_profiler SPPrintersDataType | grep Shared | grep Yes)" ]; then echo 1; exit; fi; if [ -n "$(system_profiler SPPrintersDataType | grep 'System Printer Sharing: Yes')" ]; then echo 1; exit; fi; echo 0; exit
-        expected_stdout: "0"
-        fix: "cupsctl --no-share-printers"
-        case_sensitive: "false"
-        description: "Printer sharing is disabled."
-        reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
-    },
-    {
         //There are a number of attacks based on IPv6 use. For the sake of simplicity, it's best to disable it entirely unless it is requried. See: https://www.ernw.de/download/ERNW_Hardening_IPv6_MacOS-X_v1_0.pdf
         type: "exact match"
         confidence: "recommended"
@@ -422,18 +438,6 @@
             networksetup -listallnetworkservices | while read i; do SUPPORT=$(networksetup -getinfo "$i" | grep "IPv6: Automatic") && if [ -n "$SUPPORT" ]; then networksetup -setv6off "$i"; fi; done;
         case_sensitive: "false"
         description: "IPv6 is disabled on all network interfaces."
-        reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
-    },
-    {
-        //System Preferences->Sharing->Internet Sharing
-        type: "exact match"
-        confidence: "required"
-        command: "defaults read /Library/Preferences/SystemConfiguration/com.apple.nat NAT | grep -c 'Enabled = 1'"
-        expected_stdout: "0"
-        fix: "defaults write /Library/Preferences/SystemConfiguration/com.apple.nat NAT -dict-add Enabled -bool false"
-        sudo_fix: "sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.nat NAT -dict-add Enabled -bool false"
-        case_sensitive: "false"
-        description: "Internet Sharing is disabled on all network interfaces."
         reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
     },
     {
