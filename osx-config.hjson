@@ -801,7 +801,17 @@
         case_sensitive: "false"
         description: "The Safari web browser uses the Do-Not-Track HTTP header."
         undo: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari SendDoNotTrackHTTPHeader -bool false"
-    }
+    },
+    {
+        type: "exact match"
+        confidence: "recommended"
+        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari WebKitOmitPDFSupport"
+        expected_stdout: "1"
+        fix: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari WebKitOmitPDFSupport -bool true"
+        case_sensitive: "false"
+        description: "PDF viewing is disabled in the Safari web browser."
+        undo: ""
+    },
     /* ----END SAFARI BROWSER SETTINGS---- */
 
     /* useful for debugging `sudo_command`
