@@ -63,6 +63,7 @@
         description: "Current user is a non-admin account. (Create a new account if this fails!)"
     },
     {
+        //System Preferences->Security & Privacy->Firewall->Turn On Firewall
         //Note: This seems to get overwritten logging out/in. See following, user-specific version.
         type: "exact match"
         confidence: "required"
@@ -75,6 +76,7 @@
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
     },
     {
+        //System Preferences->Security & Privacy->Firewall->Turn On Firewall
         type: "exact match"
         confidence: "required"
         command: "defaults -currentHost read ~/Library/Preferences/com.apple.alf globalstate"
@@ -86,6 +88,7 @@
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
     },
     {
+
         type: "exact match"
         confidence: "required"
         command: "defaults read /Library/Preferences/com.apple.screensaver askForPassword"
@@ -108,6 +111,7 @@
         reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
     },
     {
+        //System Preferences->Security & Privacy->General->Require password [time interval]
         type: "exact match"
         confidence: "required"
         command: "defaults -currentHost read /Library/Preferences/com.apple.screensaver askForPasswordDelay"
@@ -121,6 +125,7 @@
         reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
     },
     {
+        //System Preferences->Security & Privacy->General->Require password [time interval]
         type: "exact match"
         confidence: "required"
         command: "defaults -currentHost read ~/Library/Preferences/com.apple.screensaver askForPasswordDelay"
@@ -132,6 +137,7 @@
         reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
     },
     {
+
         type: "exact match"
         confidence: "required"
         command: "defaults -currentHost read /Library/Preferences/com.apple.alf loggingenabled"
@@ -155,6 +161,7 @@
         reference: "https://github.com/Homebrew/brew/blob/master/share/doc/homebrew/Analytics.md"
     },
     {
+        //System Preferences->Security & Privacy->Firewall->Firewall Options...->Enable Stealth Mode
         //Note: This seems to get overwritten logging out/in. See following, user-specific version.
         type: "exact match"
         confidence: "recommended"
@@ -168,6 +175,7 @@
         undo: "sudo defaults write /Library/Preferences/com.apple.alf stealthenabled -bool false"
     },
     {
+        //System Preferences->Security & Privacy->Firewall->Firewall Options...->Enable Stealth Mode
         type: "exact match"
         confidence: "recommended"
         command: "defaults -currentHost read ~/Library/Preferences/com.apple.alf stealthenabled"
@@ -180,6 +188,7 @@
         undo: "defaults write ~/Library/Preferences/com.apple.alf stealthenabled -bool false"
     },
     {
+        //System Preferences->Security & Privacy->Firewall->Firewall Options...->Automatically allow signed software to receive incoming connections
         type: "exact match"
         confidence: "required"
         command: "defaults -currentHost read /Library/Preferences/com.apple.alf allowsignedenabled"
@@ -192,6 +201,7 @@
         undo: "sudo defaults -currentHost write /Library/Preferences/com.apple.alf allowsignedenabled -bool true"
     },
     {
+        //System Preferences->Security & Privacy->Firewall->Firewall Options...->Automatically allow signed software to receive incoming connections
         type: "exact match"
         confidence: "required"
         command: "defaults -currentHost read ~/Library/Preferences/com.apple.alf allowsignedenabled"
@@ -264,6 +274,7 @@
         reference: "https://github.com/SummitRoute/osxlockdown/"
     },
     {
+        //System Preferences->Security & Privacy->General->Allow apps downloaded from
         type: "exact match"
         confidence: "required"
         command: "spctl --status | grep 'assessments enabled'"
@@ -275,6 +286,7 @@
         undo: "sudo spctl --master-disable"
     },
     {
+        //System Preferences->Bluetooth->Turn Bluetooth Off
         type: "exact match"
         confidence: "experimental"
         command: "defaults read /Library/Preferences/com.apple.Bluetooth ControllerPowerState"
@@ -311,6 +323,7 @@
         undo: "defaults write /Library/Preferences/com.apple.NetworkBrowser DisableAirDrop -bool false"
     },
     {
+        //System Preferences->Sharing->Remote Login
         type: "exact match"
         confidence: "required"
         command: "systemsetup -getremotelogin"
@@ -323,6 +336,7 @@
         undo: "sudo systemsetup -f -setremotelogin on"
     },
     {
+        //System Preferences->Energy Saver->Wake for network access
         type: "exact match"
         confidence: "required"
         command: "systemsetup getwakeonnetworkaccess"
@@ -362,6 +376,7 @@
         reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
     },
     {
+        //System Preferences->Sharing->Remote Management
         type: "exact match"
         confidence: "required"
         command:
@@ -373,6 +388,7 @@
         description: "Remote Management is disabled."
     },
     {
+        //System Preferences->Sharing->File Sharing
         type: "exact match"
         confidence: "recommended"
         command:
@@ -384,6 +400,7 @@
         reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
     },
     {
+        //System Preferences->Sharing->Printer Sharing
         type: "exact match"
         confidence: "required"
         command:
@@ -408,6 +425,7 @@
         reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
     },
     {
+        //System Preferences->Sharing->Internet Sharing
         type: "exact match"
         confidence: "required"
         command: "defaults read /Library/Preferences/SystemConfiguration/com.apple.nat NAT | grep -c 'Enabled = 1'"
