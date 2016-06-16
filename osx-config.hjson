@@ -48,7 +48,7 @@
         command: "ps ax | grep -c '/Applications/System Preferences.app/Contents/MacOS/System Preferences'"
         expected_stdout: "2" //a value of "3" means it's running -- the other 2 are `/bin/sh` and the `grep` command.
         fix:
-            killall "System Preferences"
+            killall "System Preferences" ; sleep 1
         case_sensitive: "false"
         description: "The System Preferences application is currently closed."
         reference: "https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man1/defaults.1.html"
@@ -573,7 +573,7 @@
         command: "ps ax | grep -c '/Applications/Safari.app/Contents/MacOS/Safari'"
         expected_stdout: "2" //a value of "3" means it's running -- the other 2 are `/bin/sh` and the `grep` command.
         fix:
-            killall "Safari"
+            killall "Safari" ; sleep 1
         case_sensitive: "false"
         description: "The Safari application is currently closed."
         reference: "https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man1/defaults.1.html"
