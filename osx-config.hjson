@@ -438,19 +438,6 @@
     },
     {
         type: "exact match"
-        confidence: "recommended"
-        command: "defaults read /Library/Preferences/com.apple.alf allowsignedenabled"
-        sudo_command: "sudo defaults read /Library/Preferences/com.apple.alf allowsignedenabled"
-        expected_stdout: "0"
-        fix: "defaults write /Library/Preferences/com.apple.alf allowsignedenabled -bool false"
-        sudo_fix: "sudo defaults write /Library/Preferences/com.apple.alf allowsignedenabled -bool false"
-        case_sensitive: "false"
-        description: "Signed applications are not automatically whitelisted by the application firewall."
-        reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
-        undo: "sudo defaults write /Library/Preferences/com.apple.alf allowsignedenabled -bool true"
-    },
-    {
-        type: "exact match"
         confidence: "required"
         command:
             if [ -n "$(security authorizationdb read system.preferences 2> /dev/null | grep -A1 shared | grep -E '(true|false)' | grep 'false')" ]; then echo 0; else echo 1; fi
