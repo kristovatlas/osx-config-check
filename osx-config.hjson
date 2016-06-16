@@ -650,6 +650,18 @@
         description: "Safari extensions are disabled."
     },
     {
+        //Safari->Preferences->Security->Fraudulent sites->Warn when visiting a fraudulent website
+        type: "exact match"
+        //I'm setting this to recommended for on the basis that there is like a privacy trade-off
+        confidence: "recommended"
+        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari WarnAboutFraudulentWebsites"
+        expected_stdout: "1"
+        fix: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari WarnAboutFraudulentWebsites -bool true"
+        case_sensitive: "false"
+        description: "The Safari web browser will warn when vistiting known fraudulent websites."
+        undo: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari WarnAboutFraudulentWebsites -bool false"
+    },
+    {
         //Safari->Preferences->Security->Web Content->Enable JavaScript
         type: "exact match"
         confidence: "recommended"
