@@ -869,6 +869,34 @@
     },
     /* ----END SAFARI BROWSER SETTINGS---- */
 
+    /* ---BEGIN APPLE MAIL SETTINGS--- */
+    {
+        //Check if the Mail app is closed -- otherwise, it may override changes this app makes.
+        type: "exact match"
+        confidence: "required"
+        command: "ps ax | grep -c '/Applications/Mail.app/Contents/MacOS/Mail'"
+        expected_stdout: "2" //a value of "3" means it's running -- the other 2 are `/bin/sh` and the `grep` command.
+        fix:
+            killall "Mail" ; sleep 1
+        case_sensitive: "false"
+        description: "The Mail application is currently closed."
+        reference: "https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man1/defaults.1.html"
+    },
+    {
+        //Mail->Preferences->Viewing->Load remote content in messages
+        type: "exact match"
+        confidence: "recommended"
+        //Either Apple Mail is not in use or remote content is disabled. I use "ls" here to resolve the "~" symbol to the fully qualified file path that "test" requires.
+        command:
+            REMOTELOAD=$(defaults read ~/Library/Preferences/com.apple.mail-shared DisableURLLoading | grep 1) ; if [ ! -e $(ls ~/Library/Preferences/com.apple.mail-shared.plist) ] || [ -n "$REMOTELOAD" ]; then echo 1; else echo 0; fi
+        expected_stdout: "1"
+        fix: "defaults write ~/Library/Preferences/com.apple.mail-shared DisableURLLoading -bool true"
+        case_sensitive: "false"
+        description: "Apple Mail does not automatically load remote content in e-mails."
+        undo: "defaults write ~/Library/Preferences/com.apple.mail-shared DisableURLLoading -bool false"
+    },
+    /* ----END APPLE MAIL SETTINGS---- */
+
     /* useful for debugging `sudo_command`
     {
         type: "regex match"
