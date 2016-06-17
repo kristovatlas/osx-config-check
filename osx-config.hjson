@@ -929,6 +929,18 @@
         description: "New e-mails composed in Apple Mail and saved as drafts are encrypted by GPGMail."
         undo: "defaults write ~/Library/Preferences/org.gpgtools.gpgmail.plist OptionallyEncryptDrafts -bool false"
     },
+    {
+        //Mail->Preferences->GPGMail->Composing->Sign new messages by default
+        type: "exact match"
+        confidence: "required"
+        command:
+            AUTOSIGN=$(defaults read ~/Library/Preferences/org.gpgtools.gpgmail SignNewEmailsByDefault | grep 1) ; if [ ! -e $(ls ~/Library/Preferences/org.gpgtools.gpgmail.plist) ] || [ -n "$AUTOSIGN" ]; then echo 1; else echo 0; fi
+        expected_stdout: "1"
+        fix: "defaults write ~/Library/Preferences/org.gpgtools.gpgmail.plist SignNewEmailsByDefault -bool true"
+        case_sensitive: "false"
+        description: "New e-mails composed in Apple Mail are signed by GPGMail."
+        undo: "defaults write ~/Library/Preferences/org.gpgtools.gpgmail.plist SignNewEmailsByDefault -bool false"
+    },
     /* ----END APPLE MAIL SETTINGS---- */
 
     /* useful for debugging `sudo_command`
