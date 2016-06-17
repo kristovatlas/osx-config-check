@@ -918,6 +918,19 @@
         description: "New e-mails composed in Apple Mail will be encrypted by GPGMail if the receiver's PGP is present in the keychain."
         undo: "defaults write ~/Library/Preferences/org.gpgtools.gpgmail.plist EncryptNewEmailsByDefault -bool false"
     },
+    {
+        //Mail->Preferences->GPGMail->Composing->Encrypt drafts
+        type: "exact match"
+        confidence: "required"
+        command:
+            AUTOENCRYPTDRAFTS=$(defaults read ~/Library/Preferences/org.gpgtools.gpgmail OptionallyEncryptDrafts | grep 1) ; if [ ! -e $(ls ~/Library/Preferences/org.gpgtools.gpgmail.plist) ] || [ -n "$AUTOENCRYPTDRAFTS" ]; then echo 1; else echo 0; fi
+        expected_stdout: "1"
+        fix: "defaults write ~/Library/Preferences/org.gpgtools.gpgmail.plist OptionallyEncryptDrafts -bool true"
+        description: "GPGMail is configured to encrypt e-mail drafts by default."
+        case_sensitive: "false"
+        description: "New e-mails composed in Apple Mail and saved as drafts will be encrypted by GPGMail."
+        undo: "defaults write ~/Library/Preferences/org.gpgtools.gpgmail.plist OptionallyEncryptDrafts -bool false"
+    },
     /* ----END APPLE MAIL SETTINGS---- */
 
     /* useful for debugging `sudo_command`
