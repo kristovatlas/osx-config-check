@@ -895,6 +895,16 @@
         description: "Apple Mail does not automatically load remote content in e-mails."
         undo: "defaults write ~/Library/Preferences/com.apple.mail-shared DisableURLLoading -bool false"
     },
+    {
+        //Mail->Preferences->Junk Mail->Enable junk mail filtering AND When junk mail arrives: Move it to the Junk mailbox
+        type: "exact match"
+        confidence: "recommended"
+        command: "defaults -currentHost read ~/Library/Containers/com.apple.mail/Data/Library/Preferences/com.apple.mail JunkMailBehavior"
+        expected_stdout: "2"
+        fix: "defaults -currentHost write ~/Library/Containers/com.apple.mail/Data/Library/Preferences/com.apple.mail JunkMailBehavior -int 2"
+        case_sensitive: "false"
+        description: "Mail identified by Apple Mail as junk is sent to the Junk mailbox."
+    },
     /* ----END APPLE MAIL SETTINGS---- */
 
     /* useful for debugging `sudo_command`
