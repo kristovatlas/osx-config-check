@@ -905,6 +905,19 @@
         case_sensitive: "false"
         description: "Mail identified by Apple Mail as junk is sent to the Junk mailbox."
     },
+    {
+        //Mail->Preferences->GPGMail->Composing->Encrypt new messages by default
+        type: "exact match"
+        confidence: "recommended"
+        command:
+            AUTOENCRYPT=$(defaults read ~/Library/Preferences/org.gpgtools.gpgmail EncryptNewEmailsByDefault | grep 1) ; if [ ! -e $(ls ~/Library/Preferences/org.gpgtools.gpgmail.plist) ] || [ -n "$AUTOENCRYPT" ]; then echo 1; else echo 0; fi
+        expected_stdout: "1"
+        fix: "defaults write ~/Library/Preferences/org.gpgtools.gpgmail.plist EncryptNewEmailsByDefault -bool true"
+        description: "GPGMail is configured to encrypt messages by default."
+        case_sensitive: "false"
+        description: "New e-mails composed in Apple Mail will be encrypted by GPGMail if the receiver's PGP is present in the keychain."
+        undo: "defaults write ~/Library/Preferences/org.gpgtools.gpgmail.plist EncryptNewEmailsByDefault -bool false"
+    },
     /* ----END APPLE MAIL SETTINGS---- */
 
     /* useful for debugging `sudo_command`
