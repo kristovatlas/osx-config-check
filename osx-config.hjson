@@ -941,6 +941,18 @@
         description: "New e-mails composed in Apple Mail are signed by GPGMail."
         undo: "defaults write ~/Library/Preferences/org.gpgtools.gpgmail.plist SignNewEmailsByDefault -bool false"
     },
+    {
+        //Mail->Preferences->GPGMail->Updates->Automatically check for updates
+        type: "exact match"
+        confidence: "required"
+        command:
+            AUTOCHECK=$(defaults read ~/Library/Preferences/org.gpgtools.gpgmail SUEnableAutomaticChecks | grep 1) ; if [ ! -e $(ls ~/Library/Preferences/org.gpgtools.gpgmail.plist) ] || [ -n "$AUTOCHECK" ]; then echo 1; else echo 0; fi
+        expected_stdout: "1"
+        fix: "defaults write ~/Library/Preferences/org.gpgtools.gpgmail.plist SUEnableAutomaticChecks -bool true"
+        case_sensitive: "false"
+        description: "Apple Mail with automatically check for updates to GPGMail."
+        undo: "defaults write ~/Library/Preferences/org.gpgtools.gpgmail.plist SUEnableAutomaticChecks -bool false"
+    },
     /* ----END APPLE MAIL SETTINGS---- */
 
     /* useful for debugging `sudo_command`
