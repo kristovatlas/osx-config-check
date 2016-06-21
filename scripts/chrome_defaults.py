@@ -32,7 +32,9 @@ Examples:
     $ python chrome_defaults.py write "/Users/myusername/Library/Application Support/Google/Chrome/Default/Preferences" download.directory_upgrade -bool true
 
 Todo:
-    Unit tests
+    * Unit tests
+    * Add support for writing list values
+    * Add support for writing null value
 """
 
 import sys
@@ -220,7 +222,6 @@ def get_args():
 
 def print_usage():
     """Prints syntax for usage and exits the program."""
-    #TODO: add support for handling list values and null
     print(("Usage:\n"
            "\tpython chrome_defaults.py read %sfile%s "
            "[%sattribute-name%s]\n"
