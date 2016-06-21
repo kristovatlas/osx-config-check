@@ -1,2 +1,5 @@
 #Compiled Python files
 *.pyc
+
+#Backed up Preferences Files
+*.bak
