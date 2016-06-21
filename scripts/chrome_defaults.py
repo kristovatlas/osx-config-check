@@ -44,7 +44,6 @@ import re
 
 UNDERLINE = '\033[4m'
 ENDC = '\033[0m'
-JSON_SPACE_INDENT_COUNT = 4
 
 def _main():
     (action, preferences_filename, chrome_property, value) = get_args()
@@ -63,14 +62,6 @@ def _main():
 
         with open(preferences_filename, 'w') as preferences_file:
             preferences_file.write(json.dumps(new_json))
-
-        """TODO: allow user to specify pretty pretty with tabs or spaces
-        json_tab_file_write = JSONTabIndentFileWriter(preferences_filename,
-                                                      JSON_SPACE_INDENT_COUNT)
-        json.dump(new_json, json_tab_file_write, indent=JSON_SPACE_INDENT_COUNT,
-                  separators=(',', ': '), sort_keys=True)
-        json_tab_file_write.close()
-        """
 
 def normalize(obj):
     """Recursively normalizes `unicode` data into utf-8 encoded `str`.
@@ -244,38 +235,6 @@ def _make_backup(filename):
     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
     dest = "%s%s.bak" % (filename, timestamp)
     shutil.copyfile(filename, dest)
-
-class JSONTabIndentFileWriter(object):
-    """Google Chrome prefers JSON using tabs for indendetation.
-    https://gist.github.com/magnetikonline/f189c4d8eb25daea2961f0fc76699b08
-    """
-    def __init__(self, filepath, indent):
-        # open JSON file
-        self.file_handle = open(filepath, 'w')
-
-        # create indent find regular expression
-        self.indent_regexp = re.compile(r'^([\[,]*\r?\n)( {{{0},}})(.*)'.format(indent))
-        self.indent_size = indent
-
-    def write(self, output):
-        """Write JSON to file."""
-        # match JSON builder indent output
-        indent_match = self.indent_regexp.search(output)
-
-        if indent_match:
-            # swap out space indents with tabs
-            output = ''.join([
-                indent_match.group(1), # optional "[" or "," character before indent
-                '\t' * int(len(indent_match.group(2)) / self.indent_size), # indent conversion
-                indent_match.group(3) # characters past indent
-            ])
-
-        # write output to file
-        self.file_handle.write(output)
-
-    def close(self):
-        """Close the file after writing."""
-        self.file_handle.close()
 
 if __name__ == "__main__":
     _main()
