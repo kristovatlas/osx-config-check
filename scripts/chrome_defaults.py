@@ -55,9 +55,13 @@ def _main():
             print "%s" % json.dumps(preferences_json, indent=4)
             sys.exit()
         else:
-            value = get_json_field(
-                preferences_json, chrome_property, preferences_filename)
-            print "%s" % normalize(value)
+            try:
+                value = get_json_field(
+                    preferences_json, chrome_property, preferences_filename)
+                print "%s" % normalize(value)
+            except KeyError:
+                print("The attribute '%s' does not exist in '%s'." %
+                      (chrome_property, preferences_filename))
     else: #'write'
         _make_backup(preferences_filename)
         new_json = write_json_field(preferences_json, chrome_property, value)
