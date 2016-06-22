@@ -955,6 +955,33 @@
     },
     /* ----END APPLE MAIL SETTINGS---- */
 
+    /* ---BEGIN GOOGLE CHROME SETTINGS--- */
+    {
+        //Check if the Chrome app is closed -- otherwise, it may override changes this app makes.
+        type: "exact match"
+        confidence: "required"
+        command: "ps ax | grep -c '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'"
+        expected_stdout: "2" //a value of "3" means it's running -- the other 2 are `/bin/sh` and the `grep` command.
+        fix:
+            killall "Google Chrome" ; sleep 3
+        case_sensitive: "false"
+        description: "The Google Chrome browser is currently closed."
+    },
+    {
+        //Google Chrome->Show Advanced Settings->Privacy->Send a "Do Not Track" request with your browsing traffic
+        type: "regex match"
+        confidence: "recommended"
+        command:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' enable_do_not_track
+        expected_regex: "(True\n?)+"
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' enable_do_not_track -bool true
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles use the Do-Not-Track HTTP header."
+    },
+
+    /* ----END GOOGLE CHROME SETTINGS---- */
+
     /* useful for debugging `sudo_command`
     {
         type: "regex match"
