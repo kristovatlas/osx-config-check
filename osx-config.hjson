@@ -1004,6 +1004,19 @@
         case_sensitive: "false"
         description: "All Google Chrome web browser profiles prevent filling personal information into forms automatically."
     },
+    {
+        //Possibly controversial, but I'm suggesting that Password Manager in Chrome be disabled in favor of a better one, such as KeePass or LastPass. Passwords stored in Google Password Manager are stored at passwords.google.com and may be availble on unanticipated devices without additional apps or extensions installed.
+        //Chrome->Preferences->Show Advanced Settings->Passwords and forms->Offer to save your web passwords.
+type: "regex match"
+        confidence: "recommended"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "True"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.password_manager_enabled ; fi
+        expected_regex: "(False\n?)+"
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' profile.password_manager_enabled -bool false
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles have disabled Password Manager."
+    }
 
     /* ----END GOOGLE CHROME SETTINGS---- */
 
