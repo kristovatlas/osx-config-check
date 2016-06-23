@@ -3,7 +3,10 @@
 
 Based on the `defaults` utility for reading/writing PList files in OS X.
 
-The two sub-commands currently supported are "read" and "write".
+The sub-commands currently supported are
+* read
+* write
+* delete
 
 Nested attribute names of JSON objects are referred to using dot-notation, e.g.
 "my.object.property"
@@ -30,6 +33,8 @@ Examples:
     $ python chrome_defaults.py read "/Users/myusername/Library/Application Support/Google/Chrome/Default/Preferences" download.directory_upgrade
 
     $ python chrome_defaults.py write "/Users/myusername/Library/Application Support/Google/Chrome/Default/Preferences" download.directory_upgrade -bool true
+
+    $ python chrome_defaults.py delete "/Users/myusername/Library/Application Support/Google/Chrome/Default/Preferences" dns_prefetching
 
 Todo:
     * Unit tests
@@ -62,12 +67,20 @@ def _main():
             except KeyError:
                 print("The attribute '%s' does not exist in '%s'." %
                       (chrome_property, preferences_filename))
-    else: #'write'
+    elif action == 'write':
         _make_backup(preferences_filename)
         new_json = write_json_field(preferences_json, chrome_property, value)
 
         with open(preferences_filename, 'w') as preferences_file:
             preferences_file.write(json.dumps(new_json))
+    elif action == 'delete':
+        _make_backup(preferences_filename)
+        new_json = delete_json_field(preferences_json, chrome_property)
+
+        with open(preferences_filename, 'w') as preferences_file:
+            preferences_file.write(json.dumps(new_json))
+    else:
+        raise ValueError("Invalid sub-command.")
 
 def normalize(obj):
     """Recursively normalizes `unicode` data into utf-8 encoded `str`.
@@ -114,18 +127,40 @@ def write_json_field(json_obj, attribute_name, value):
     except KeyError as err:
         sys.exit("Error: " + re.sub('"', '', str(err)))
 
-def _recursive_write(json_obj, attribute_name, value):
+def _recursive_write(json_obj, attribute_name, value=None, delete_attrib=False):
     """
+    Args:
+        json_obj (dict): The JSON data being modified.
+        attribute_name (str): The attribute to modify. If there are nested
+            structures expressed within the attribute_name, they should be
+            separated by periods. Consequently, attribute names and nested
+            names cannot contain periods.
+        value (Optional): The value to write to the attribute. The `value`
+            should be an instance of one of the following Python data types:
+            int, float, str, bool, list, dict, None. The "None" value is used to
+            represent a "null" value in JSON. The default value is None.
+        delete_attrib (Optional[bool]): If set to True, the attribute will be
+            deleted instead of set to a specific value. When this is set to
+            True, the `value` parameter should be set to `None`.
     Raises:
         KeyError: When a sub-attribute is specified for a non-object.
     """
-    #print("DEBUG: json_obj = %s attribute_name = %s value = %s" %
-    #      (json_obj, attribute_name, value))
+    if delete_attrib:
+        assert value is None
+
     attrib_as_list = attribute_name.split('.')
     current_attrib = attrib_as_list.pop(0)
 
     if len(attrib_as_list) == 0:
-        json_obj[attribute_name] = value
+        if delete_attrib:
+            del json_obj[attribute_name]
+        else:
+            try:
+                json_obj[attribute_name] = value
+            except TypeError:
+                sys.exit(("Error: Attribute '%s' cannot be set because the "
+                          "parent attribute is already set to a non-object "
+                          "value.") % current_attrib)
         return json_obj
     else:
         if not isinstance(json_obj, dict):
@@ -139,6 +174,21 @@ def _recursive_write(json_obj, attribute_name, value):
                                                     attribute_name, value)
         return json_obj
 
+def delete_json_field(json_obj, attribute_name):
+    """Deletes a value from a JSON object (dict).
+    Args:
+        json_obj (dict): The JSON file that contains the attribute to delete.
+        attribute_name (str): The attribute to delete. If there are nested
+            structures expressed within the attribute_name, they should be
+            separated by periods. Consequently, attribute names and nested
+            names cannot contain periods.
+    """
+    try:
+        new_json = _recursive_write(deepcopy(json_obj), attribute_name,
+                                    value=None, delete_attrib=True)
+        return new_json
+    except KeyError as err:
+        sys.exit("Error: '%s' attribute not found." % attribute_name)
 
 def get_json_field(json_obj, attribute_name, json_filename=None,
                    suppress_err_msg=False):
@@ -189,7 +239,14 @@ def get_args():
     """
     if len(sys.argv) in (3, 4, 6):
         action = sys.argv[1]
-        if action in ('read', 'write'):
+        if action == 'read' and len(sys.argv) not in (3, 4):
+            print_usage()
+        if action == 'write' and len(sys.argv) != 6:
+            print_usage()
+        if action == 'delete' and len(sys.argv) != 4:
+            print_usage()
+
+        if action in ('read', 'write', 'delete'):
             preferences_filename = sys.argv[2]
             chrome_property = None
             if len(sys.argv) in (4, 6):
@@ -231,9 +288,11 @@ def print_usage():
            "[%sattribute-name%s]\n"
            "\tOR\n"
            "\tpython chrome_defaults.py write %sfile%s %sattribute-name%s "
-           "-bool|-string|-int %svalue%s") %
+           "-bool|-string|-int %svalue%s\n"
+           "\tOR\n"
+           "\tpython chrome_defaults.py delete %sfile%s %sattribute-name%s") %
           (UNDERLINE, ENDC, UNDERLINE, ENDC, UNDERLINE, ENDC, UNDERLINE, ENDC,
-           UNDERLINE, ENDC))
+           UNDERLINE, ENDC, UNDERLINE, ENDC, UNDERLINE, ENDC))
     sys.exit()
 
 def _make_backup(filename):
