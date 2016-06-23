@@ -993,6 +993,18 @@
         description: "All Google Chrome web browser profiles prevent information leakage through navigation errors."
     },
     {
+        //Chrome->Preferences->Show Advanced Settings->Privacy->Use a prediction service to help complete searches and URLs typed in the address bar or the app launcher
+        type: "regex match"
+        confidence: "required"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "True"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' search.suggest_enabled ; fi
+        expected_regex: "(False\n?)+"
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' search.suggest_enabled -bool false
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles prevent information leakage through URL suggestions."
+    },
+    {
         //Chrome->Preferences->Show Advanced Settings->Passwords and forms->Enable Autofill to fill out web forms in a single click
         type: "regex match"
         confidence: "required"
