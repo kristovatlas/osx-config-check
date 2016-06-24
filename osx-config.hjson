@@ -1029,6 +1029,20 @@
         description: "All Google Chrome web browser profiles prevent information leakage through report security incidents to Google."
     },
     {
+        //Another potentially controversial setting: Enabling Google Safe Browsing. My guess is that, on the whole, this will make machines more secure than it makes them insecure, but it's worth pointing out that there are privacy leaks and that there are allegations of NSA exploitation targeting using this feature. See reference field below.
+        //Chrome->Preferences->Show Advanced Settings->Privacy->Protect you and your device from dangerous sites
+        type: "regex match"
+        confidence: "recommended"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "True"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' safebrowsing.enabled ; fi
+        expected_regex: "^(True\n?)+$"
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' safebrowsing.enabled -bool true
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles have Google Safe Browsing enabled."
+        reference: "https://en.wikipedia.org/wiki/Google_Safe_Browsing"
+    },
+    {
         //Chrome->Preferences->Show Advanced Settings->Passwords and forms->Enable Autofill to fill out web forms in a single click
         type: "regex match"
         confidence: "required"
