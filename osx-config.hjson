@@ -1042,6 +1042,18 @@
         description: "All Google Chrome web browser profiles prevent information leakage through spell-checking network services."
     },
     {
+        //Chrome->Preferences->Show Advanced Settings->Privacy->Automatically send usage statistics and crash reports to Google
+        type: "regex match"
+        confidence: "required"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; exit; fi; if [ -e "$(ls ~/Library/Application\ Support/Google/Chrome/Consent\ To\ Send\ Stats)" ]; then echo "True"; exit; fi ; echo $(python ./scripts/chrome_defaults.py read ~/Library/Application\ Support/Google/Chrome/Local\ State user_experience_metrics.reporting_enabled)
+        expected_regex: ".*False$"
+        fix:
+            rm ~/Library/Application\ Support/Google/Chrome/Consent\ To\ Send\ Stats ; python ./scripts/chrome_defaults.py write "$(ls ~/Library/Application\ Support/Google/Chrome/Local\ State)" user_experience_metrics.reporting_enabled -bool false
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles prevent information leakage through reporting usage statistics to Google."
+    },
+    {
         //Chrome->Preferences->Show Advanced Settings->Privacy->Send a "Do Not Track" request with your browsing traffic
         type: "regex match"
         confidence: "recommended"
