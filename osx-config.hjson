@@ -1005,6 +1005,18 @@
         description: "All Google Chrome web browser profiles prevent information leakage through URL suggestions."
     },
     {
+        //Chrome->Preferences->Show Advanced Settings->Privacy->Use a prediction service to load pages more quickly
+        type: "regex match"
+        confidence: "required"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "2"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' net.network_prediction_options ; fi
+        expected_regex: "^(2\n?)+$"
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' net.network_prediction_options -int 2
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles prevent information leakage through network prediction."
+    },
+    {
         //Chrome->Preferences->Show Advanced Settings->Passwords and forms->Enable Autofill to fill out web forms in a single click
         type: "regex match"
         confidence: "required"
