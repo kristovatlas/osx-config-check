@@ -1103,6 +1103,18 @@
         case_sensitive: "false"
         description: "All Google Chrome web browser profiles have disabled automatic sign-in for stored passwords."
     },
+    {
+        //Chrome->Preferences->Show Advanced Settings->Google CloudPrint->Show notifications when new printers are detected on network
+        type: "regex match"
+        confidence: "required"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' local_discovery.notifications_enabled ; fi
+        expected_regex: "^(False\n?)+$"
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' local_discovery.notifications_enabled -bool false
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles have disabled Google CloudPrint."
+    },
 
     /* ----END GOOGLE CHROME SETTINGS---- */
 
