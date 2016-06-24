@@ -1030,6 +1030,18 @@
         reference: "https://en.wikipedia.org/wiki/Google_Safe_Browsing"
     },
     {
+        //Chrome->Preferences->Show Advanced Settings->Privacy->Use a web service to help resolve spelling errors
+        type: "regex match"
+        confidence: "recommended"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' spellcheck.use_spelling_service ; fi
+        expected_regex: "^(False\n?)+$"
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' spellcheck.use_spelling_service -bool false
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles prevent information leakage through spell-checking network services."
+    },
+    {
         //Chrome->Preferences->Show Advanced Settings->Privacy->Send a "Do Not Track" request with your browsing traffic
         type: "regex match"
         confidence: "recommended"
