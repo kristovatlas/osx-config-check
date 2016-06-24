@@ -968,19 +968,6 @@
         description: "The Google Chrome browser is currently closed."
     },
     {
-        //Chrome->Preferences->Show Advanced Settings->Privacy->Send a "Do Not Track" request with your browsing traffic
-        type: "regex match"
-        confidence: "recommended"
-        //This check should short-circuit and match the regex if Chrome is not installed
-        command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "True"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' enable_do_not_track ; fi
-        expected_regex: "^(True\n?)+$"
-        fix:
-            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' enable_do_not_track -bool true
-        case_sensitive: "false"
-        description: "All Google Chrome web browser profiles use the Do-Not-Track HTTP header."
-    },
-    {
         //Chrome->Preferences->Show Advanced Settings->Privacy->Use a web service to help resolve navigation errors
         type: "regex match"
         confidence: "recommended"
@@ -1041,6 +1028,19 @@
         case_sensitive: "false"
         description: "All Google Chrome web browser profiles have Google Safe Browsing enabled."
         reference: "https://en.wikipedia.org/wiki/Google_Safe_Browsing"
+    },
+    {
+        //Chrome->Preferences->Show Advanced Settings->Privacy->Send a "Do Not Track" request with your browsing traffic
+        type: "regex match"
+        confidence: "recommended"
+        //This check should short-circuit and match the regex if Chrome is not installed
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "True"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' enable_do_not_track ; fi
+        expected_regex: "^(True\n?)+$"
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' enable_do_not_track -bool true
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles use the Do-Not-Track HTTP header."
     },
     {
         //Chrome->Preferences->Show Advanced Settings->Passwords and forms->Enable Autofill to fill out web forms in a single click
