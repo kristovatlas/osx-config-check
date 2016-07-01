@@ -1067,6 +1067,19 @@
         description: "All Google Chrome web browser profiles use the Do-Not-Track HTTP header."
     },
     {
+        //Chrome->Preferences->Show Advanced Settings->Privacy->Content Settings->Pop-ups->Do not allow any site to show pop-ups (recommended)
+        type: "regex match"
+        confidence: "required"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "True"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.default_content_setting_values.popups ; fi
+        expected_regex:
+            ^(The attribute 'profile.default_content_setting_values.popups' does not exist\n?)|(None\n?)+$
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py delete '{}' profile.default_content_setting_values.popups
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles prevent pop-ups."
+    },
+    {
         //Chrome->Preferences->Show Advanced Settings->Passwords and forms->Enable Autofill to fill out web forms in a single click
         type: "regex match"
         confidence: "required"
