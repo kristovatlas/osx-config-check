@@ -1115,6 +1115,16 @@
         case_sensitive: "false"
         description: "All Google Chrome web browser profiles have disabled Google CloudPrint."
     },
+    {
+        type: "exact match"
+        confidence: "recommended"
+        command:
+            VERSIONER_PERL_PREFER_32_BIT=true perl -MMac::InternetConfig -le 'print +(GetICHelper "http")[1]'
+        expected_stdout: "Google Chrome"
+        fix: "#TODO: There is none known, set manually?"
+        case_sensitive: "false"
+        description: "Google Chrome is the default web browser."
+    }
 
     /* ----END GOOGLE CHROME SETTINGS---- */
 
