@@ -7,6 +7,36 @@ The sub-commands currently supported are
 * read
 * write
 * delete
+* write-array
+
+###########################
+# write-array Sub-Command #
+###########################
+
+The "write-array" sub-command is a `defaults`-unlike command that allows one to
+write a value to objects contained in array, optionally specifying a condition
+to match only some of the array objects. For example:
+{
+    ...other attributes in the JSON
+    "plugins_list": [
+        {
+            "enabled": true,
+            "name": "Widevine Content Decryption Module"
+        },
+        {
+            "enabled": true,
+            "name": "Shockwave Flash"
+        }
+    ]
+}
+
+In order to set the "Shockwave Flash" element of the "plugins_list" array to
+enabled = false, we can use this write-array sub-command:
+write-array plugins_list enabled -bool false where name -string "Shockwave Flash"
+
+################
+# Dot Notation #
+################
 
 Nested attribute names of JSON objects are referred to using dot-notation, e.g.
 "my.object.property"
@@ -36,9 +66,11 @@ Examples:
 
     $ python chrome_defaults.py delete "/Users/myusername/Library/Application Support/Google/Chrome/Default/Preferences" dns_prefetching
 
-Todo:
+    $ python chrome_defaults.py write-array "/Users/myusername/Library/Application Support/Google/Chrome/Default/Preferences" plugins.plugins_list enabled -bool false where name -string "Shockwave Flash"
+
+Todos:
     * Unit tests
-    * Add support for writing list values
+    * Add support for writing list values e.g. write [1, 2, 3]
     * Add support for writing null value
 """
 
@@ -52,32 +84,49 @@ import re
 UNDERLINE = '\033[4m'
 ENDC = '\033[0m'
 
+DEBUG_PRINT = True
+
 def _main():
-    (action, preferences_filename, chrome_property, value) = get_args()
-    preferences_json = _get_json(preferences_filename)
-    if action == 'read':
-        if chrome_property is None:
+    args = get_args()
+    dprint(args)
+    preferences_json = _get_json(args['preferences_filename'])
+    if args['action'] == 'read':
+        if args['chrome_property'] is None:
             print "%s" % json.dumps(preferences_json, indent=4)
             sys.exit()
         else:
             try:
-                value = get_json_field(
-                    preferences_json, chrome_property, preferences_filename)
-                print "%s" % normalize(value)
+                args['value'] = get_json_field(
+                    preferences_json, args['chrome_property'],
+                    args['preferences_filename'])
+                print "%s" % normalize(args['value'])
             except KeyError:
                 print("The attribute '%s' does not exist in '%s'." %
-                      (chrome_property, preferences_filename))
-    elif action == 'write':
-        _make_backup(preferences_filename)
-        new_json = write_json_field(preferences_json, chrome_property, value)
+                      (args['chrome_property'], args['preferences_filename']))
+    elif args['action'] == 'write':
+        _make_backup(args['preferences_filename'])
+        new_json = write_json_field(
+            preferences_json, args['chrome_property'], args['value'])
 
-        with open(preferences_filename, 'w') as preferences_file:
+        with open(args['preferences_filename'], 'w') as preferences_file:
             preferences_file.write(json.dumps(new_json))
-    elif action == 'delete':
-        _make_backup(preferences_filename)
-        new_json = delete_json_field(preferences_json, chrome_property)
+    elif args['action'] == 'delete':
+        _make_backup(args['preferences_filename'])
+        new_json = delete_json_field(preferences_json, args['chrome_property'])
 
-        with open(preferences_filename, 'w') as preferences_file:
+        with open(args['preferences_filename'], 'w') as preferences_file:
+            preferences_file.write(json.dumps(new_json))
+    elif args['action'] == 'write-array':
+        _make_backup(args['preferences_filename'])
+
+        where_clause = None
+        if 'where_property' in args and 'where_value' in args:
+            where_clause = (args['where_property'], args['where_value'])
+
+        new_json = write_json_array(preferences_json, args['chrome_property'],
+                                    args['value'], args['child_attrib'],
+                                    where_clause=where_clause)
+        with open(args['preferences_filename'], 'w') as preferences_file:
             preferences_file.write(json.dumps(new_json))
     else:
         raise ValueError("Invalid sub-command.")
@@ -127,14 +176,54 @@ def write_json_field(json_obj, attribute_name, value):
     except KeyError as err:
         sys.exit("Error: " + re.sub('"', '', str(err)))
 
-def _recursive_write(json_obj, attribute_name, value=None, delete_attrib=False):
+def write_json_array(json_obj, attribute_name, value, child_name,
+                     where_clause=None):
+    """
+    Args:
+        json_obj (dict): The JSON data being modified.
+        attribute_name (str): The location of the parent array that contains
+        the objects being written to.
+        value (Optional): The value to write to the attribute. The `value`
+            should be an instance of one of the following Python data types:
+            int, float, str, bool, list, dict, None. The "None" value is used to
+            represent a "null" value in JSON. The default value is None.
+        child_name (str): The name of the attribute that will be modified within
+            the members of the object array. If there are nested structures
+            expressed within child_name, they should be separated by periods.
+        where_clause (Optional[(str, value)]: If writing to multiple objects
+            using the "write-array" sub-command, this argument can indicate
+            criteria by which to choose specific members of the object array
+            to write to. This argument consists of a 2-tuple: The name of the
+            attribute to match, and the value it must equal in order to meet
+            the criteria. This is akin to a "WHERE {atrib} = {value}" clause
+            in SQL.
+    """
+    if (type(value) not in (int, float, str, bool, list, dict) and
+            value is not None):
+        raise ValueError("Type '%s' of value '%s' is not valid." %
+                         (type(value), value))
+
+    try:
+        new_json = _recursive_write(deepcopy(json_obj), attribute_name,
+                                    value=value, child_name=child_name,
+                                    where_clause=where_clause)
+        return new_json
+    except KeyError as err:
+        sys.exit("Error: " + re.sub('"', '', str(err)))
+
+
+def _recursive_write(json_obj, attribute_name, value=None, delete_attrib=False,
+                     child_name=None, where_clause=None):
     """
     Args:
         json_obj (dict): The JSON data being modified.
         attribute_name (str): The attribute to modify. If there are nested
             structures expressed within the attribute_name, they should be
             separated by periods. Consequently, attribute names and nested
-            names cannot contain periods.
+            names cannot contain periods. If writing to multiple objects using
+            the "write-array" sub-command, this argument should instead be the
+            location of the parent array that contains the objects being written
+            to.
         value (Optional): The value to write to the attribute. The `value`
             should be an instance of one of the following Python data types:
             int, float, str, bool, list, dict, None. The "None" value is used to
@@ -142,25 +231,69 @@ def _recursive_write(json_obj, attribute_name, value=None, delete_attrib=False):
         delete_attrib (Optional[bool]): If set to True, the attribute will be
             deleted instead of set to a specific value. When this is set to
             True, the `value` parameter should be set to `None`.
+        child_name (Optional[str]): If writing to multiple objects using the
+            "write-array" sub-command, this argument should be the name of the
+            attribute that will be modified within the members of the object
+            array. If there are nested structures expressed within child_name,
+            they should be separated by periods.
+        where_clause (Optional[(str, value)]: If writing to multiple objects
+            using the "write-array" sub-command, this argument can indicate
+            criteria by which to choose specific members of the object array
+            to write to. This argument consists of a 2-tuple: The name of the
+            attribute to match, and the value it must equal in order to meet
+            the criteria. This is akin to a "WHERE {atrib} = {value}" clause
+            in SQL.
     Raises:
         KeyError: When a sub-attribute is specified for a non-object.
     """
     if delete_attrib:
         assert value is None
 
+    if child_name is None:
+        assert where_clause is None
+
     attrib_as_list = attribute_name.split('.')
     current_attrib = attrib_as_list.pop(0)
 
     if len(attrib_as_list) == 0:
+        #Recursed down to target attribute
         if delete_attrib:
             del json_obj[attribute_name]
-        else:
+        elif child_name is None:
+            #normal write operation
             try:
                 json_obj[attribute_name] = value
             except TypeError:
                 sys.exit(("Error: Attribute '%s' cannot be set because the "
                           "parent attribute is already set to a non-object "
                           "value.") % current_attrib)
+        else:
+            #write-array operation
+            try:
+                iter(json_obj[attribute_name])
+            except TypeError:
+                sys.exit(("Error: Cannot write to array because '%s' is not an "
+                          "array.") % attribute_name)
+            for array_item in json_obj[attribute_name]:
+                if where_clause is None:
+                    try:
+                        array_item[child_name] = value
+                    except TypeError:
+                        sys.exit(("Error: Attribute '%s' cannot be set because "
+                                  "one of the elements of the target array is "
+                                  "already set to a non-object value.") %
+                                 current_attrib)
+                else:
+                    where_attrib = str(where_clause[0])
+                    where_val = where_clause[1]
+                    if array_item[where_attrib] == where_val:
+                        try:
+                            array_item[child_name] = value
+                        except TypeError:
+                            sys.exit(("Error: Attribute '%s' cannot be set "
+                                      "because one of the elements of the "
+                                      "target array is already set to a "
+                                      "non-object value.") % current_attrib)
         return json_obj
     else:
         if not isinstance(json_obj, dict):
@@ -187,7 +320,7 @@ def delete_json_field(json_obj, attribute_name):
         new_json = _recursive_write(deepcopy(json_obj), attribute_name,
                                     value=None, delete_attrib=True)
         return new_json
-    except KeyError as err:
+    except KeyError:
         sys.exit("Error: '%s' attribute not found." % attribute_name)
 
 def get_json_field(json_obj, attribute_name, json_filename=None,
@@ -229,57 +362,127 @@ def _get_json(filename):
         with open(filename, 'r') as json_file:
             return json.load(json_file)
     except TypeError:
-        sys.exit("No Google Chrome preferences file found at '%s'\n" % filename)
+        sys.exit("No Google Chrome preferences file found at '%s'" % filename)
+    except ValueError:
+        sys.exit(("File '%s' does not appear to be a valid JSON file. Check "
+                  "this directory for backup copies to restore to, in case "
+                  "this file has become corrupted.") % filename)
 
 def get_args():
     """Reads command line arguments.
     Returns:
-        tuple: action, preferences, chrome_property. If no chrome_property is
-        specified by the user, this value is set to None.
+        dict: Contains the following keys set to values:
+            * 'action'
+            * 'preferences_filename'
+            * 'chrome_property': If no chrome_property is specified by the user,
+                this value is set to None.
+            * 'value' (optional)
+            * 'where_property' (optional): Condition to write 'value' to array
+                of objects
+            * 'where_value' (optional)
     """
-    if len(sys.argv) in (3, 4, 6):
-        action = sys.argv[1]
-        if action == 'read' and len(sys.argv) not in (3, 4):
-            print_usage()
-        if action == 'write' and len(sys.argv) != 6:
-            print_usage()
-        if action == 'delete' and len(sys.argv) != 4:
-            print_usage()
+    args = dict()
+    args['action'] = None
+    args['preferences_filename'] = None
+    args['chrome_property'] = None
 
-        if action in ('read', 'write', 'delete'):
-            preferences_filename = sys.argv[2]
-            chrome_property = None
-            if len(sys.argv) in (4, 6):
-                chrome_property = sys.argv[3]
-            value = None
-            if len(sys.argv) == 6:
-                write_type = sys.argv[4]
-                write_value = sys.argv[5]
-                if write_type == '-bool':
-                    if write_value.lower() == 'true':
-                        value = True
-                    elif write_value.lower() == 'false':
-                        value = False
-                    else:
-                        print "'%s' is not a valid boolean." % str(write_value)
-                        print_usage()
-                elif write_type == '-int':
-                    try:
-                        value = int(write_value)
-                    except ValueError:
-                        print "'%s' is not a valid integer." % str(write_value)
-                        print_usage()
-                elif write_type == '-string':
-                    try:
-                        value = str(write_value)
-                    except ValueError:
-                        print "Provided value is not a valid string."
-                        print_usage()
+    if len(sys.argv) > 2:
+        args['action'] = sys.argv[1]
+    else:
+        print_usage()
+
+    if args['action'] == 'read':
+        if len(sys.argv) == 3:
+            args['preferences_filename'] = sys.argv[2]
+        elif len(sys.argv) == 4:
+            args['preferences_filename'] = sys.argv[2]
+            args['chrome_property'] = sys.argv[3]
+        else:
+            print_usage()
+    elif args['action'] == 'delete':
+        if len(sys.argv) == 4:
+            args['preferences_filename'] = sys.argv[2]
+            args['chrome_property'] = sys.argv[3]
+        else:
+            print_usage()
+    elif args['action'] == 'write':
+        if len(sys.argv) == 6:
+            args['preferences_filename'] = sys.argv[2]
+            args['chrome_property'] = sys.argv[3]
+            write_type = sys.argv[4]
+            write_value = sys.argv[5]
+
+            args['value'] = _get_value_and_handle_errors(value=write_value,
+                                                         type_arg=write_type)
+        else:
+            print_usage()
+    elif args['action'] == 'write-array':
+        if len(sys.argv) in (7, 11):
+            args['preferences_filename'] = sys.argv[2]
+            args['chrome_property'] = sys.argv[3]
+            args['child_attrib'] = sys.argv[4]
+            write_type = sys.argv[5]
+            write_value = sys.argv[6]
+
+            args['value'] = _get_value_and_handle_errors(value=write_value,
+                                                         type_arg=write_type)
+            if len(sys.argv) == 11:
+                if sys.argv[7] == 'where':
+                    args['where_property'] = sys.argv[8]
+                    where_type = sys.argv[9]
+                    where_val = sys.argv[10]
+                    args['where_value'] = _get_value_and_handle_errors(
+                        value=where_val, type_arg=where_type)
                 else:
                     print_usage()
-            return (action, preferences_filename, chrome_property, value)
+        else:
+            print_usage()
 
-    print_usage()
+    return args
+
+def _get_value_and_handle_errors(value, type_arg):
+    """See: `_get_value`"""
+    try:
+        return _get_value(value, type_arg)
+    except ValueError as err:
+        print re.sub('"', '', str(err))
+        print_usage()
+    except TypeError as err:
+        print re.sub('"', '', str(err))
+        print_usage()
+
+def _get_value(value, type_arg):
+    """Returns the value cast into the appropriate Python data type.
+    Arguments:
+        value: The value to return, in some castable form.
+        type_arg (str): One of the following strings: '-bool', '-int', 'string'
+
+    Raises:
+        ValueError: If the value is not castable into the specified data type.
+        TypeError: If the `type_arg` is not a valid type
+    """
+
+    if type_arg == '-bool':
+        if value.lower() == 'true':
+            return True
+        elif value.lower() == 'false':
+            return False
+        else:
+            raise ValueError("'%s' is not a valid boolean." % str(value))
+    elif type_arg == '-int':
+        try:
+            return int(value)
+        except ValueError:
+            raise ValueError("'%s' is not a valid integer." % str(value))
+    elif type_arg == '-string':
+        try:
+            return str(value)
+        except ValueError:
+            raise ValueError("Provided value is not a valid string.")
+    else:
+        raise TypeError("The type '%s' is not a supported data type." %
+                        re.sub('-', '', str(type_arg)))
+
 
 def print_usage():
     """Prints syntax for usage and exits the program."""
@@ -290,15 +493,26 @@ def print_usage():
            "\tpython chrome_defaults.py write %sfile%s %sattribute-name%s "
            "-bool|-string|-int %svalue%s\n"
            "\tOR\n"
-           "\tpython chrome_defaults.py delete %sfile%s %sattribute-name%s") %
+           "\tpython chrome_defaults.py delete %sfile%s %sattribute-name%s\n"
+           "\tOR\n"
+           "\tpython chrome_defaults.py write-array %sfile%s "
+           "%sarray-name%s %sattribute-name%s -bool|-string|-int %svalue%s "
+           "[where %sattribute-name%s -bool|-string|-int %svalue%s]") %
           (UNDERLINE, ENDC, UNDERLINE, ENDC, UNDERLINE, ENDC, UNDERLINE, ENDC,
-           UNDERLINE, ENDC, UNDERLINE, ENDC, UNDERLINE, ENDC))
+           UNDERLINE, ENDC, UNDERLINE, ENDC, UNDERLINE, ENDC, UNDERLINE, ENDC,
+           UNDERLINE, ENDC, UNDERLINE, ENDC, UNDERLINE, ENDC, UNDERLINE, ENDC,
+           UNDERLINE, ENDC))
     sys.exit()
 
 def _make_backup(filename):
     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
     dest = "%s%s.bak" % (filename, timestamp)
     shutil.copyfile(filename, dest)
+
+def dprint(data):
+    """Print debug information."""
+    if DEBUG_PRINT:
+        print "DEBUG: %s" % str(data)
 
 if __name__ == "__main__":
     _main()
