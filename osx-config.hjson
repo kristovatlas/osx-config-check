@@ -1080,6 +1080,18 @@
         description: "All Google Chrome web browser profiles prevent pop-ups."
     },
     {
+        //Chrome->Preferences->Show Advanced Settings->Privacy->Content Settings->Location->Do not allow any site to track your physical location
+        type: "regex match"
+        confidence: "recommended"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "2"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.default_content_setting_values.geolocation ; fi
+        expected_regex: "^(2\n?)+$"
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' profile.default_content_setting_values.geolocation -int 2
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles prevent geolocation by websites."
+    },
+    {
         //Chrome->Preferences->Show Advanced Settings->Passwords and forms->Enable Autofill to fill out web forms in a single click
         type: "regex match"
         confidence: "required"
