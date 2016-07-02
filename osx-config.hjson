@@ -972,7 +972,7 @@
         type: "regex match"
         confidence: "recommended"
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "True"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' alternate_error_pages.enabled ; fi
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' alternate_error_pages.enabled ; fi
         expected_regex: "^(False\n?)+$"
         fix:
             find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' alternate_error_pages.enabled -bool false
@@ -984,7 +984,7 @@
         type: "regex match"
         confidence: "required"
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "True"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' search.suggest_enabled ; fi
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' search.suggest_enabled ; fi
         expected_regex: "^(False\n?)+$"
         fix:
             find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' search.suggest_enabled -bool false
@@ -1008,7 +1008,7 @@
         type: "regex match"
         confidence: "recommended"
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "false"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' safebrowsing.extended_reporting_enabled ; fi
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' safebrowsing.extended_reporting_enabled ; fi
         expected_regex: "^(False\n?)+$"
         fix:
             find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' safebrowsing.extended_reporting_enabled -bool false
@@ -1071,7 +1071,7 @@
         type: "regex match"
         confidence: "required"
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "True"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.default_content_setting_values.popups ; fi
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "The attribute 'profile.default_content_setting_values.popups' does not exist"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.default_content_setting_values.popups ; fi
         expected_regex:
             ^(The attribute 'profile.default_content_setting_values.popups' does not exist\n?)|(None\n?)+$
         fix:
@@ -1110,7 +1110,7 @@
         type: "regex match"
         confidence: "required"
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "True"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' autofill.enabled ; fi
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' autofill.enabled ; fi
         expected_regex: "^(False\n?)+$"
         fix:
             find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' autofill.enabled -bool false
@@ -1123,7 +1123,7 @@
         type: "regex match"
         confidence: "recommended"
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "True"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.password_manager_enabled ; fi
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.password_manager_enabled ; fi
         expected_regex: "^(False\n?)+$"
         fix:
             find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' profile.password_manager_enabled -bool false
@@ -1135,7 +1135,7 @@
         type: "regex match"
         confidence: "required"
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "True"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' credentials_enable_autosignin ; fi
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' credentials_enable_autosignin ; fi
         expected_regex: "^(False\n?)+$"
         fix:
             find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' credentials_enable_autosignin -bool false
