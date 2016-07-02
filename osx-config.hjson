@@ -1092,6 +1092,20 @@
         description: "All Google Chrome web browser profiles prevent geolocation by websites."
     },
     {
+        //Users should be strongly discouraged from using NPAPI plugins; see reference. My concern here is that the current warning message in Chrome is not sufficiently scary that merely prompting the user to approve access will allow the average user to make a good security choice, so I'm recommending that unsandboxed plugins be blocked completely.
+        //Chrome->Preferences->Show Advanced Settings->Privacy->Content Settings->Unsandboxed plugin access->Do not allow any sites to use a plugin to access your computer
+        type: "regex match"
+        confidence: "recommended"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "2"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.default_content_setting_values.ppapi_broker ; fi
+        expected_regex: "^(2\n?)+$"
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' profile.default_content_setting_values.ppapi_broker -int 2
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles block unsandboxed plug-in software."
+        reference: "http://superuser.com/questions/654595/adobe-flash-player-ppapi-vs-npapi-in-google-chrome"
+    },
+    {
         //Chrome->Preferences->Show Advanced Settings->Passwords and forms->Enable Autofill to fill out web forms in a single click
         type: "regex match"
         confidence: "required"
