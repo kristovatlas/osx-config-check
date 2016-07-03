@@ -84,7 +84,7 @@ import re
 UNDERLINE = '\033[4m'
 ENDC = '\033[0m'
 
-DEBUG_PRINT = False
+DEBUG_PRINT = True
 
 def _main():
     args = get_args()
@@ -211,8 +211,11 @@ def write_json_array(json_obj, attribute_name, value, child_name,
                          (type(value), value))
 
     try:
-        new_json = _recursive_write(deepcopy(json_obj), attribute_name,
-                                    value=value, child_name=child_name,
+        new_json = _recursive_write(json_obj=deepcopy(json_obj),
+                                    attribute_name=attribute_name,
+                                    value=value,
+                                    delete_attrib=False,
+                                    child_name=child_name,
                                     where_clause=where_clause)
         return new_json
     except KeyError as err:
@@ -270,15 +273,20 @@ def _recursive_write(json_obj, attribute_name, value=None, delete_attrib=False,
     if len(attrib_as_list) == 0:
         #Recursed down to target attribute
         if delete_attrib:
-            del json_obj[current_attrib]
+            try:
+                del json_obj[current_attrib]
+            except TypeError:
+                raise KeyError(("Error: Attribute '%s' cannot be deleted "
+                                "because the presumed parent attribute is not "
+                                "an object.") % current_attrib)
         elif child_name is None:
             #normal write operation
             try:
                 json_obj[current_attrib] = value
             except TypeError:
-                sys.exit(("Error: Attribute '%s' cannot be set because the "
-                          "parent attribute is already set to a non-object "
-                          "value.") % current_attrib)
+                raise KeyError(("Error: Attribute '%s' cannot be set because "
+                                "the parent attribute is already set to a "
+                                "non-object value.") % current_attrib)
         else:
             #write-array operation
             try:
@@ -286,6 +294,7 @@ def _recursive_write(json_obj, attribute_name, value=None, delete_attrib=False,
             except TypeError:
                 sys.exit(("Error: Cannot write to array because '%s' is not an "
                           "array.") % current_attrib)
+            print "DEBUG: length of array is: %d" % len(json_obj[current_attrib])
             for array_item in json_obj[current_attrib]:
                 if where_clause is None:
                     try:
@@ -316,8 +325,12 @@ def _recursive_write(json_obj, attribute_name, value=None, delete_attrib=False,
         if current_attrib not in json_obj:
             json_obj[current_attrib] = dict()
         attribute_name = '.'.join(attrib_as_list) #no period included for len 1
-        json_obj[current_attrib] = _recursive_write(json_obj[current_attrib],
-                                                    attribute_name, value)
+
+        json_obj[current_attrib] = _recursive_write(
+            json_obj=json_obj[current_attrib], attribute_name=attribute_name,
+            value=value, delete_attrib=delete_attrib, child_name=child_name,
+            where_clause=where_clause)
+
         dprint("_recursive_write: returning '%s'" % str(json_obj))
         return json_obj
 
