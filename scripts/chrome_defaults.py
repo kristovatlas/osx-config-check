@@ -294,7 +294,7 @@ def _recursive_write(json_obj, attribute_name, value=None, delete_attrib=False,
             except TypeError:
                 sys.exit(("Error: Cannot write to array because '%s' is not an "
                           "array.") % current_attrib)
-            print "DEBUG: length of array is: %d" % len(json_obj[current_attrib])
+
             for array_item in json_obj[current_attrib]:
                 if where_clause is None:
                     try:
