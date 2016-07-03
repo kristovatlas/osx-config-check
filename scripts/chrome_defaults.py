@@ -84,7 +84,7 @@ import re
 UNDERLINE = '\033[4m'
 ENDC = '\033[0m'
 
-DEBUG_PRINT = True
+DEBUG_PRINT = False
 
 def _main():
     args = get_args()
