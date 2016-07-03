@@ -133,10 +133,17 @@ def _main():
 
 def normalize(obj):
     """Recursively normalizes `unicode` data into utf-8 encoded `str`.
+
+    This will have the effect of converting a Chrome preferences JSON file into
+    UTF-8 encoding, which may break some non-English or otherwise funky files.
+
     http://stackoverflow.com/questions/18272066/easy-way-to-convert-a-unicode-list-to-a-list-containing-python-strings
     """
+    dprint("normalize: object is of type %s" % str(type(obj)))
     if isinstance(obj, unicode):
-        return obj.encode('utf-8')
+        encoded = obj.encode('utf-8', errors='replace')
+        dprint('Encoded %s' % encoded)
+        return encoded
     elif isinstance(obj, dict):
         return dict((normalize(key), normalize(obj[key])) for key in obj)
     elif isinstance(obj, list):
@@ -255,14 +262,19 @@ def _recursive_write(json_obj, attribute_name, value=None, delete_attrib=False,
     attrib_as_list = attribute_name.split('.')
     current_attrib = attrib_as_list.pop(0)
 
+    dprint(("_recursive_write: attribute_name='%s' current_attrib='%s' "
+            "value='%s' delete_attrib='%s' child_name='%s' where_clause='%s'") %
+           (attribute_name, current_attrib, str(value), str(delete_attrib),
+            str(child_name), str(where_clause)))
+
     if len(attrib_as_list) == 0:
         #Recursed down to target attribute
         if delete_attrib:
-            del json_obj[attribute_name]
+            del json_obj[current_attrib]
         elif child_name is None:
             #normal write operation
             try:
-                json_obj[attribute_name] = value
+                json_obj[current_attrib] = value
             except TypeError:
                 sys.exit(("Error: Attribute '%s' cannot be set because the "
                           "parent attribute is already set to a non-object "
@@ -270,11 +282,11 @@ def _recursive_write(json_obj, attribute_name, value=None, delete_attrib=False,
         else:
             #write-array operation
             try:
-                iter(json_obj[attribute_name])
+                iter(json_obj[current_attrib])
             except TypeError:
                 sys.exit(("Error: Cannot write to array because '%s' is not an "
-                          "array.") % attribute_name)
-            for array_item in json_obj[attribute_name]:
+                          "array.") % current_attrib)
+            for array_item in json_obj[current_attrib]:
                 if where_clause is None:
                     try:
                         array_item[child_name] = value
@@ -294,6 +306,7 @@ def _recursive_write(json_obj, attribute_name, value=None, delete_attrib=False,
                                       "because one of the elements of the "
                                       "target array is already set to a "
                                       "non-object value.") % current_attrib)
+        dprint("_recursive_write: base case: returning '%s'" % str(json_obj))
         return json_obj
     else:
         if not isinstance(json_obj, dict):
@@ -305,6 +318,7 @@ def _recursive_write(json_obj, attribute_name, value=None, delete_attrib=False,
         attribute_name = '.'.join(attrib_as_list) #no period included for len 1
         json_obj[current_attrib] = _recursive_write(json_obj[current_attrib],
                                                     attribute_name, value)
+        dprint("_recursive_write: returning '%s'" % str(json_obj))
         return json_obj
 
 def delete_json_field(json_obj, attribute_name):
