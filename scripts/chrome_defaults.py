@@ -56,6 +56,15 @@ created in the JSON:
     }
 }
 
+#######################
+# Writing JSON values #
+#######################
+
+The 'write' command now accepts '-json' as type argument. The argument that
+follows this will be decoded as a string representation of a JSON object. This
+facilitates setting arbitrarily complex values, including arrays and objects
+(dictionaries in Python).
+
 Examples:
 
     $ python chrome_defaults.py read "/Users/myusername/Library/Application Support/Google/Chrome/Default/Preferences"
@@ -63,6 +72,8 @@ Examples:
     $ python chrome_defaults.py read "/Users/myusername/Library/Application Support/Google/Chrome/Default/Preferences" download.directory_upgrade
 
     $ python chrome_defaults.py write "/Users/myusername/Library/Application Support/Google/Chrome/Default/Preferences" download.directory_upgrade -bool true
+
+    $ python chrome_defaults.py write "/Users/myusername/Library/Application Support/Google/Chrome/Default/Preferences" plugins.plugins_list -json '[{"enabled": false, "name": "Shockwave Flash"}]'
 
     $ python chrome_defaults.py delete "/Users/myusername/Library/Application Support/Google/Chrome/Default/Preferences" dns_prefetching
 
@@ -266,9 +277,10 @@ def _recursive_write(json_obj, attribute_name, value=None, delete_attrib=False,
     current_attrib = attrib_as_list.pop(0)
 
     dprint(("_recursive_write: attribute_name='%s' current_attrib='%s' "
-            "value='%s' delete_attrib='%s' child_name='%s' where_clause='%s'") %
-           (attribute_name, current_attrib, str(value), str(delete_attrib),
-            str(child_name), str(where_clause)))
+            "value='%s' type(value)='%s' delete_attrib='%s' child_name='%s' "
+            "where_clause='%s'") %
+           (attribute_name, current_attrib, str(value), str(type(value)),
+            str(delete_attrib), str(child_name), str(where_clause)))
 
     if len(attrib_as_list) == 0:
         #Recursed down to target attribute
@@ -506,6 +518,12 @@ def _get_value(value, type_arg):
             return str(value)
         except ValueError:
             raise ValueError("Provided value is not a valid string.")
+    elif type_arg == '-json':
+        try:
+            return json.loads(value)
+        except ValueError:
+            raise ValueError("'%s' is not a valid JSON string representation." %
+                             str(value))
     else:
         raise TypeError("The type '%s' is not a supported data type." %
                         re.sub('-', '', str(type_arg)))
@@ -518,7 +536,7 @@ def print_usage():
            "[%sattribute-name%s]\n"
            "\tOR\n"
            "\tpython chrome_defaults.py write %sfile%s %sattribute-name%s "
-           "-bool|-string|-int %svalue%s\n"
+           "-bool|-string|-int|-json %svalue%s\n"
            "\tOR\n"
            "\tpython chrome_defaults.py delete %sfile%s %sattribute-name%s\n"
            "\tOR\n"

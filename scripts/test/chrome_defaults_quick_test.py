@@ -11,6 +11,7 @@ Todos:
 # pylint: disable=invalid-name, protected-access
 
 import unittest
+import json
 from .. import chrome_defaults #chrome_defaults.py
 
 class SupportFunctionTest(unittest.TestCase):
@@ -146,6 +147,56 @@ class WriteCommandTest(unittest.TestCase):
         self.assertEqual(result['level1']['level2']['level3']['str'], 'foo')
         self.assertEqual(result['level1']['level2']['level3']['level4']['str'],
                          'val')
+
+    def test_overwrite_attrib_with_json(self):
+        """This should support writing an arbitrarily complex JSON object."""
+        original_json = {'level1': 'asdf'}
+        new_json_val = ('{"level2": [{"name": "arr-obj1", "val": 1},'
+                        '{"name": "arr-obj2", "val": 2}]}')
+        result = chrome_defaults.write_json_field(
+            original_json, 'level1', json.loads(new_json_val))
+        self.assertIsInstance(result['level1'], dict)
+        self.assertEqual(result['level1']['level2'][0]['name'], 'arr-obj1')
+        self.assertEqual(result['level1']['level2'][0]['val'], 1)
+        self.assertEqual(result['level1']['level2'][1]['name'], 'arr-obj2')
+        self.assertEqual(result['level1']['level2'][1]['val'], 2)
+        self.assertEqual(len(result['level1']['level2']), 2)
+
+    def test_write_nested_attrib_with_json(self):
+        """This should write a JSON object to a nested attrib."""
+        original_json = {'level1': {'level2': {}}}
+        new_json_val = ('{"level4": [{"name": "arr-obj1", "val": 1},'
+                        '{"name": "arr-obj2", "val": 2}]}')
+        result = chrome_defaults.write_json_field(
+            original_json, 'level1.level2.level3', json.loads(new_json_val))
+        self.assertIsInstance(result['level1']['level2']['level3'], dict)
+        self.assertEqual(
+            result['level1']['level2']['level3']['level4'][0]['name'],
+            'arr-obj1')
+        self.assertEqual(
+            result['level1']['level2']['level3']['level4'][0]['val'],
+            1)
+        self.assertEqual(
+            result['level1']['level2']['level3']['level4'][1]['name'],
+            'arr-obj2')
+        self.assertEqual(
+            result['level1']['level2']['level3']['level4'][1]['val'],
+            2)
+        self.assertEqual(len(result['level1']['level2']['level3']['level4']), 2)
+
+    def test_write_nested_attrib_with_json_parent_not_obj_exit(self):
+        """This should terminate because a parent attrib is a non-obj.
+
+        Note that if you want to overwrite a non-obj and replace it with an
+        object-based structure, you can first use the 'delete' sub-command on
+        it, and then write to it.
+        """
+        original_json = {'level1': {'level2': False}}
+        new_json_val = ('{"level4": [{"name": "arr-obj1", "val": 1},'
+                        '{"name": "arr-obj2", "val": 2}]}')
+        with self.assertRaises(SystemExit):
+            result = chrome_defaults.write_json_field(
+                original_json, 'level1.level2.level3', json.loads(new_json_val))
 
 class DeleteCommandTest(unittest.TestCase):
     """Tests for the 'delete' sub-command.
