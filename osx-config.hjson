@@ -1155,6 +1155,63 @@
         description: "All Google Chrome web browser profiles have disabled Google CloudPrint."
     },
     {
+        //Note: I'm not so clear on what 'clear_lso_data_enabled' does. Maybe it should typically be set to true? 'False' is the setting achieved when you disable Flash through the plugins GUI.
+        //chrome://plugins/->Adobe Flash Player->Disable
+        type: "regex match"
+        confidence: "required"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' browser.clear_lso_data_enabled ; fi
+        expected_regex: "^(False\n?)+$"
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' browser.clear_lso_data_enabled -bool false
+        case_sensitive: "false"
+
+        description: "All Google Chrome web browser profiles have disaled Flash cookies."
+        reference: "https://en.wikipedia.org/wiki/Local_shared_object"
+    },
+    {
+        //chrome://plugins/->Adobe Flash Player->Disable
+        type: "regex match"
+        confidence: "required"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' browser.pepper_flash_settings_enabled ; fi
+        expected_regex: "^(False\n?)+$"
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' browser.pepper_flash_settings_enabled -bool false
+        case_sensitive: "false"
+
+        description: "All Google Chrome web browser profiles have disaled the Chrome Pepper Flash Player plug-in."
+        reference: "http://www.newtriks.com/2012/12/01/how-to-disable-the-chrome-pepper-flash-player/"
+    },
+    {
+        //chrome://plugins/->Adobe Flash Player->Disable
+        type: "regex match"
+        confidence: "required"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "'enabled': False, 'name': 'Shockwave Flash'"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' plugins.plugins_list ; fi
+        expected_regex:
+            ^(\[[^\[]+'enabled': False, 'name': 'Shockwave Flash'[^\]]+\]\n?)+$
+        //To simplify syntax, most of this logic has been stored in the "chrome_flash.sh" script
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} ./scripts/chrome_flash.sh '{}'
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles have disaled the Adobe Shockwave Flash plug-in."
+    },
+    {
+        //chrome://plugins/->Adobe Flash Player->Disable
+        type: "regex match"
+        confidence: "required"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "'enabled': False, 'name': 'Adobe Flash Player'"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' plugins.plugins_list ; fi
+        expected_regex:
+            ^(\[[^\[]+'enabled': False, 'name': 'Adobe Flash Player'[^\]]+\]\n?)+$
+        //To simplify syntax, most of this logic has been stored in the "chrome_flash.sh" script
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} ./scripts/chrome_flash.sh '{}'
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles have disaled the Adobe Flash Player plug-in."
+    },
+    {
         type: "exact match"
         confidence: "recommended"
         command:
