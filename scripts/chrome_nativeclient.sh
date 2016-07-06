@@ -41,7 +41,7 @@ is_list_missing
 native_client_missing
 if [ "$VALUE" = "False" ] || [ "$VALUE" = "[]" ] || [[ $MISSING = "1" ]] || [[ $NCPRESENT = "0" ]] ; then
     python chrome_defaults.py delete "$FILE" plugins.plugins_list
-    python chrome_defaults.py write "$FILE" plugins.plugins_list -json '[{"enabled": false, "version": "", "name": "Shockwave Flash"},{"enabled": false, "version": "", "name": "Adobe Flash Player"},{"enabled": false, "version": "", "name": "Native Client"}]'
+    python chrome_defaults.py write "$FILE" plugins.plugins_list -json '[{"enabled": false, "version": "", "name": "Shockwave Flash"},{"enabled": false, "version": "", "name": "Adobe Flash Player"},{"enabled": false, "version": "", "name": "Native Client"},{"enabled": false, "version": "", "name": "Widevine Content Decryption Module"}]'
 fi
 
 #write correct value

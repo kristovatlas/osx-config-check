@@ -1227,6 +1227,21 @@
         reference: "https://developer.chrome.com/native-client"
     },
     {
+        //chrome://plugins/->Widevine Content Decryption Module->Disable
+        type: "regex match"
+        confidence: "recommended"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "'enabled': False, 'name': 'Widevine Content Decryption Module'"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' plugins.plugins_list ; fi
+        expected_regex:
+            ^(\[[^\[]+'enabled': False, 'name': 'Widevine Content Decryption Module'[^\]]+\]\n?)+$
+        //To simplify syntax, most of this logic has been stored in the "chrome_widevine.sh" script
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} bash ./scripts/chrome_widevine.sh '{}'
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles have disabled the Widevine Content Decryption Module plug-in."
+        reference: "https://developer.chrome.com/native-client"
+    },
+    {
         type: "exact match"
         confidence: "recommended"
         command:
