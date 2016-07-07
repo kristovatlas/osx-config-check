@@ -895,7 +895,400 @@
         description: "Apple Mail does not automatically load remote content in e-mails."
         undo: "defaults write ~/Library/Preferences/com.apple.mail-shared DisableURLLoading -bool false"
     },
+    {
+        //Mail->Preferences->Junk Mail->Enable junk mail filtering AND When junk mail arrives: Move it to the Junk mailbox
+        type: "exact match"
+        confidence: "recommended"
+        command: "defaults -currentHost read ~/Library/Containers/com.apple.mail/Data/Library/Preferences/com.apple.mail JunkMailBehavior"
+        expected_stdout: "2"
+        fix: "defaults -currentHost write ~/Library/Containers/com.apple.mail/Data/Library/Preferences/com.apple.mail JunkMailBehavior -int 2"
+        case_sensitive: "false"
+        description: "Mail identified by Apple Mail as junk is sent to the Junk mailbox."
+    },
+    {
+        //Mail->Preferences->GPGMail->Composing->Encrypt new messages by default
+        type: "exact match"
+        confidence: "recommended"
+        command:
+            AUTOENCRYPT=$(defaults read ~/Library/Preferences/org.gpgtools.gpgmail EncryptNewEmailsByDefault | grep 1) ; if [ ! -e $(ls ~/Library/Preferences/org.gpgtools.gpgmail.plist) ] || [ -n "$AUTOENCRYPT" ]; then echo 1; else echo 0; fi
+        expected_stdout: "1"
+        fix: "defaults write ~/Library/Preferences/org.gpgtools.gpgmail.plist EncryptNewEmailsByDefault -bool true"
+        case_sensitive: "false"
+        description: "New e-mails composed in Apple Mail are encrypted by GPGMail if the receiver's PGP is present in the keychain."
+        undo: "defaults write ~/Library/Preferences/org.gpgtools.gpgmail.plist EncryptNewEmailsByDefault -bool false"
+    },
+    {
+        //Mail->Preferences->GPGMail->Composing->Encrypt drafts
+        type: "exact match"
+        confidence: "required"
+        command:
+            AUTOENCRYPTDRAFTS=$(defaults read ~/Library/Preferences/org.gpgtools.gpgmail OptionallyEncryptDrafts | grep 1) ; if [ ! -e $(ls ~/Library/Preferences/org.gpgtools.gpgmail.plist) ] || [ -n "$AUTOENCRYPTDRAFTS" ]; then echo 1; else echo 0; fi
+        expected_stdout: "1"
+        fix: "defaults write ~/Library/Preferences/org.gpgtools.gpgmail.plist OptionallyEncryptDrafts -bool true"
+        case_sensitive: "false"
+        description: "New e-mails composed in Apple Mail and saved as drafts are encrypted by GPGMail."
+        undo: "defaults write ~/Library/Preferences/org.gpgtools.gpgmail.plist OptionallyEncryptDrafts -bool false"
+    },
+    {
+        //Mail->Preferences->GPGMail->Composing->Sign new messages by default
+        type: "exact match"
+        confidence: "required"
+        command:
+            AUTOSIGN=$(defaults read ~/Library/Preferences/org.gpgtools.gpgmail SignNewEmailsByDefault | grep 1) ; if [ ! -e $(ls ~/Library/Preferences/org.gpgtools.gpgmail.plist) ] || [ -n "$AUTOSIGN" ]; then echo 1; else echo 0; fi
+        expected_stdout: "1"
+        fix: "defaults write ~/Library/Preferences/org.gpgtools.gpgmail.plist SignNewEmailsByDefault -bool true"
+        case_sensitive: "false"
+        description: "New e-mails composed in Apple Mail are signed by GPGMail."
+        undo: "defaults write ~/Library/Preferences/org.gpgtools.gpgmail.plist SignNewEmailsByDefault -bool false"
+    },
+    {
+        //Mail->Preferences->GPGMail->Updates->Automatically check for updates
+        type: "exact match"
+        confidence: "required"
+        command:
+            AUTOCHECK=$(defaults read ~/Library/Preferences/org.gpgtools.gpgmail SUEnableAutomaticChecks | grep 1) ; if [ ! -e $(ls ~/Library/Preferences/org.gpgtools.gpgmail.plist) ] || [ -n "$AUTOCHECK" ]; then echo 1; else echo 0; fi
+        expected_stdout: "1"
+        fix: "defaults write ~/Library/Preferences/org.gpgtools.gpgmail.plist SUEnableAutomaticChecks -bool true"
+        case_sensitive: "false"
+        description: "Apple Mail with automatically check for updates to GPGMail."
+        undo: "defaults write ~/Library/Preferences/org.gpgtools.gpgmail.plist SUEnableAutomaticChecks -bool false"
+    },
     /* ----END APPLE MAIL SETTINGS---- */
+
+    /* ---BEGIN GOOGLE CHROME SETTINGS--- */
+    {
+        //Check if the Chrome app is closed -- otherwise, it may override changes this app makes.
+        type: "exact match"
+        confidence: "required"
+        command: "ps ax | grep -c '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'"
+        expected_stdout: "2" //a value of "3" means it's running -- the other 2 are `/bin/sh` and the `grep` command.
+        fix:
+            killall "Google Chrome" ; sleep 3
+        case_sensitive: "false"
+        description: "The Google Chrome browser is currently closed."
+    },
+    {
+        //Chrome->Preferences->Show Advanced Settings->Privacy->Use a web service to help resolve navigation errors
+        type: "regex match"
+        confidence: "recommended"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' alternate_error_pages.enabled ; fi
+        expected_regex: "^(False\n?)+$"
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' alternate_error_pages.enabled -bool false
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles prevent information leakage through navigation errors."
+    },
+    {
+        //Chrome->Preferences->Show Advanced Settings->Privacy->Use a prediction service to help complete searches and URLs typed in the address bar or the app launcher
+        type: "regex match"
+        confidence: "required"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' search.suggest_enabled ; fi
+        expected_regex: "^(False\n?)+$"
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' search.suggest_enabled -bool false
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles prevent information leakage through URL suggestions."
+    },
+    {
+        //Chrome->Preferences->Show Advanced Settings->Privacy->Use a prediction service to load pages more quickly
+        type: "regex match"
+        confidence: "required"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "2"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' net.network_prediction_options ; fi
+        expected_regex: "^(2\n?)+$"
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' net.network_prediction_options -int 2
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles prevent information leakage through network prediction."
+    },
+    {
+        //Chrome->Preferences->Show Advanced Settings->Privacy->Automatically report details of possible security incidents to Google
+        type: "regex match"
+        confidence: "recommended"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' safebrowsing.extended_reporting_enabled ; fi
+        expected_regex: "^(False\n?)+$"
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' safebrowsing.extended_reporting_enabled -bool false
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles prevent information leakage through report security incidents to Google."
+    },
+    {
+        //Another potentially controversial setting: Enabling Google Safe Browsing. My guess is that, on the whole, this will make machines more secure than it makes them insecure, but it's worth pointing out that there are privacy leaks and that there are allegations of NSA exploitation targeting using this feature. See reference field below.
+        //Chrome->Preferences->Show Advanced Settings->Privacy->Protect you and your device from dangerous sites
+        type: "regex match"
+        confidence: "recommended"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "True"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' safebrowsing.enabled ; fi
+        expected_regex: "^(True\n?)+$"
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' safebrowsing.enabled -bool true
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles have Google Safe Browsing enabled."
+        reference: "https://en.wikipedia.org/wiki/Google_Safe_Browsing"
+    },
+    {
+        //Chrome->Preferences->Show Advanced Settings->Privacy->Use a web service to help resolve spelling errors
+        type: "regex match"
+        confidence: "recommended"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' spellcheck.use_spelling_service ; fi
+        expected_regex: "^(False\n?)+$"
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' spellcheck.use_spelling_service -bool false
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles prevent information leakage through spell-checking network services."
+    },
+    {
+        //Chrome->Preferences->Show Advanced Settings->Privacy->Automatically send usage statistics and crash reports to Google
+        type: "regex match"
+        confidence: "required"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; exit; fi; if [ -e "$(ls ~/Library/Application\ Support/Google/Chrome/Consent\ To\ Send\ Stats)" ]; then echo "True"; exit; fi ; echo $(python ./scripts/chrome_defaults.py read ~/Library/Application\ Support/Google/Chrome/Local\ State user_experience_metrics.reporting_enabled)
+        expected_regex: ".*False$"
+        fix:
+            rm ~/Library/Application\ Support/Google/Chrome/Consent\ To\ Send\ Stats ; python ./scripts/chrome_defaults.py write "$(ls ~/Library/Application\ Support/Google/Chrome/Local\ State)" user_experience_metrics.reporting_enabled -bool false
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles prevent information leakage through reporting usage statistics to Google."
+    },
+    {
+        //Chrome->Preferences->Show Advanced Settings->Privacy->Send a "Do Not Track" request with your browsing traffic
+        type: "regex match"
+        confidence: "recommended"
+        //This check should short-circuit and match the regex if Chrome is not installed
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "True"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' enable_do_not_track ; fi
+        expected_regex: "^(True\n?)+$"
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' enable_do_not_track -bool true
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles use the Do-Not-Track HTTP header."
+    },
+    {
+        //Chrome->Preferences->Show Advanced Settings->Privacy->Content Settings->Pop-ups->Do not allow any site to show pop-ups (recommended)
+        type: "regex match"
+        confidence: "required"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "The attribute 'profile.default_content_setting_values.popups' does not exist"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.default_content_setting_values.popups ; fi
+        expected_regex:
+            ^(The attribute 'profile.default_content_setting_values.popups' does not exist\n?)|(None\n?)+$
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py delete '{}' profile.default_content_setting_values.popups
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles prevent pop-ups."
+    },
+    {
+        //Chrome->Preferences->Show Advanced Settings->Privacy->Content Settings->Location->Do not allow any site to track your physical location
+        type: "regex match"
+        confidence: "recommended"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "2"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.default_content_setting_values.geolocation ; fi
+        expected_regex: "^(2\n?)+$"
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' profile.default_content_setting_values.geolocation -int 2
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles prevent geolocation by websites."
+    },
+    {
+        //Users should be strongly discouraged from using NPAPI plugins; see reference. My concern here is that the current warning message in Chrome is not sufficiently scary that merely prompting the user to approve access will allow the average user to make a good security choice, so I'm recommending that unsandboxed plugins be blocked completely.
+        //Chrome->Preferences->Show Advanced Settings->Privacy->Content Settings->Unsandboxed plugin access->Do not allow any sites to use a plugin to access your computer
+        type: "regex match"
+        confidence: "recommended"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "2"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.default_content_setting_values.ppapi_broker ; fi
+        expected_regex: "^(2\n?)+$"
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' profile.default_content_setting_values.ppapi_broker -int 2
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles block unsandboxed plug-in software."
+        reference: "http://superuser.com/questions/654595/adobe-flash-player-ppapi-vs-npapi-in-google-chrome"
+    },
+    {
+        //Chrome->Preferences->Show Advanced Settings->Passwords and forms->Enable Autofill to fill out web forms in a single click
+        type: "regex match"
+        confidence: "required"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' autofill.enabled ; fi
+        expected_regex: "^(False\n?)+$"
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' autofill.enabled -bool false
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles prevent filling personal information into forms automatically."
+    },
+    {
+        //Possibly controversial, but I'm suggesting that Password Manager in Chrome be disabled in favor of a better one, such as KeePass or LastPass. Passwords stored in Google Password Manager are stored at passwords.google.com and may be availble on unanticipated devices without additional apps or extensions installed.
+        //Chrome->Preferences->Show Advanced Settings->Passwords and forms->Offer to save your web passwords.
+        type: "regex match"
+        confidence: "recommended"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.password_manager_enabled ; fi
+        expected_regex: "^(False\n?)+$"
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' profile.password_manager_enabled -bool false
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles have disabled Password Manager."
+    },
+    {
+        //Chrome->Preferences->Show Advanced Settings->Passwords and forms->Manage passwords->Auto Sign-In
+        type: "regex match"
+        confidence: "required"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' credentials_enable_autosignin ; fi
+        expected_regex: "^(False\n?)+$"
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' credentials_enable_autosignin -bool false
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles have disabled automatic sign-in for stored passwords."
+    },
+    {
+        //Chrome->Preferences->Show Advanced Settings->Google CloudPrint->Show notifications when new printers are detected on network
+        type: "regex match"
+        confidence: "required"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' local_discovery.notifications_enabled ; fi
+        expected_regex: "^(False\n?)+$"
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' local_discovery.notifications_enabled -bool false
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles have disabled Google CloudPrint."
+    },
+    {
+        //Note: I'm not so clear on what 'clear_lso_data_enabled' does. Maybe it should typically be set to true? 'False' is the setting achieved when you disable Flash through the plugins GUI.
+        //chrome://plugins/->Adobe Flash Player->Disable
+        type: "regex match"
+        confidence: "required"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' browser.clear_lso_data_enabled ; fi
+        expected_regex: "^(False\n?)+$"
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' browser.clear_lso_data_enabled -bool false
+        case_sensitive: "false"
+
+        description: "All Google Chrome web browser profiles have disaled Flash cookies."
+        reference: "https://en.wikipedia.org/wiki/Local_shared_object"
+    },
+    {
+        //chrome://plugins/->Adobe Flash Player->Disable
+        type: "regex match"
+        confidence: "required"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' browser.pepper_flash_settings_enabled ; fi
+        expected_regex: "^(False\n?)+$"
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py write '{}' browser.pepper_flash_settings_enabled -bool false
+        case_sensitive: "false"
+
+        description: "All Google Chrome web browser profiles have disaled the Chrome Pepper Flash Player plug-in."
+        reference: "http://www.newtriks.com/2012/12/01/how-to-disable-the-chrome-pepper-flash-player/"
+    },
+    {
+        //chrome://plugins/->Adobe Flash Player->Disable
+        type: "regex match"
+        confidence: "required"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "'enabled': False, 'name': 'Shockwave Flash'"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' plugins.plugins_list ; fi
+        expected_regex:
+            ^(\[[^\[]+'enabled': False, 'name': 'Shockwave Flash'[^\]]+\]\n?)+$
+        //To simplify syntax, most of this logic has been stored in the "chrome_flash.sh" script
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} ./scripts/chrome_flash.sh '{}'
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles have disaled the Adobe Shockwave Flash plug-in."
+    },
+    {
+        //chrome://plugins/->Adobe Flash Player->Disable
+        type: "regex match"
+        confidence: "required"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "'enabled': False, 'name': 'Adobe Flash Player'"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' plugins.plugins_list ; fi
+        expected_regex:
+            ^(\[[^\[]+'enabled': False, 'name': 'Adobe Flash Player'[^\]]+\]\n?)+$
+        //To simplify syntax, most of this logic has been stored in the "chrome_flash.sh" script
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} ./scripts/chrome_flash.sh '{}'
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles have disaled the Adobe Flash Player plug-in."
+    },
+    {
+        //chrome://plugins/->Native Client->Disable
+        type: "regex match"
+        confidence: "required"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "'enabled': False, 'name': 'Native Client'"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' plugins.plugins_list ; fi
+        expected_regex:
+            ^(\[[^\[]+'enabled': False, 'name': 'Native Client'[^\]]+\]\n?)+$
+        //To simplify syntax, most of this logic has been stored in the "chrome_nativeclient.sh" script
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} bash ./scripts/chrome_nativeclient.sh '{}'
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles have disabled the Native Client plug-in."
+        reference: "https://developer.chrome.com/native-client"
+    },
+    {
+        //chrome://plugins/->Widevine Content Decryption Module->Disable
+        type: "regex match"
+        confidence: "recommended"
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "'enabled': False, 'name': 'Widevine Content Decryption Module'"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' plugins.plugins_list ; fi
+        expected_regex:
+            ^(\[[^\[]+'enabled': False, 'name': 'Widevine Content Decryption Module'[^\]]+\]\n?)+$
+        //To simplify syntax, most of this logic has been stored in the "chrome_widevine.sh" script
+        fix:
+            find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} bash ./scripts/chrome_widevine.sh '{}'
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles have disabled the Widevine Content Decryption Module plug-in."
+        reference: "https://developer.chrome.com/native-client"
+    },
+    {
+        //chrome://extensions/->uBlock Origin
+        type: "exact match"
+        confidence: "recommended"
+        //This style of bash command basically prints "False" and exits any time it detects a problem in any Chrome profile, since we're looking for 100% compliance. We'll create an exception for the default System and Guest profiles, since these are not configurable through the GUI.
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "True" ; exit ; fi ; DISABLEREASONS=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.cjpalhdlnbpafiamejdnhcphjbkeiagm.disable_reasons | grep -v "does not exist" | grep -v "not found") ; if [[ -n $DISABLEREASONS ]] ; then echo "False" ; exit ; fi ; BADSTATE=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | grep -v "Guest Profile" | grep -v "System Profile" | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.cjpalhdlnbpafiamejdnhcphjbkeiagm.state | grep -v "1") ; if [[ -n $BADSTATE ]] ; then echo "False" ; fi ; echo "True" ;
+        expected_stdout: "True"
+        fix: "#TODO: Requires user intervention to install extension."
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles have enabled the uBlock Origin extension."
+    },
+    {
+        //chrome://extensions/->Ghostery
+        type: "exact match"
+        confidence: "recommended"
+        //This style of bash command basically prints "False" and exits any time it detects a problem in any Chrome profile, since we're looking for 100% compliance. We'll create an exception for the default System and Guest profiles, since these are not configurable through the GUI.
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "True" ; exit ; fi ; DISABLEREASONS=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.mlomiejdfkolichcflejclcbmpeaniij.disable_reasons | grep -v "does not exist" | grep -v "not found") ; if [[ -n $DISABLEREASONS ]] ; then echo "False" ; exit ; fi ; BADSTATE=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | grep -v "Guest Profile" | grep -v "System Profile" | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.mlomiejdfkolichcflejclcbmpeaniij.state | grep -v "1") ; if [[ -n $BADSTATE ]] ; then echo "False" ; fi ; echo "True" ;
+        expected_stdout: "True"
+        fix: "#TODO: Requires user intervention to install extension."
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles have enabled the Ghostery extension."
+    },
+    {
+        //chrome://extensions/->ScriptSafe
+        type: "exact match"
+        confidence: "experimental"
+        //This style of bash command basically prints "False" and exits any time it detects a problem in any Chrome profile, since we're looking for 100% compliance. We'll create an exception for the default System and Guest profiles, since these are not configurable through the GUI.
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "True" ; exit ; fi ; DISABLEREASONS=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.oiigbmnaadbkfbmpbfijlflahbdbdgdf.disable_reasons | grep -v "does not exist" | grep -v "not found") ; if [[ -n $DISABLEREASONS ]] ; then echo "False" ; exit ; fi ; BADSTATE=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | grep -v "Guest Profile" | grep -v "System Profile" | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.oiigbmnaadbkfbmpbfijlflahbdbdgdf.state | grep -v "1") ; if [[ -n $BADSTATE ]] ; then echo "False" ; fi ; echo "True" ;
+        expected_stdout: "True"
+        fix: "#TODO: Requires user intervention to install extension."
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles have enabled the ScriptSafe extension."
+    },
+    {
+        type: "exact match"
+        confidence: "recommended"
+        command:
+            VERSIONER_PERL_PREFER_32_BIT=true perl -MMac::InternetConfig -le 'print +(GetICHelper "http")[1]'
+        expected_stdout: "Google Chrome"
+        fix: "#TODO: There is none known, set manually?"
+        case_sensitive: "false"
+        description: "Google Chrome is the default web browser."
+    }
+
+    /* ----END GOOGLE CHROME SETTINGS---- */
 
     /* useful for debugging `sudo_command`
     {

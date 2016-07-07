@@ -1,0 +1,29 @@
+{
+    "homepage" : "http://www.codyeding.com",
+    "homepage_is_newtabpage" : false,
+    "browser" : {
+        "show_home_button" : true,
+        "check_default_browser" : false,
+        "show_update_promotion_info_bar" : false
+    },
+    "session" : {
+        "restore_on_startup" : 4,
+        "urls_to_restore_on_startup" : [
+            "http://www.codyeding.com"
+        ]
+    },
+    "bookmark_bar" : {
+        "show_on_all_tabs" : true
+    },
+    "distribution" : {
+        "skip_first_run_ui" : true,
+        "show_welcome_page" : false,
+        "make_chrome_default" : false
+    },
+    "sync_promo" : {
+        "user_skipped" : true
+    },
+    "first_run_tabs" : [
+        "http://www.codyeding.com"
+    ]
+}
