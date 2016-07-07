@@ -1242,6 +1242,42 @@
         reference: "https://developer.chrome.com/native-client"
     },
     {
+        //chrome://extensions/->uBlock Origin
+        type: "exact match"
+        confidence: "recommended"
+        //This style of bash command basically prints "False" and exits any time it detects a problem in any Chrome profile, since we're looking for 100% compliance. We'll create an exception for the default System and Guest profiles, since these are not configurable through the GUI.
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "True" ; exit ; fi ; DISABLEREASONS=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.cjpalhdlnbpafiamejdnhcphjbkeiagm.disable_reasons | grep -v "does not exist" | grep -v "not found") ; if [[ -n $DISABLEREASONS ]] ; then echo "False" ; exit ; fi ; BADSTATE=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | grep -v "Guest Profile" | grep -v "System Profile" | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.cjpalhdlnbpafiamejdnhcphjbkeiagm.state | grep -v "1") ; if [[ -n $BADSTATE ]] ; then echo "False" ; fi ; echo "True" ;
+        expected_stdout: "True"
+        fix: "#TODO: Requires user intervention to install extension."
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles have enabled the uBlock Origin extension."
+    },
+    {
+        //chrome://extensions/->Ghostery
+        type: "exact match"
+        confidence: "recommended"
+        //This style of bash command basically prints "False" and exits any time it detects a problem in any Chrome profile, since we're looking for 100% compliance. We'll create an exception for the default System and Guest profiles, since these are not configurable through the GUI.
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "True" ; exit ; fi ; DISABLEREASONS=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.mlomiejdfkolichcflejclcbmpeaniij.disable_reasons | grep -v "does not exist" | grep -v "not found") ; if [[ -n $DISABLEREASONS ]] ; then echo "False" ; exit ; fi ; BADSTATE=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | grep -v "Guest Profile" | grep -v "System Profile" | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.mlomiejdfkolichcflejclcbmpeaniij.state | grep -v "1") ; if [[ -n $BADSTATE ]] ; then echo "False" ; fi ; echo "True" ;
+        expected_stdout: "True"
+        fix: "#TODO: Requires user intervention to install extension."
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles have enabled the Ghostery extension."
+    },
+    {
+        //chrome://extensions/->ScriptSafe
+        type: "exact match"
+        confidence: "experimental"
+        //This style of bash command basically prints "False" and exits any time it detects a problem in any Chrome profile, since we're looking for 100% compliance. We'll create an exception for the default System and Guest profiles, since these are not configurable through the GUI.
+        command:
+            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "True" ; exit ; fi ; DISABLEREASONS=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.oiigbmnaadbkfbmpbfijlflahbdbdgdf.disable_reasons | grep -v "does not exist" | grep -v "not found") ; if [[ -n $DISABLEREASONS ]] ; then echo "False" ; exit ; fi ; BADSTATE=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | grep -v "Guest Profile" | grep -v "System Profile" | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.oiigbmnaadbkfbmpbfijlflahbdbdgdf.state | grep -v "1") ; if [[ -n $BADSTATE ]] ; then echo "False" ; fi ; echo "True" ;
+        expected_stdout: "True"
+        fix: "#TODO: Requires user intervention to install extension."
+        case_sensitive: "false"
+        description: "All Google Chrome web browser profiles have enabled the ScriptSafe extension."
+    },
+    {
         type: "exact match"
         confidence: "recommended"
         command:
