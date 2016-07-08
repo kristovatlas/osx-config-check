@@ -147,6 +147,9 @@ CHECK #99: All Google Chrome web browser profiles have disabled the Widevine Con
 CHECK #100: All Google Chrome web browser profiles have enabled the uBlock Origin extension.... PASSED!
 CHECK #100: All Google Chrome web browser profiles have enabled the uBlock Origin extension.... PASSED!
 CHECK #101: All Google Chrome web browser profiles have enabled the Ghostery extension.... PASSED!
+CHECK #102: All Google Chrome web browser profiles have enabled the ScriptSafe extension.... PASSED!
+CHECK #103: Google Chrome is the default web browser.... PASSED!
+Wrote results to '~/Documents/osx-config-check_2016-07-08_12-13-37.log'.
 ```
 
 ## Troubleshooting
