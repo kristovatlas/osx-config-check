@@ -6,7 +6,9 @@ You can specify your own preferred configuration baseline by supplying your own 
 
 ## Disclaimer
 
-I am not responsible if hardening your computer's configuration using this app breaks stuff.
+The authors of this tool are not responsible if running it breaks stuff; disabling features of your operating system and applications may disrupt normal functionality.
+
+Once applied, the security configurations do not not gurantee security. You will still need to make good decisions in order to stay secure. The configurations will generally not help you if your computer has been previously compromised.
 
 Configurations come from sites like:
 * [drduh's OS X Security and Privacy Guide](https://github.com/drduh/OS-X-Security-and-Privacy-Guide)
@@ -59,7 +61,7 @@ CHECK #20: GateKeeper protection against untrusted applications is enabled.... P
 The next configuration check requires elevated privileges; you may be prompted for your current OS X user's password below. The command to be executed is: 'sudo defaults read /Library/Preferences/com.apple.Bluetooth ControllerPowerState'
 CHECK #21: Bluetooth is disabled.... FAILED!
     Apply the following EXPERIMENTAL  fix? This will execute this command:
-        'defaults write /Library/Preferences/com.apple.Bluetooth ControllerPowerState -bool false; killall -HUP blued' [y/N] n
+        'defaults write /Library/Preferences/com.apple.Bluetooth ControllerPowerState -bool false; killall -HUP blued' [y/N]
 CHECK #22: The infrared receiver is disabled.... PASSED!
 CHECK #23: AirDrop file sharing is disabled.... PASSED!
 CHECK #24: File sharing is disabled.... PASSED!
@@ -74,9 +76,6 @@ The next configuration check requires elevated privileges; you may be prompted f
 CHECK #30: Wake on Network Access feature is disabled.... PASSED!
 The next configuration check requires elevated privileges; you may be prompted for your current OS X user's password below. The command to be executed is: 'sudo systemsetup getusingnetworktime'
 CHECK #31: Automatic setting of time and date is disabled.... PASSED!
-CHECK #32: IPv6 is disabled on all network interfaces.... FAILED!
-    Apply the following RECOMMENDED  fix? This will execute this command:
-        'networksetup -listallnetworkservices | while read i; do SUPPORT=$(networksetup -getinfo "$i" | grep "IPv6: Automatic") && if [ -n "$SUPPORT" ]; then networksetup -setv6off "$i"; fi; done;' [Y/n] y
 CHECK #32: IPv6 is disabled on all network interfaces.... PASSED!
 CHECK #33: An administrator password is required to change system-wide preferences.... PASSED!
 CHECK #34: Documents are not stored to iCloud Drive by default. (May be mistaken if iCloud is disabled)... PASSED!
@@ -122,7 +121,35 @@ CHECK #73: Mail identified by Apple Mail as junk is sent to the Junk mailbox....
 CHECK #74: New e-mails composed in Apple Mail are encrypted by GPGMail if the receiver's PGP is present in the keychain.... PASSED!
 CHECK #75: New e-mails composed in Apple Mail and saved as drafts are encrypted by GPGMail.... PASSED!
 CHECK #76: New e-mails composed in Apple Mail are signed by GPGMail.... PASSED!
-Wrote results to '~/Documents/osx-config-check_2016-06-17_15-45-05.log'.
+CHECK #77: Apple Mail with automatically check for updates to GPGMail.... PASSED!
+CHECK #78: The Google Chrome browser is currently closed.... PASSED!
+CHECK #79: All Google Chrome web browser profiles prevent information leakage through navigation errors.... PASSED!
+CHECK #80: All Google Chrome web browser profiles prevent information leakage through URL suggestions.... PASSED!
+CHECK #81: All Google Chrome web browser profiles prevent information leakage through network prediction.... PASSED!
+CHECK #82: All Google Chrome web browser profiles prevent information leakage through report security incidents to Google.... PASSED!
+CHECK #83: All Google Chrome web browser profiles have Google Safe Browsing enabled.... PASSED!
+CHECK #84: All Google Chrome web browser profiles prevent information leakage through spell-checking network services.... PASSED!
+CHECK #85: All Google Chrome web browser profiles prevent information leakage through reporting usage statistics to Google.... PASSED!
+CHECK #86: All Google Chrome web browser profiles use the Do-Not-Track HTTP header.... PASSED!
+CHECK #87: All Google Chrome web browser profiles prevent pop-ups.... PASSED!
+CHECK #88: All Google Chrome web browser profiles prevent geolocation by websites.... PASSED!
+CHECK #89: All Google Chrome web browser profiles block unsandboxed plug-in software.... PASSED!
+CHECK #90: All Google Chrome web browser profiles prevent filling personal information into forms automatically.... PASSED!
+CHECK #91: All Google Chrome web browser profiles have disabled Password Manager.... PASSED!
+CHECK #92: All Google Chrome web browser profiles have disabled automatic sign-in for stored passwords.... PASSED!
+CHECK #93: All Google Chrome web browser profiles have disabled Google CloudPrint.... PASSED!
+CHECK #94: All Google Chrome web browser profiles have disaled Flash cookies.... PASSED!
+CHECK #95: All Google Chrome web browser profiles have disaled the Chrome Pepper Flash Player plug-in.... PASSED!
+CHECK #96: All Google Chrome web browser profiles have disaled the Adobe Shockwave Flash plug-in.... PASSED!
+CHECK #97: All Google Chrome web browser profiles have disaled the Adobe Flash Player plug-in.... PASSED!
+CHECK #98: All Google Chrome web browser profiles have disabled the Native Client plug-in.... PASSED!
+CHECK #99: All Google Chrome web browser profiles have disabled the Widevine Content Decryption Module plug-in.... PASSED!
+CHECK #100: All Google Chrome web browser profiles have enabled the uBlock Origin extension.... PASSED!
+CHECK #100: All Google Chrome web browser profiles have enabled the uBlock Origin extension.... PASSED!
+CHECK #101: All Google Chrome web browser profiles have enabled the Ghostery extension.... PASSED!
+CHECK #102: All Google Chrome web browser profiles have enabled the ScriptSafe extension.... PASSED!
+CHECK #103: Google Chrome is the default web browser.... PASSED!
+Wrote results to '~/Documents/osx-config-check_2016-07-08_12-13-37.log'.
 ```
 
 ## Troubleshooting
