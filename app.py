@@ -74,8 +74,9 @@ class ConfigCheck(object):
     check_type = ''
     expected_stdout = ''
 
-    def __init__(self, command, comparison_type, expected, fix, case_sensitive,
-                 description, confidence, sudo_command=None, sudo_fix=None):
+    def __init__(self, command, comparison_type, expected, case_sensitive,
+                 description, confidence, fix=None, sudo_fix=None,
+                 manual_fix=None, sudo_command=None):
         """
         Args:
 
@@ -83,31 +84,30 @@ class ConfigCheck(object):
             comparison_type (str): "exact match" or "regex match"
             expected (str): The expected string to match or regex to match
                 against the stdout of the specified `command`.
-            fix (str): The command to run if the configuration fails the check.
             case_senstive (bool): Specifies whether `expected` is a
                 case-sensitive comparison.
             description (str): A human-readable description of the configuration
                 being checked.
             confidence (str): "required", "recommended", or "experimental"
-            sudo_command (Optional[str]): A version of `command` that
-                requests administrative privileges from the operating system.
-                This will only be executed if `command` does not produce the
-                desired results.
+            fix (Optional[str]): The command to run if the configuration fails
+                the check.
             sudo_fix (Optional[str]): A version of `fix` that requests
                 administrative privileges from the operating system. This will
                 only be executed if `fix` does not produce the desired config
                 change.
+            manual_fix (Optional[str]): Instructions to output to the user to
+                manually remediate if a config cannot be fixed automatically.
+            sudo_command (Optional[str]): A version of `command` that
+                requests administrative privileges from the operating system.
+                This will only be executed if `command` does not produce the
+                desired results.
         """
         assert comparison_type in ('exact match', 'regex match')
         self.command = command
-        self.sudo_command = sudo_command #default: None
         self.comparison_type = comparison_type
         self.expected = expected
-        self.fix = fix
-        self.sudo_fix = sudo_fix #default: None
         self.case_sensitive = case_sensitive
         self.description = description
-
         if confidence == 'required':
             self.confidence = Confidence.required
         elif confidence == 'recommended':
@@ -116,6 +116,12 @@ class ConfigCheck(object):
             self.confidence = Confidence.experimental
         else:
             raise ValueError
+
+        #Optional args
+        self.fix = fix #default: None
+        self.sudo_fix = sudo_fix #default: None
+        self.manual_fix = manual_fix #default: None
+        self.sudo_command = sudo_command #default: None
 
     def __str__(self):
         return str(self.__dict__)
@@ -137,37 +143,75 @@ def read_config(config_filename):
 
     config_checks = []
 
-    for config_check_json in config:
-        if '_comment' in config_check_json:
+    for config_check in config:
+        if '_comment' in config_check:
             continue
+
+        #Config MUST specify a command to check the status of the system
+        command = config_check['command']
+
+        #Config MUST specify either expected STDOUT or regex pattern
         expected = None
-        if config_check_json['type'] == 'exact match':
-            expected = config_check_json['expected_stdout']
-        elif config_check_json['type'] == 'regex match':
-            expected = config_check_json['expected_regex']
+        comparison_type = None
+        if config_check['type'] == 'exact match':
+            comparison_type = 'exact match'
+            expected = config_check['expected_stdout']
+        elif config_check['type'] == 'regex match':
+            comparison_type = 'regex match'
+            expected = config_check['expected_regex']
         else:
             sys.exit("Expected comparison string does not match 'type' field.")
 
-        sudo_command = None
-        if 'sudo_command' in config_check_json:
-            sudo_command = config_check_json['sudo_command']
+        #Config MUST specify whether the commands checking the status are case
+        #sensitive
+        case_sensitive = False
+        assert config_check['case_sensitive'] in ('true', True, 'false', False)
+        if config_check['case_sensitive'] in ('true', True):
+            case_sensitive = True
 
+        #Config MUST specify a description of the check
+        description = config_check['description']
+        dprint("Description: %s" % description)
+
+        #Config MUST indicate the confidence of the configuration check
+        confidence = config_check['confidence']
+
+        #Config MUST specify a fix object
+        assert 'fix' in config_check
+        assert isinstance(config_check['fix'], dict)
+
+        #Fix object must specify at least one of these:
+        #command, sudo_command, manual
+        assert ('command' in config_check['fix'] or
+                'sudo_command' in config_check['fix'] or
+                'manual' in config_check['fix'])
+        fix = None
         sudo_fix = None
-        if 'sudo_fix' in config_check_json:
-            sudo_fix = config_check_json['sudo_fix']
+        manual_fix = None
+        if 'command' in config_check['fix']:
+            fix = config_check['fix']['command']
+        if 'sudo_command' in config_check['fix']:
+            sudo_fix = config_check['fix']['sudo_command']
+        if 'manual' in config_check['fix']:
+            manual_fix = config_check['fix']['manual']
 
-        config_check = ConfigCheck(
-            command=config_check_json['command'],
-            comparison_type=config_check_json['type'],
+        #Config MAY specify a sudo_command, a sudo version of "command"
+        sudo_command = None
+        if 'sudo_command' in config_check:
+            sudo_command = config_check['sudo_command']
+
+        config_check_obj = ConfigCheck(
+            command=command,
+            comparison_type=comparison_type,
             expected=expected,
-            fix=config_check_json['fix'],
-            case_sensitive=(True if config_check_json['case_sensitive'] == \
-                            'true' else False),
-            description=config_check_json['description'],
-            confidence=config_check_json['confidence'],
-            sudo_command=sudo_command,
-            sudo_fix=sudo_fix)
-        config_checks.append(config_check)
+            case_sensitive=case_sensitive,
+            description=description,
+            confidence=confidence,
+            fix=fix,
+            sudo_fix=sudo_fix,
+            manual_fix=manual_fix,
+            sudo_command=sudo_command)
+        config_checks.append(config_check_obj)
 
     return config_checks
 
@@ -324,31 +368,81 @@ def main():
     global glob_check_num
 
     config_checks = read_config(const.DEFAULT_CONFIG_FILE)
+    completely_failed_tests = []
     for config_check in config_checks:
         if not run_check(config_check):
             #config failed check
-            if const.PROMPT_FOR_FIXES:
-                prompt_default = True
-                descriptor = ''
-                if config_check.confidence == Confidence.recommended:
-                    prompt_default = const.FIX_RECOMMENDED_BY_DEFAULT
-                    descriptor = const.RECOMMENDED_STR + ' '
-                elif config_check.confidence == Confidence.experimental:
-                    prompt_default = const.FIX_EXPERIMENTAL_BY_DEFAULT
-                    descriptor = const.EXPERIMENTAL_STR + ' '
-                question = (("\tApply the following %s fix? This will execute "
-                             "this command:\n\t\t'%s'") %
-                            (descriptor, config_check.fix))
-                if prompt.query_yes_no(question=question,
-                                       default=_bool_to_yes_no(prompt_default)):
-                    do_fix_and_test(config_check)
+            if config_check.fix is None and config_check.sudo_fix is None:
+                #no automatic fix available
+                if config_check.manual_fix is not None:
+                    completely_failed_tests.append(glob_check_num)
+                else:
+                    dprint(("Could not satisfy test #%d but no manual fix "
+                            "specified.") % glob_check_num)
             else:
-                do_fix_and_test(config_check)
+                #attempt fix, but prompt user first if appropriate
+                if const.PROMPT_FOR_FIXES:
+                    prompt_default = True
+                    descriptor = ''
+                    if config_check.confidence == Confidence.recommended:
+                        prompt_default = const.FIX_RECOMMENDED_BY_DEFAULT
+                        descriptor = const.RECOMMENDED_STR + ' '
+                    elif config_check.confidence == Confidence.experimental:
+                        prompt_default = const.FIX_EXPERIMENTAL_BY_DEFAULT
+                        descriptor = const.EXPERIMENTAL_STR + ' '
+                    question = (("\tApply the following %s fix? This will "
+                                 "execute  this command:\n\t\t'%s'") %
+                                (descriptor, config_check.fix))
+                    if prompt.query_yes_no(question=question,
+                                           default=_bool_to_yes_no(prompt_default)):
+                        fixed = do_fix_and_test(config_check)
+                        dprint("Value of fixed is: %s" % str(fixed))
+                        if not fixed:
+                            if config_check.manual_fix is not None:
+                                completely_failed_tests.append(glob_check_num)
+                            else:
+                                dprint(("Could not satisfy test #%d but no "
+                                        "manual fix specified.") %
+                                       glob_check_num)
+                else:
+                    fixed = do_fix_and_test(config_check)
+                    dprint("Value of fixed is: %s" % str(fixed))
+                    if not fixed:
+                        if config_check.manual_fix is not None:
+                            completely_failed_tests.append(glob_check_num)
+                        else:
+                            dprint(("Could not satisfy test #%d but no manual "
+                                    "fix specified.") % glob_check_num)
+
         glob_check_num += 1
 
     if const.WRITE_TO_LOG_FILE:
         print("Wrote results to %s'%s'%s." %
               (const.COLORS['BOLD'], const.LOG_FILE_LOC, const.COLORS['ENDC']))
+
+    if len(completely_failed_tests) > 0:
+        print "=========================="
+        print(("%s%d tests could not be automatically fixed, but manual "
+               "instructions are available. Please manually remediate these "
+               "problems adn re-run the tool:%s") %
+              (const.COLORS['BOLD'], len(completely_failed_tests),
+               const.COLORS['ENDC']))
+        for test_num in completely_failed_tests:
+            description = config_checks[test_num - 1].description
+            instructions = config_checks[test_num - 1].manual_fix
+            print "TEST #%d: %s" % (test_num, description)
+            print "%s" % _underline_hyperlink(instructions)
+            print "=========================="
+    else:
+        dprint("List of completely failed tests is empty.")
+
+def _underline_hyperlink(string):
+    """Insert underlines into hyperlinks"""
+    return re.sub(
+        r"(https?://[^ ]+)",
+        (r"%s\1%s" % (const.COLORS['UNDERLINE'], const.COLORS['ENDC'])),
+        string,
+        flags=re.IGNORECASE)
 
 def _bool_to_yes_no(boolean):
     return 'yes' if boolean else 'no'
