@@ -149,7 +149,19 @@ CHECK #100: All Google Chrome web browser profiles have enabled the uBlock Origi
 CHECK #101: All Google Chrome web browser profiles have enabled the Ghostery extension.... PASSED!
 CHECK #102: All Google Chrome web browser profiles have enabled the ScriptSafe extension.... PASSED!
 CHECK #103: Google Chrome is the default web browser.... PASSED!
-Wrote results to '~/Documents/osx-config-check_2016-07-08_12-13-37.log'.
+Wrote results to '~/Documents/osx-config-check_2016-07-08_17-43-50.log'.
+==========================
+2 tests could not be automatically fixed, but manual instructions are available. Please manually remediate these problems adn re-run the tool:
+TEST #100: All Google Chrome web browser profiles have enabled the uBlock Origin extension.
+1. For each of your Chrome profiles, visit https://chrome.google.com/webstore/detail/ublock-origin/cjpalhdlnbpafiamejdnhcphjbkeiagm in Google Chrome.
+2. Select "Add to Chrome".
+3. Complete any required follow-up steps as instructed on the screen.
+==========================
+TEST #101: All Google Chrome web browser profiles have enabled the Ghostery extension.
+1. For each of your Chrome profiles, visit https://chrome.google.com/webstore/detail/ghostery/mlomiejdfkolichcflejclcbmpeaniij in Google Chrome.
+2. Select "Add to Chrome".
+3. Complete any required follow-up steps as instructed on the screen.
+==========================
 ```
 
 ## Troubleshooting
