@@ -424,7 +424,7 @@ def main():
         print "=========================="
         print(("%s%d tests could not be automatically fixed, but manual "
                "instructions are available. Please manually remediate these "
-               "problems adn re-run the tool:%s") %
+               "problems and re-run the tool:%s") %
               (const.COLORS['BOLD'], len(completely_failed_tests),
                const.COLORS['ENDC']))
         for test_num in completely_failed_tests:
