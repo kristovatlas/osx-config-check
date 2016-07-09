@@ -367,6 +367,8 @@ def main():
     """Main function."""
     global glob_check_num
 
+    _print_banner()
+
     config_checks = read_config(const.DEFAULT_CONFIG_FILE)
     completely_failed_tests = []
     for config_check in config_checks:
@@ -459,6 +461,22 @@ def is_match(regex, string, ignore_case=False):
         regex_flags = re.DOTALL | re.IGNORECASE
 
     return re.match(regex, string, regex_flags) is not None
+
+def _print_banner():
+    banner = (("---------------------------------------------------------------"
+               "---------------------------\n"
+               "%s%sosx-config-check%s\n"
+               "Download the latest copy of this tool at: "
+               "https://github.com/kristovatlas/osx-config-check \n"
+               "Report bugs/issues:\n"
+               "\t* GitHub: "
+               "https://github.com/kristovatlas/osx-config-check/issues \n"
+               "\t* Twitter: https://twitter.com/kristovatlas \n"
+               "---------------------------------------------------------------"
+               "---------------------------\n") %
+              (const.COLORS['BOLD'], const.COLORS['OKBLUE'],
+               const.COLORS['ENDC']))
+    print _underline_hyperlink(banner)
 
 if __name__ == "__main__":
     main()
