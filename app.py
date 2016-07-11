@@ -254,7 +254,7 @@ def run_check(config_check, last_attempt=False, quiet_fail=False):
                                 config_check.case_sensitive)
 
     if passed or not quiet_fail:
-        msg = ("CHECK #%d: %s... %s" % (glob_check_num,
+        msg = ("\nCHECK #%d: %s... %s" % (glob_check_num,
                                         config_check.description,
                                         _get_result_str(passed)))
         print msg
