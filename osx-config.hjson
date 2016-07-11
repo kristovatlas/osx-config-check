@@ -601,7 +601,7 @@
     },
     {
         description: "The File Vault key is destroyed when going to standby mode."
-        confidence: "recommended"
+        confidence: "experimental"
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
         type: "regex match"
         command: "pmset -g"
