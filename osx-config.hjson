@@ -311,8 +311,8 @@
         case_sensitive: "false"
         fix:
         {
-            command: "brew update ; brew install openssl ; brew upgrade openssl ; brew link openssl --force ; mv /usr/bin/openssl /usr/in/openssl-apple"
-            sudo_command: "brew update ; brew install openssl ; brew upgrade openssl ; brew link openssl --force ; sudo mv /usr/bin/openssl /usr/in/openssl-apple"
+            command: "brew update ; brew install openssl ; brew upgrade openssl ; brew link openssl --force ; mv /usr/bin/openssl /usr/bin/openssl-apple"
+            sudo_command: "brew update ; brew install openssl ; brew upgrade openssl ; brew link openssl --force ; sudo mv /usr/bin/openssl /usr/bin/openssl-apple"
         }
         undo: "sudo mv /usr/bin/openssl-apple /usr/bin/openssl ; brew unlink openssl"
     },
