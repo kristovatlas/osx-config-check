@@ -138,10 +138,10 @@ CHECK #90: All Google Chrome web browser profiles prevent filling personal infor
 CHECK #91: All Google Chrome web browser profiles have disabled Password Manager.... PASSED!
 CHECK #92: All Google Chrome web browser profiles have disabled automatic sign-in for stored passwords.... PASSED!
 CHECK #93: All Google Chrome web browser profiles have disabled Google CloudPrint.... PASSED!
-CHECK #94: All Google Chrome web browser profiles have disaled Flash cookies.... PASSED!
-CHECK #95: All Google Chrome web browser profiles have disaled the Chrome Pepper Flash Player plug-in.... PASSED!
-CHECK #96: All Google Chrome web browser profiles have disaled the Adobe Shockwave Flash plug-in.... PASSED!
-CHECK #97: All Google Chrome web browser profiles have disaled the Adobe Flash Player plug-in.... PASSED!
+CHECK #94: All Google Chrome web browser profiles have disabled Flash cookies.... PASSED!
+CHECK #95: All Google Chrome web browser profiles have disabled the Chrome Pepper Flash Player plug-in.... PASSED!
+CHECK #96: All Google Chrome web browser profiles have disabled the Adobe Shockwave Flash plug-in.... PASSED!
+CHECK #97: All Google Chrome web browser profiles have disabled the Adobe Flash Player plug-in.... PASSED!
 CHECK #98: All Google Chrome web browser profiles have disabled the Native Client plug-in.... PASSED!
 CHECK #99: All Google Chrome web browser profiles have disabled the Widevine Content Decryption Module plug-in.... PASSED!
 CHECK #100: All Google Chrome web browser profiles have enabled the uBlock Origin extension.... PASSED!
