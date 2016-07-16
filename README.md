@@ -168,7 +168,7 @@ TEST #101: All Google Chrome web browser profiles have enabled the Ghostery exte
 
 ### Errors related to "sudo" or "sudoers"
 
-If you receive an error message referencing these terms, the user you are currently logged in as may not be permitted to temporarily assume elevated priviledges, preventing this tool from fully auditing and/or fixing your user's configuration. If you have added a non-Administrator user to your machine to help secure it, you will find that your non-Administrator user is not part of the "sudoers" list by default. To learn about how to add your user to the "sudoers" list, please [http://osxdaily.com/2014/02/06/add-user-sudoers-file-mac/](refer to this link).
+If you receive an error message referencing these terms, the user you are currently logged in as may not be permitted to temporarily assume elevated priviledges, preventing this tool from fully auditing and/or fixing your user's configuration. If you have added a non-Administrator user to your machine to help secure it, you will find that your non-Administrator user is not part of the "sudoers" list by default. To learn about how to add your user to the "sudoers" list, please [refer to this link](http://osxdaily.com/2014/02/06/add-user-sudoers-file-mac/).
 
 ## Developers
 
