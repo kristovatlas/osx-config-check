@@ -8,7 +8,6 @@ import re
 from subprocess import Popen, PIPE, STDOUT
 from warnings import warn
 import json
-from enum import Enum
 import const #const.py
 import prompt #prompt.py
 
@@ -59,7 +58,7 @@ const.LOG_FILE_LOC = const.DEFAULT_OUTPUT_LOCATION + const.LOG_FILE_NAME
 
 glob_check_num = 1
 
-class Confidence(Enum):
+class Confidence(object):
     """Likelihood that a configuration will create negative side-effects.
 
     A lower integer value indicates less likelihood that a configuration will
