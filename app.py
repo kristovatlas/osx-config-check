@@ -392,8 +392,8 @@ def main():
                     elif config_check.confidence == Confidence.experimental:
                         prompt_default = const.FIX_EXPERIMENTAL_BY_DEFAULT
                         descriptor = const.EXPERIMENTAL_STR + ' '
-                    question = (("\tApply the following %s fix? This will "
-                                 "execute  this command:\n\t\t'%s'") %
+                    question = (("\tApply the following %sfix? This will "
+                                 "execute this command:\n\t\t'%s'") %
                                 (descriptor, config_check.fix))
                     if prompt.query_yes_no(question=question,
                                            default=_bool_to_yes_no(prompt_default)):
