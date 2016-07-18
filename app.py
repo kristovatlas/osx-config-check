@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """Checks the configuration of various osx options."""
 
 import time
