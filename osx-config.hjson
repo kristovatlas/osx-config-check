@@ -418,10 +418,10 @@
         case_sensitive: "false"
         fix:
         {
-            command: "defaults write /Library/Preferences/com.apple.NetworkBrowser DisableAirDrop -bool true"
-            sudo_command: "sudo defaults write /Library/Preferences/com.apple.NetworkBrowser DisableAirDrop -bool true"
+            command: "defaults write com.apple.NetworkBrowser DisableAirDrop -bool true"
+            sudo_command: "sudo defaults write com.apple.NetworkBrowser DisableAirDrop -bool true"
         }
-        undo: "defaults write /Library/Preferences/com.apple.NetworkBrowser DisableAirDrop -bool false"
+        undo: "defaults write com.apple.NetworkBrowser DisableAirDrop -bool false"
     },
 
         /* Begin: System Preferences->Sharing */
