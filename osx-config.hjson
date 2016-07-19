@@ -712,7 +712,7 @@
         undo: ""
     },
     {
-        description: "FileVault file system encrption is enabled at the root directory."
+        description: "FileVault file system encryption is enabled at the root directory."
         confidence: "required"
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
         type: "regex match"
@@ -853,7 +853,7 @@
     },
     {
         //Safari->Preferences->Security->Fraudulent sites->Warn when visiting a fraudulent website
-        description: "The Safari web browser will warn when vistiting known fraudulent websites."
+        description: "The Safari web browser will warn when visiting known fraudulent websites."
         //I'm setting this to recommended for on the basis that there is like a privacy trade-off
         confidence: "recommended"
         type: "exact match"
