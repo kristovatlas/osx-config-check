@@ -1021,7 +1021,7 @@
     },
     {
         //Safari->Develop->Treat SHA-1 Certificates as Insecure
-        description: "The Safari web browser is configured to treat SHA-1 certficiates as insecure."
+        description: "The Safari web browser is configured to treat SHA-1 certificates as insecure."
         confidence: "recommended"
         type: "exact match"
         command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari TreatSHA1CertificatesAsInsecure"
