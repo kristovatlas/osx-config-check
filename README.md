@@ -2,13 +2,13 @@
 
 Checks your OSX machine against various hardened configuration settings.
 
-You can specify your own preferred configuration baseline by supplying your own [HJson](https://hjson.org/) file instead of the provided one.
+You can specify your own preferred configuration baseline by supplying your own [Hjson](https://hjson.org/) file instead of the provided one.
 
 ## Disclaimer
 
 The authors of this tool are not responsible if running it breaks stuff; disabling features of your operating system and applications may disrupt normal functionality.
 
-Once applied, the security configurations do not not gurantee security. You will still need to make good decisions in order to stay secure. The configurations will generally not help you if your computer has been previously compromised.
+Once applied, the security configurations do not not guarantee security. You will still need to make good decisions in order to stay secure. The configurations will generally not help you if your computer has been previously compromised.
 
 Configurations come from sites like:
 * [drduh's OS X Security and Privacy Guide](https://github.com/drduh/OS-X-Security-and-Privacy-Guide)
@@ -86,7 +86,7 @@ CHECK #38: Apple Push Notifications are disabled.... PASSED!
 CHECK #39: Google DNS servers are used by default on all network interfaces.... PASSED!
 CHECK #40: The curl utility is up to date or absent from the system.... PASSED!
 CHECK #41: FileVault file system encryption is enabled.... PASSED!
-CHECK #42: FileVault file system encrption is enabled at the root directory.... PASSED!
+CHECK #42: FileVault file system encryption is enabled at the root directory.... PASSED!
 CHECK #43: The idle timer for screen saver activation is set to 10 minutes or less.... PASSED!
 CHECK #44: The Safari application is currently closed.... PASSED!
 CHECK #45: Safari will not auto-fill credit card data.... PASSED!
@@ -96,7 +96,7 @@ CHECK #48: Safari will not auto-fill usernames or passwords.... PASSED!
 CHECK #49: Files downloaded in Safari are not automatically opened.... PASSED!
 CHECK #50: Cookies and local storage are always blocked in Safari.... PASSED!
 CHECK #51: Safari extensions are disabled.... PASSED!
-CHECK #52: The Safari web browser will warn when vistiting known fraudulent websites.... PASSED!
+CHECK #52: The Safari web browser will warn when visiting known fraudulent websites.... PASSED!
 CHECK #53: JavaScript disabled in the Safari web browser.... PASSED!
 CHECK #54: JavaScript disabled in the Safari web browser (Legacy version).... PASSED!
 CHECK #55: Pop-up windows are blocked in the Safari web browser.... PASSED!
@@ -108,7 +108,7 @@ CHECK #60: Plug-ins are blocked by default in the Safari web browser unless a si
 CHECK #61: The Java plug-in for Safari web browser is blocked unless a site is explicitly added to a list of allowed sites.... PASSED!
 CHECK #62: The Java plug-in is disabled in the Safari web browser.... PASSED!
 CHECK #63: The Java plug-in is disabled in the Safari web browser (Legacy version).... PASSED!
-CHECK #64: The Safari web browser is configured to treat SHA-1 certficiates as insecure.... PASSED!
+CHECK #64: The Safari web browser is configured to treat SHA-1 certificates as insecure.... PASSED!
 CHECK #65: The Safari web browser will not pre-load webpages that rank highly as search matches.... PASSED!
 CHECK #66: The Safari web browser will not include search engine suggestions for text typed in the location bar.... PASSED!
 CHECK #67: The Safari web browser's search suggestions are disabled.... PASSED!
@@ -151,7 +151,7 @@ CHECK #102: All Google Chrome web browser profiles have enabled the ScriptSafe e
 CHECK #103: Google Chrome is the default web browser.... PASSED!
 Wrote results to '~/Documents/osx-config-check_2016-07-08_17-43-50.log'.
 ==========================
-2 tests could not be automatically fixed, but manual instructions are available. Please manually remediate these problems adn re-run the tool:
+2 tests could not be automatically fixed, but manual instructions are available. Please manually remediate these problems and re-run the tool:
 TEST #100: All Google Chrome web browser profiles have enabled the uBlock Origin extension.
 1. For each of your Chrome profiles, visit https://chrome.google.com/webstore/detail/ublock-origin/cjpalhdlnbpafiamejdnhcphjbkeiagm in Google Chrome.
 2. Select "Add to Chrome".
@@ -168,7 +168,7 @@ TEST #101: All Google Chrome web browser profiles have enabled the Ghostery exte
 
 ### Errors related to "sudo" or "sudoers"
 
-If you receive an error message referencing these terms, the user you are currently logged in as may not be permitted to temporarily assume elevated priviledges, preventing this tool from fully auditing and/or fixing your user's configuration. If you have added a non-Administrator user to your machine to help secure it, you will find that your non-Administrator user is not part of the "sudoers" list by default. To learn about how to add your user to the "sudoers" list, please [refer to this link](http://osxdaily.com/2014/02/06/add-user-sudoers-file-mac/).
+If you receive an error message referencing these terms, the user you are currently logged in as may not be permitted to temporarily assume elevated privileges, preventing this tool from fully auditing and/or fixing your user's configuration. If you have added a non-Administrator user to your machine to help secure it, you will find that your non-Administrator user is not part of the "sudoers" list by default. To learn about how to add your user to the "sudoers" list, please [refer to this link](http://osxdaily.com/2014/02/06/add-user-sudoers-file-mac/).
 
 ## Contributing
 
