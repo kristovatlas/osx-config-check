@@ -2,18 +2,18 @@
 
 This project uses a Gitflow-like organization for code:
 
-* The `master` branch represents a stable version of the project at any given time.
-* Releases are tags on the `master` branch.
-* All features and bug fixes are performed against the `develop` branch.
-* New features are allocated their own branch based on the `develop` branch, and pull requests are made from the new feature branch to the `develop` branch.
+* The [`master`](https://github.com/kristovatlas/osx-config-check/tree/master) branch represents a stable version of the project at any given time.
+* Releases are tags on the [`master`](https://github.com/kristovatlas/osx-config-check/tree/master) branch.
+* All features and bug fixes are performed against the [`develop`](https://github.com/kristovatlas/osx-config-check/tree/develop) branch.
+* New features are allocated their own branch based on the [`develop`](https://github.com/kristovatlas/osx-config-check/tree/develop) branch, and pull requests are made from the new feature branch to the [`develop`](https://github.com/kristovatlas/osx-config-check/tree/develop) branch.
 
 Developers who wish to submit a pull request should perform the following protocol:
 
 1. Fork the project on GitHub
-2. Create a special-purpose branch from the `develop` branch, e.g. 'fix-filevault' or 'disable-apple-mail'
+2. Create a special-purpose branch from the [`develop`](https://github.com/kristovatlas/osx-config-check/tree/develop) branch, e.g. 'fix-filevault' or 'disable-apple-mail'
 3. Implement the changes in the branch
 4. Follow the guidelines in the sections below depending on whether you are modifying configuration checks, Python code, or any combination therefore
-5. Make a pull request from your feature branch to the `develop` branch. 
+5. Make a pull request from your feature branch to the [`develop`](https://github.com/kristovatlas/osx-config-check/tree/develop) branch.
 
 ## Modifying default configuration checks
 
