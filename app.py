@@ -22,6 +22,8 @@ const.WARN_FOR_EXPERIMENTAL = True #TODO: command line flag
 const.FIX_RECOMMENDED_BY_DEFAULT = True #TODO: command line flag
 const.FIX_EXPERIMENTAL_BY_DEFAULT = False #TODO: command line flag
 
+const.API_FILENAME = './scripts/api.sh'
+
 const.COLORS = {
     'HEADER': '\033[95m',
     'OKBLUE': '\033[94m',
@@ -296,6 +298,7 @@ def _execute_check(command, comparison_type, expected, case_sensitive):
        bool: Whether the output matched the expected output of the command.
     """
     #http://stackoverflow.com/questions/7129107/python-how-to-suppress-the-output-of-os-system
+    command = "source %s ; %s" % (const.API_FILENAME, command)
     process = Popen(command, stdout=PIPE, stderr=STDOUT, shell=True)
     stdout, _ = process.communicate()
 
