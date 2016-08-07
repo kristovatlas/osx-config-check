@@ -1674,4 +1674,19 @@
         }
     }
     */
+    /* useful for debugging api.sh
+    {
+        description: "DEBUG for api.sh"
+        confidence: "required"
+        type: "exact match"
+        command:
+            echo $(homebrew_is_installed)
+        expected_stdout: "1"
+        case_sensitive: "false"
+        fix:
+        {
+            manual: "blah"
+        }
+    }
+    */
 ]
