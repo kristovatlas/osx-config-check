@@ -601,16 +601,18 @@
     },
     {
         description: "The File Vault key is destroyed when going to standby mode."
+        //Once this set of configurations is proven stable, this can be upgraded from "experimental" to "recommended". We may want to warn the user first that waking will be slower and require authenticating twice.
         confidence: "experimental"
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
-        type: "regex match"
-        command: "pmset -g"
-        expected_regex: ".*destroyfvkeyonstandby\\s+1.*"
+        type: "exact match"
+        command: "bash ./scripts/DestroyFVKeyOnStandby_check.sh"
+        expected_stdout: "1"
         case_sensitive: "false"
         fix:
         {
-            command: "pmset -a destroyfvkeyonstandby 1"
-            sudo_command: "sudo pmset -a destroyfvkeyonstandby 1"
+            //Additional configurations are required to make this setting not fight with powernap/standby/autopoweroff. See: https://github.com/drduh/OS-X-Security-and-Privacy-Guide/issues/124
+            command: "pmset -a destroyfvkeyonstandby 1 ; pmset -a hibernatemode 25 ; pmset -a powernap 0 ; pmset -a standby 0 ; pmset -a standbydelay 0; pmset -a autopoweroff 0"
+            sudo_command: "sudo pmset -a destroyfvkeyonstandby 1 ; sudo pmset -a hibernatemode 25 ; sudo pmset -a powernap 0 ; sudo pmset -a standby 0 ; sudo pmset -a standbydelay 0; sudo pmset -a autopoweroff 0"
         }
     },
     {
