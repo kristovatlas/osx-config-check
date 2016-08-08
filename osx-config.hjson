@@ -1234,7 +1234,8 @@
         description: "The Google Chrome browser is currently closed."
         confidence: "required"
         type: "exact match"
-        command: "ps ax | grep -c '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'"
+        command:
+            if [ $(chrome_is_installed) = "0" ] ; then echo "2" ; else ps ax | grep -c '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' ; fi
         expected_stdout: "2" //a value of "3" means it's running -- the other 2 are `/bin/sh` and the `grep` command.
         case_sensitive: "false"
         fix:
@@ -1249,7 +1250,7 @@
         confidence: "recommended"
         type: "regex match"
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' alternate_error_pages.enabled ; fi
+            if [ $(chrome_is_installed) = "0" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' alternate_error_pages.enabled ; fi
         expected_regex: "^(False\n?)+$"
         case_sensitive: "false"
         fix:
@@ -1264,7 +1265,7 @@
         confidence: "required"
         type: "regex match"
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' search.suggest_enabled ; fi
+            if [ $(chrome_is_installed) = "0" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' search.suggest_enabled ; fi
         expected_regex: "^(False\n?)+$"
         case_sensitive: "false"
         fix:
@@ -1279,7 +1280,7 @@
         confidence: "required"
         type: "regex match"
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "2"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' net.network_prediction_options ; fi
+            if [ $(chrome_is_installed) = "0" ]; then echo "2"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' net.network_prediction_options ; fi
         expected_regex: "^(2\n?)+$"
         case_sensitive: "false"
         fix:
@@ -1294,7 +1295,7 @@
         confidence: "recommended"
         type: "regex match"
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' safebrowsing.extended_reporting_enabled ; fi
+            if [ $(chrome_is_installed) = "0" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' safebrowsing.extended_reporting_enabled ; fi
         expected_regex: "^(False\n?)+$"
         case_sensitive: "false"
         fix:
@@ -1311,7 +1312,7 @@
         reference: "https://en.wikipedia.org/wiki/Google_Safe_Browsing"
         type: "regex match"
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "True"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' safebrowsing.enabled ; fi
+            if [ $(chrome_is_installed) = "0" ]; then echo "True"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' safebrowsing.enabled ; fi
         expected_regex: "^(True\n?)+$"
         case_sensitive: "false"
         fix:
@@ -1326,7 +1327,7 @@
         confidence: "recommended"
         type: "regex match"
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' spellcheck.use_spelling_service ; fi
+            if [ $(chrome_is_installed) = "0" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' spellcheck.use_spelling_service ; fi
         expected_regex: "^(False\n?)+$"
         case_sensitive: "false"
         fix:
@@ -1341,7 +1342,7 @@
         confidence: "required"
         type: "regex match"
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; exit; fi; if [ -e "$(ls ~/Library/Application\ Support/Google/Chrome/Consent\ To\ Send\ Stats)" ]; then echo "True"; exit; fi ; echo $(python ./scripts/chrome_defaults.py read ~/Library/Application\ Support/Google/Chrome/Local\ State user_experience_metrics.reporting_enabled)
+            if [ $(chrome_is_installed) = "0" ]; then echo "False"; exit; fi; if [ -e "$(ls ~/Library/Application\ Support/Google/Chrome/Consent\ To\ Send\ Stats)" ]; then echo "True"; exit; fi ; echo $(python ./scripts/chrome_defaults.py read ~/Library/Application\ Support/Google/Chrome/Local\ State user_experience_metrics.reporting_enabled)
         expected_regex: ".*False$"
         case_sensitive: "false"
         fix:
@@ -1357,7 +1358,7 @@
         type: "regex match"
         //This check should short-circuit and match the regex if Chrome is not installed
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "True"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' enable_do_not_track ; fi
+            if [ $(chrome_is_installed) = "0" ]; then echo "True"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' enable_do_not_track ; fi
         expected_regex: "^(True\n?)+$"
         case_sensitive: "false"
         fix:
@@ -1372,7 +1373,7 @@
         confidence: "required"
         type: "regex match"
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "The attribute 'profile.default_content_setting_values.popups' does not exist"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.default_content_setting_values.popups ; fi
+            if [ $(chrome_is_installed) = "0" ]; then echo "The attribute 'profile.default_content_setting_values.popups' does not exist"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.default_content_setting_values.popups ; fi
         expected_regex:
             ^(The attribute 'profile.default_content_setting_values.popups' does not exist\n?)|(None\n?)+$
         case_sensitive: "false"
@@ -1388,7 +1389,7 @@
         confidence: "recommended"
         type: "regex match"
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "2"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.default_content_setting_values.geolocation ; fi
+            if [ $(chrome_is_installed) = "0" ]; then echo "2"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.default_content_setting_values.geolocation ; fi
         expected_regex: "^(2\n?)+$"
         case_sensitive: "false"
         fix:
@@ -1405,7 +1406,7 @@
         reference: "http://superuser.com/questions/654595/adobe-flash-player-ppapi-vs-npapi-in-google-chrome"
         type: "regex match"
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "2"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.default_content_setting_values.ppapi_broker ; fi
+            if [ $(chrome_is_installed) = "0" ]; then echo "2"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.default_content_setting_values.ppapi_broker ; fi
         expected_regex: "^(2\n?)+$"
         case_sensitive: "false"
         fix:
@@ -1420,7 +1421,7 @@
         confidence: "required"
         type: "regex match"
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' autofill.enabled ; fi
+            if [ $(chrome_is_installed) = "0" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' autofill.enabled ; fi
         expected_regex: "^(False\n?)+$"
         case_sensitive: "false"
         fix:
@@ -1436,7 +1437,7 @@
         confidence: "recommended"
         type: "regex match"
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.password_manager_enabled ; fi
+            if [ $(chrome_is_installed) = "0" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.password_manager_enabled ; fi
         expected_regex: "^(False\n?)+$"
         case_sensitive: "false"
         fix:
@@ -1451,7 +1452,7 @@
         confidence: "required"
         type: "regex match"
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' credentials_enable_autosignin ; fi
+            if [ $(chrome_is_installed) = "0" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' credentials_enable_autosignin ; fi
         expected_regex: "^(False\n?)+$"
         case_sensitive: "false"
         fix:
@@ -1466,7 +1467,7 @@
         confidence: "required"
         type: "regex match"
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' local_discovery.notifications_enabled ; fi
+            if [ $(chrome_is_installed) = "0" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' local_discovery.notifications_enabled ; fi
         expected_regex: "^(False\n?)+$"
         case_sensitive: "false"
         fix:
@@ -1483,7 +1484,7 @@
         reference: "https://en.wikipedia.org/wiki/Local_shared_object"
         type: "regex match"
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' browser.clear_lso_data_enabled ; fi
+            if [ $(chrome_is_installed) = "0" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' browser.clear_lso_data_enabled ; fi
         expected_regex: "^(False\n?)+$"
         case_sensitive: "false"
         fix:
@@ -1499,7 +1500,7 @@
         reference: "http://www.newtriks.com/2012/12/01/how-to-disable-the-chrome-pepper-flash-player/"
         type: "regex match"
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' browser.pepper_flash_settings_enabled ; fi
+            if [ $(chrome_is_installed) = "0" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' browser.pepper_flash_settings_enabled ; fi
         expected_regex: "^(False\n?)+$"
         case_sensitive: "false"
         fix:
@@ -1514,7 +1515,7 @@
         confidence: "required"
         type: "regex match"
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "'enabled': False, 'name': 'Shockwave Flash'"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' plugins.plugins_list ; fi
+            if [ $(chrome_is_installed) = "0" ]; then echo "'enabled': False, 'name': 'Shockwave Flash'"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' plugins.plugins_list ; fi
         expected_regex:
             ^(\[[^\[]+'enabled': False, 'name': 'Shockwave Flash'[^\]]+\]\n?)+$
         case_sensitive: "false"
@@ -1531,7 +1532,7 @@
         confidence: "required"
         type: "regex match"
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "'enabled': False, 'name': 'Adobe Flash Player'"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' plugins.plugins_list ; fi
+            if [ $(chrome_is_installed) = "0" ]; then echo "'enabled': False, 'name': 'Adobe Flash Player'"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' plugins.plugins_list ; fi
         expected_regex:
             ^(\[[^\[]+'enabled': False, 'name': 'Adobe Flash Player'[^\]]+\]\n?)+$
         case_sensitive: "false"
@@ -1549,7 +1550,7 @@
         reference: "https://developer.chrome.com/native-client"
         type: "regex match"
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "'enabled': False, 'name': 'Native Client'"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' plugins.plugins_list ; fi
+            if [ $(chrome_is_installed) = "0" ]; then echo "'enabled': False, 'name': 'Native Client'"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' plugins.plugins_list ; fi
         expected_regex:
             ^(\[[^\[]+'enabled': False, 'name': 'Native Client'[^\]]+\]\n?)+$
         case_sensitive: "false"
@@ -1566,7 +1567,7 @@
         confidence: "recommended"
         type: "regex match"
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "'enabled': False, 'name': 'Widevine Content Decryption Module'"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' plugins.plugins_list ; fi
+            if [ $(chrome_is_installed) = "0" ]; then echo "'enabled': False, 'name': 'Widevine Content Decryption Module'"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' plugins.plugins_list ; fi
         expected_regex:
             ^(\[[^\[]+'enabled': False, 'name': 'Widevine Content Decryption Module'[^\]]+\]\n?)+$
         case_sensitive: "false"
@@ -1584,7 +1585,7 @@
         type: "exact match"
         //This style of bash command basically prints "False" and exits any time it detects a problem in any Chrome profile, since we're looking for 100% compliance. We'll create an exception for the default System and Guest profiles, since these are not configurable through the GUI.
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "True" ; exit ; fi ; DISABLEREASONS=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.cjpalhdlnbpafiamejdnhcphjbkeiagm.disable_reasons | grep -v "does not exist" | grep -v "not found") ; if [[ -n $DISABLEREASONS ]] ; then echo "False" ; exit ; fi ; BADSTATE=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | grep -v "Guest Profile" | grep -v "System Profile" | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.cjpalhdlnbpafiamejdnhcphjbkeiagm.state | grep -v "1") ; if [[ -n $BADSTATE ]] ; then echo "False" ; fi ; echo "True" ;
+            if [ $(chrome_is_installed) = "0" ]; then echo "True" ; exit ; fi ; DISABLEREASONS=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.cjpalhdlnbpafiamejdnhcphjbkeiagm.disable_reasons | grep -v "does not exist" | grep -v "not found") ; if [[ -n $DISABLEREASONS ]] ; then echo "False" ; exit ; fi ; BADSTATE=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | grep -v "Guest Profile" | grep -v "System Profile" | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.cjpalhdlnbpafiamejdnhcphjbkeiagm.state | grep -v "1") ; if [[ -n $BADSTATE ]] ; then echo "False" ; fi ; echo "True" ;
         expected_stdout: "True"
         case_sensitive: "false"
         fix:
@@ -1604,7 +1605,7 @@
         type: "exact match"
         //This style of bash command basically prints "False" and exits any time it detects a problem in any Chrome profile, since we're looking for 100% compliance. We'll create an exception for the default System and Guest profiles, since these are not configurable through the GUI.
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "True" ; exit ; fi ; DISABLEREASONS=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.mlomiejdfkolichcflejclcbmpeaniij.disable_reasons | grep -v "does not exist" | grep -v "not found") ; if [[ -n $DISABLEREASONS ]] ; then echo "False" ; exit ; fi ; BADSTATE=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | grep -v "Guest Profile" | grep -v "System Profile" | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.mlomiejdfkolichcflejclcbmpeaniij.state | grep -v "1") ; if [[ -n $BADSTATE ]] ; then echo "False" ; fi ; echo "True" ;
+            if [ $(chrome_is_installed) = "0" ]; then echo "True" ; exit ; fi ; DISABLEREASONS=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.mlomiejdfkolichcflejclcbmpeaniij.disable_reasons | grep -v "does not exist" | grep -v "not found") ; if [[ -n $DISABLEREASONS ]] ; then echo "False" ; exit ; fi ; BADSTATE=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | grep -v "Guest Profile" | grep -v "System Profile" | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.mlomiejdfkolichcflejclcbmpeaniij.state | grep -v "1") ; if [[ -n $BADSTATE ]] ; then echo "False" ; fi ; echo "True" ;
         expected_stdout: "True"
         case_sensitive: "false"
         fix:
@@ -1624,7 +1625,7 @@
         type: "exact match"
         //This style of bash command basically prints "False" and exits any time it detects a problem in any Chrome profile, since we're looking for 100% compliance. We'll create an exception for the default System and Guest profiles, since these are not configurable through the GUI.
         command:
-            if [ ! -e "/Applications/Google Chrome.app" ]; then echo "True" ; exit ; fi ; DISABLEREASONS=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.oiigbmnaadbkfbmpbfijlflahbdbdgdf.disable_reasons | grep -v "does not exist" | grep -v "not found") ; if [[ -n $DISABLEREASONS ]] ; then echo "False" ; exit ; fi ; BADSTATE=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | grep -v "Guest Profile" | grep -v "System Profile" | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.oiigbmnaadbkfbmpbfijlflahbdbdgdf.state | grep -v "1") ; if [[ -n $BADSTATE ]] ; then echo "False" ; fi ; echo "True" ;
+            if [ $(chrome_is_installed) = "0" ]; then echo "True" ; exit ; fi ; DISABLEREASONS=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.oiigbmnaadbkfbmpbfijlflahbdbdgdf.disable_reasons | grep -v "does not exist" | grep -v "not found") ; if [[ -n $DISABLEREASONS ]] ; then echo "False" ; exit ; fi ; BADSTATE=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | grep -v "Guest Profile" | grep -v "System Profile" | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.oiigbmnaadbkfbmpbfijlflahbdbdgdf.state | grep -v "1") ; if [[ -n $BADSTATE ]] ; then echo "False" ; fi ; echo "True" ;
         expected_stdout: "True"
         case_sensitive: "false"
         fix:
