@@ -42,3 +42,18 @@ To "install" this pre-commit hook, copy it to the `.git/hooks` directory contain
 ## Modifying Python files
 
 You SHOULD use `pylint` on any Python files you modify before submitting your modifications. Please attempt to avoid lowering the `pylint` score of these files.
+
+## Versioning
+
+The osx-config-check project aims to use [Semantic Versioning 2.0.0](http://semver.org/spec/v2.0.0.html).
+
+1. A major version number is incremented when an incompatible change is made either to the Hjson syntax for a config check or when an incompatible change is made to api.sh functions (e.g. a function is removed or its prototype modified).
+2. A minor version number is incremented when a feature is added that is backwards-compatible, including:
+  * A new element is added to the Hjson syntax that is compatible with existing config checks
+  * A new function is added to api.sh
+3. A patch version number is incremented when a bug is fixed in a backward-compatible way, including:
+  * Changes to bash commands
+  * Changes to the contents of scripts
+  * Typos in code or documentation
+
+New versions are produced by merging stable changes from the [`develop`](https://github.com/kristovatlas/osx-config-check/tree/develop) branch to the [`master`](https://github.com/kristovatlas/osx-config-check/tree/master) branch, and by tagging them as a new release.
