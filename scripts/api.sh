@@ -23,3 +23,13 @@ function homebrew_is_installed {
         echo 0
     fi
 }
+
+function chrome_is_installed {
+    #detects whether Google Chrome is installed
+    TEST=$(mdfind kMDItemCFBundleIdentifier = 'com.google.Chrome')
+    if [ -n "$TEST" ] ; then
+        echo 1
+    else
+        echo 0
+    fi
+}
