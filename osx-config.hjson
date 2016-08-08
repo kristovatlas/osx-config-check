@@ -28,53 +28,6 @@
         }
     }
 ]
-/* samples:
-[
-    {
-        description: "The OSX application firewall is enabled."
-        confidence: "required"
-        tests:
-        [
-            {
-                type: "exact match"
-                command: "defaults -currentHost read /Library/Preferences/com.apple.alf globalstate"
-                command_pass: "1"
-                command_fail: "0"
-                case_sensitive: "false"
-            },
-            {
-                type: "exact match"
-                command: "sudo defaults -currentHost read /Library/Preferences/com.apple.alf globalstate"
-                command_pass: "1"
-                case_sensitive: "false"
-            }
-        ]
-        fix:
-        {
-            command: "defaults -currentHost write /Library/Preferences/com.apple.alf globalstate -bool true"
-            sudo_command: "sudo defaults -currentHost write /Library/Preferences/com.apple.alf globalstate -bool true"
-            manual:
-                1. Open System Preferences.
-                2. Select "Security & Privacy".
-                3. Select "Firewall".
-                4. If necessary, click the lock icon in the bottom left corner and enter your administrator credentials.
-                5. Select "Turn On Firewall".
-        }
-    },
-    {
-        description: "The File Vault key is destroyed when going to standby mode."
-        confidence: "required"
-        type: "regex match"
-        command: "pmset -g"
-        expected_regex: ".*DestroyFVKeyOnStandby\\s+1.*"
-        case_sensitive: "false"
-        fix:
-        {
-            command: "pmset -a destroyfvkeyonstandby 1"
-            sudo_command: "sudo pmset -a destroyfvkeyonstandby 1"
-        }
-    }
-]
 */
 /* NOTES:
     * back-slashes '\' must be escaped with a double black-slash, i.e. '\\'
