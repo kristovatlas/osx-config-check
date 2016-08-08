@@ -149,8 +149,15 @@ def read_config(config_filename):
         if '_comment' in config_check:
             continue
 
+        #Config MUST specify a description of the check
+        description = config_check['description']
+        dprint("Description: %s" % description)
+
         #Config MUST specify a command to check the status of the system
         command = config_check['command']
+
+        #Config MUST indicate the confidence of the configuration check
+        confidence = config_check['confidence']
 
         #Config MUST specify either expected STDOUT or regex pattern
         expected = None
@@ -170,13 +177,6 @@ def read_config(config_filename):
         assert config_check['case_sensitive'] in ('true', True, 'false', False)
         if config_check['case_sensitive'] in ('true', True):
             case_sensitive = True
-
-        #Config MUST specify a description of the check
-        description = config_check['description']
-        dprint("Description: %s" % description)
-
-        #Config MUST indicate the confidence of the configuration check
-        confidence = config_check['confidence']
 
         #Config MUST specify a fix object
         assert 'fix' in config_check
