@@ -10,12 +10,16 @@
         `description` is a human-readable string describing the configuration being checked. (REQUIRED FIELD)
         `confidence` indicates subjective estimation of negative side-effects. valid values: "required", "recommended", "experimental". (REQUIRED FIELD)
         `reference` provides a link to where a user can find more information about this configuration, or a citation of where this configuration was taken from. (OPTIONAL FIELD)
-        `type` is "exact match" or "regex match". (REQUIRED FIELD)
-        `command` is the command you want to verify the output of. Should not contain sudo. (OPTIONAL FIELD)
-        `sudo_command` a version of the command that requires elevated privileges should the `command` version fail to pass. (OPTIONAL FIELD)
-        `expected_stdout` is the stdout string to match if type is "exact match". (REQUIRED FIELD -- this or `expected_regex`)
-        `expected_regex` is the regex to match against stdout if type is "regex match". (REQUIRED FIELD -- this or `expected_stdout`)
-        `case_sensitive` is "true" or "false". (REQUIRED FIELD)
+        `tests`: // is an ordered array of test objects. (REQUIRED FIELD, should not be empty)
+        [
+            {
+                `type` is "exact match" or "regex match". (REQUIRED FIELD)
+                `command` is the command you want to verify the output of (REQUIRED FIELD)
+                `command_pass` is the value that `command`'s output should match. If it matches, all tests pass and subsequent tests for this config are not evaluated. (OPTIONAL FIELD)
+                `command_fail` is the value that `command`'s output should NOT match. If it matches, all tests fail and subsequent tests for this config are not evaluated. (OPTIONAL FIELD)
+                `case_sensitive` is "true" or "false" depending on whether the `command_pass` and/or `command_fail` values are case-sensitive. (REQUIRED FIELD)
+            }
+        ]
         `fix`: // is a JSON object that specifies how to remediate a broken configuration (REQUIRED FIELD, should not be empty)
         {
             `command` is the command that you use to attempt automatic remediation without sudo privileges. (OPTIONAL FIELD)
@@ -29,10 +33,22 @@
     {
         description: "The OSX application firewall is enabled."
         confidence: "required"
-        type: "exact match"
-        command: "defaults -currentHost read /Library/Preferences/com.apple.alf globalstate"
-        expected_stdout: "1"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read /Library/Preferences/com.apple.alf globalstate"
+                command_pass: "1"
+                command_fail: "0"
+                case_sensitive: "false"
+            },
+            {
+                type: "exact match"
+                command: "sudo defaults -currentHost read /Library/Preferences/com.apple.alf globalstate"
+                command_pass: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write /Library/Preferences/com.apple.alf globalstate -bool true"
