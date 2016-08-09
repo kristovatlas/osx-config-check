@@ -39,10 +39,15 @@
         description: "The System Preferences application is currently closed."
         confidence: "required"
         reference: "https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man1/defaults.1.html"
-        type: "exact match"
-        command: "ps ax | grep -c '/Applications/System Preferences.app/Contents/MacOS/System Preferences'"
-        expected_stdout: "2" //a value of "3" means it's running -- the other 2 are `/bin/sh` and the `grep` command.
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "ps ax | grep -c '/Applications/System Preferences.app/Contents/MacOS/System Preferences'"
+                command_pass: "2" //a value of "3" means it's running -- the other 2 are `/bin/sh` and the `grep` command.
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command:
@@ -52,10 +57,15 @@
     {
         description: "Current user is a non-admin account."
         confidence: "required"
-        type: "exact match"
-        command: "id -Gn | grep -c -w admin"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "id -Gn | grep -c -w admin"
+                command_pass: "0"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             manual:
@@ -75,10 +85,16 @@
         description: "The OSX application firewall is enabled (system-wide)."
         confidence: "required"
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
-        type: "exact match"
-        command: "defaults -currentHost read /Library/Preferences/com.apple.alf globalstate"
-        expected_stdout: "1"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read /Library/Preferences/com.apple.alf globalstate"
+                command_pass: "1"
+                command_fail: "0"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write /Library/Preferences/com.apple.alf globalstate -bool true"
@@ -90,10 +106,16 @@
         description: "The OSX application firewall is enabled (current user only)."
         confidence: "required"
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.alf globalstate"
-        expected_stdout: "1"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.alf globalstate"
+                command_pass: "1"
+                command_fail: "0"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.alf globalstate -bool true"
@@ -104,11 +126,23 @@
         description: "A password is required to wake the computer from sleep or screen saver (system-wide)."
         confidence: "required"
         reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
-        type: "exact match"
-        command: "defaults read /Library/Preferences/com.apple.screensaver askForPassword"
-        sudo_command: "sudo defaults read /Library/Preferences/com.apple.screensaver askForPassword"
-        expected_stdout: "1"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults read /Library/Preferences/com.apple.screensaver askForPassword"
+                command_pass: "1"
+                command_fail: "0"
+                case_sensitive: "false"
+            },
+            {
+                type: "exact match"
+                command: "sudo defaults read /Library/Preferences/com.apple.screensaver askForPassword"
+                command_pass: "1"
+                command_fail: "0"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults write /Library/Preferences/com.apple.screensaver askForPassword -bool true"
@@ -119,10 +153,15 @@
         description: "A password is required to wake the computer from sleep or screen saver (current user only)."
         confidence: "required"
         reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
-        type: "exact match"
-        command: "defaults read ~/Library/Preferences/com.apple.screensaver askForPassword"
-        expected_stdout: "1"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults read ~/Library/Preferences/com.apple.screensaver askForPassword"
+                command_pass: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults write ~/Library/Preferences/com.apple.screensaver askForPassword -bool true"
@@ -133,11 +172,23 @@
         description: "There is no delay between starting the screen saver and locking the machine (system-wide)."
         confidence: "required"
         reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
-        type: "exact match"
-        command: "defaults -currentHost read /Library/Preferences/com.apple.screensaver askForPasswordDelay"
-        sudo_command: "sudo defaults -currentHost read /Library/Preferences/com.apple.screensaver askForPasswordDelay"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read /Library/Preferences/com.apple.screensaver askForPasswordDelay"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            },
+            {
+                type: "exact match"
+                command: "sudo defaults -currentHost read /Library/Preferences/com.apple.screensaver askForPasswordDelay"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write /Library/Preferences/com.apple.screensaver askForPasswordDelay -bool false"
@@ -150,10 +201,16 @@
         description: "There is no delay between starting the screen saver and locking the machine (current user only)."
         confidence: "required"
         reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.screensaver askForPasswordDelay"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.screensaver askForPasswordDelay"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.screensaver askForPasswordDelay -bool false"
@@ -164,10 +221,17 @@
         description: "Logging is enabled for the operating system."
         confidence: "required"
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
-        type: "exact match"
-        command: "defaults -currentHost read /Library/Preferences/com.apple.alf loggingenabled"
-        expected_stdout: "1"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read /Library/Preferences/com.apple.alf loggingenabled"
+                command_pass: "1"
+                command_fail: "0"
+                case_sensitive: "false"
+
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write /Library/Preferences/com.apple.alf loggingenabled -bool true"
@@ -178,11 +242,17 @@
         description: "Homebrew analytics are disabled."
         confidence: "required"
         reference: "https://github.com/Homebrew/brew/blob/master/share/doc/homebrew/Analytics.md"
-        type: "exact match"
-        //test based on: https://github.com/Homebrew/brew/blob/master/Library/Homebrew/utils/analytics.sh
-        command: "[[ -n $HOMEBREW_NO_ANALYTICS ]] && echo 1 || echo 0"
-        expected_stdout: "1"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                //test based on: https://github.com/Homebrew/brew/blob/master/Library/Homebrew/utils/analytics.sh
+                command: "[[ -n $HOMEBREW_NO_ANALYTICS ]] && echo 1 || echo 0"
+                command_pass: "1"
+                command_fail: "0"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             //TODO: This fix works if you login/logout, but I haven't been able to get a fix working that doesn't require login/logout. The enironment variable is context dependent, and it's not clear how to set the variable in the parent-most environment without this action.
@@ -197,10 +267,16 @@
         description: "Stealth mode is enabled for OSX: Computer does not respond to ICMP ping requests or connection attempts from a closed TCP/UDP port. (system-wide)"
         confidence: "recommended"
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
-        type: "exact match"
-        command: "defaults -currentHost read /Library/Preferences/com.apple.alf stealthenabled"
-        expected_stdout: "1"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read /Library/Preferences/com.apple.alf stealthenabled"
+                command_pass: "1"
+                command_fail: "0"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults write /Library/Preferences/com.apple.alf stealthenabled -bool true"
@@ -213,10 +289,16 @@
         description: "Stealth mode is enabled for OSX: Computer does not respond to ICMP ping requests or connection attempts from a closed TCP/UDP port. (current user only)"
         confidence: "recommended"
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.alf stealthenabled"
-        expected_stdout: "1"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.alf stealthenabled"
+                command_pass: "1"
+                command_fail: "0"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults write ~/Library/Preferences/com.apple.alf stealthenabled -bool true"
@@ -229,10 +311,16 @@
         description: "Automatic whitelisting of Apple-signed applications for firewall is disabled (system-wide)."
         confidence: "required"
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
-        type: "exact match"
-        command: "defaults -currentHost read /Library/Preferences/com.apple.alf allowsignedenabled"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read /Library/Preferences/com.apple.alf allowsignedenabled"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write /Library/Preferences/com.apple.alf allowsignedenabled -bool false"
@@ -245,10 +333,16 @@
         description: "Automatic whitelisting of Apple-signed applications for firewall is disabled (current user only)."
         confidence: "required"
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.alf allowsignedenabled"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.alf allowsignedenabled"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.alf allowsignedenabled -bool false"
@@ -259,10 +353,16 @@
         description: "Captive portal for connecting to new networks is disabled to prevent MITM attacks."
         confidence: "required"
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
-        type: "exact match"
-        command: "defaults -currentHost read /Library/Preferences/SystemConfiguration/com.apple.captive.control Active"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read /Library/Preferences/SystemConfiguration/com.apple.captive.control Active"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write /Library/Preferences/SystemConfiguration/com.apple.captive.control Active -bool false"
@@ -274,10 +374,15 @@
         description: "OpenSSL is up-to-date."
         confidence: "required"
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
-        type: "exact match"
-        command: "openssl version"
-        expected_stdout: "OpenSSL 1.0.2h  3 May 2016"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "openssl version"
+                command_pass: "OpenSSL 1.0.2h  3 May 2016"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "brew update ; brew install openssl ; brew upgrade openssl ; brew link openssl --force ; mv /usr/bin/openssl /usr/bin/openssl-apple"
@@ -289,10 +394,16 @@
         description: "Hidden files are displayed in Finder."
         confidence: "recommended"
         reference: "http://lifehacker.com/the-best-hidden-settings-you-can-unlock-with-os-xs-ter-1476627111"
-        type: "exact match"
-        command: "defaults -currentHost read /Library/Preferences/SystemConfiguration/com.apple.finder AppleShowAllFiles"
-        expected_stdout: "1"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read /Library/Preferences/SystemConfiguration/com.apple.finder AppleShowAllFiles"
+                command_pass: "1"
+                command_fail: "0"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write /Library/Preferences/SystemConfiguration/com.apple.finder AppleShowAllFiles -bool true && killall Dock"
@@ -304,11 +415,17 @@
         description: "All application software is currently up to date."
         confidence: "required"
         reference: "https://github.com/SummitRoute/osxlockdown/"
-        type: "exact match"
-        command:
-            LASTUPDATE=$(defaults read /Library/Preferences/com.apple.SoftwareUpdate | grep LastSuccessfulDate | sed -e 's@^.* "\([0-9\\-]*\) .*$@\1@'); if [ "$LASTUPDATE" = "$(date +%Y-%m-%d)" ];then echo 1 && exit; fi; exit 0 && exit
-        expected_stdout: "1"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command:
+                    LASTUPDATE=$(defaults read /Library/Preferences/com.apple.SoftwareUpdate | grep LastSuccessfulDate | sed -e 's@^.* "\([0-9\\-]*\) .*$@\1@'); if [ "$LASTUPDATE" = "$(date +%Y-%m-%d)" ];then echo 1 && exit; fi; exit 0 && exit
+                command_pass: "1"
+                command_fail: "0"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "softwareupdate -i -a"
@@ -320,11 +437,21 @@
         description: "Automatic check for software updates is enabled."
         confidence: "required"
         reference: "https://github.com/SummitRoute/osxlockdown/"
-        type: "exact match"
-        command: "softwareupdate --schedule | grep 'Automatic check is on'"
-        sudo_command: "sudo softwareupdate --schedule | grep 'Automatic check is on'"
-        expected_stdout: "Automatic check is on"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "softwareupdate --schedule | grep -i 'Automatic check is on'"
+                command_pass: "Automatic check is on"
+                case_sensitive: "false"
+            },
+            {
+                type: "exact match"
+                command: "sudo softwareupdate --schedule | grep -i 'Automatic check is on'"
+                command_pass: "Automatic check is on"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "softwareupdate --schedule on"
@@ -335,10 +462,15 @@
         //System Preferences->Security & Privacy->General->Allow apps downloaded from
         description: "GateKeeper protection against untrusted applications is enabled."
         confidence: "required"
-        type: "exact match"
-        command: "spctl --status | grep 'assessments enabled'"
-        expected_stdout: "assessments enabled"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "spctl --status | grep -i 'assessments enabled'"
+                command_pass: "assessments enabled"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "spctl --master-enable"
@@ -350,11 +482,23 @@
         //System Preferences->Bluetooth->Turn Bluetooth Off
         description: "Bluetooth is disabled."
         confidence: "experimental"
-        type: "exact match"
-        command: "defaults read /Library/Preferences/com.apple.Bluetooth ControllerPowerState"
-        sudo_command: "sudo defaults read /Library/Preferences/com.apple.Bluetooth ControllerPowerState"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults read /Library/Preferences/com.apple.Bluetooth ControllerPowerState"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            },
+            {
+                type: "exact match"
+                command: "sudo defaults read /Library/Preferences/com.apple.Bluetooth ControllerPowerState"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults write /Library/Preferences/com.apple.Bluetooth ControllerPowerState -bool false; killall -HUP blued"
@@ -365,11 +509,23 @@
     {
         description: "The infrared receiver is disabled."
         confidence: "required"
-        type: "exact match"
-        command: "defaults read /Library/Preferences/com.apple.driver.AppleIRController DeviceEnabled"
-        sudo_command: "sudo defaults read /Library/Preferences/com.apple.driver.AppleIRController DeviceEnabled"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults read /Library/Preferences/com.apple.driver.AppleIRController DeviceEnabled"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            },
+            {
+                type: "exact match"
+                command: "sudo defaults read /Library/Preferences/com.apple.driver.AppleIRController DeviceEnabled"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults write /Library/Preferences/com.apple.driver.AppleIRController DeviceEnabled -bool false"
@@ -380,11 +536,23 @@
     {
         description: "AirDrop file sharing is disabled."
         confidence: "required"
-        type: "exact match"
-        command: "defaults read com.apple.NetworkBrowser DisableAirDrop"
-        sudo_command: "sudo defaults read com.apple.NetworkBrowser DisableAirDrop"
-        expected_stdout: "1"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults read com.apple.NetworkBrowser DisableAirDrop"
+                command_pass: "1"
+                command_fail: "0"
+                case_sensitive: "false"
+            },
+            {
+                type: "exact match"
+                command: "sudo defaults read com.apple.NetworkBrowser DisableAirDrop"
+                command_pass: "1"
+                command_fail: "0"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults write /Library/Preferences/com.apple.NetworkBrowser DisableAirDrop -bool true"
@@ -399,11 +567,17 @@
         description: "File sharing is disabled."
         confidence: "recommended"
         reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
-        type: "exact match"
-        command:
-            if [ -n "$(launchctl list | egrep AppleFileServer)" ]; then exit 1; fi; if [ -n "$(grep -i array /Library/Preferences/SystemConfiguration/com.apple.smb.server.plist)" ]; then echo 1; exit; fi; echo 0; exit
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command:
+                    if [ -n "$(launchctl list | egrep AppleFileServer)" ]; then exit 1; fi; if [ -n "$(grep -i array /Library/Preferences/SystemConfiguration/com.apple.smb.server.plist)" ]; then echo 1; exit; fi; echo 0; exit
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "launchctl unload -w /System/Library/LaunchDaemons/com.apple.AppleFileServer.plist; launchctl unload -w /System/Library/LaunchDaemons/com.apple.smbd.plist"
@@ -414,11 +588,17 @@
         description: "Printer sharing is disabled."
         confidence: "required"
         reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
-        type: "exact match"
-        command:
-            if [ -n "$(system_profiler SPPrintersDataType | grep Shared | grep Yes)" ]; then echo 1; exit; fi; if [ -n "$(system_profiler SPPrintersDataType | grep 'System Printer Sharing: Yes')" ]; then echo 1; exit; fi; echo 0; exit
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command:
+                    if [ -n "$(system_profiler SPPrintersDataType | grep Shared | grep Yes)" ]; then echo 1; exit; fi; if [ -n "$(system_profiler SPPrintersDataType | grep 'System Printer Sharing: Yes')" ]; then echo 1; exit; fi; echo 0; exit
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "cupsctl --no-share-printers"
@@ -428,11 +608,21 @@
         //System Preferences->Sharing->Remote Login
         description: "Remote login is disabled."
         confidence: "required"
-        type: "exact match"
-        command: "systemsetup -getremotelogin"
-        sudo_command: "sudo systemsetup -getremotelogin"
-        expected_stdout: "Remote Login: Off"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "systemsetup -getremotelogin"
+                command_pass: "Remote Login: Off"
+                case_sensitive: "false"
+            },
+            {
+                type: "exact match"
+                command: "sudo systemsetup -getremotelogin"
+                command_pass: "Remote Login: Off"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "systemsetup -f -setremotelogin off"
@@ -444,11 +634,17 @@
         //System Preferences->Sharing->Remote Management
         description: "Remote Management is disabled."
         confidence: "required"
-        type: "exact match"
-        command:
-            if [ -n "$(ps -ef | egrep "/System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/MacOS/[A]RDAgent")" ]; then echo 1; exit; fi; echo 0; exit
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command:
+                    if [ -n "$(ps -ef | egrep "/System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/MacOS/[A]RDAgent")" ]; then echo 1; exit; fi; echo 0; exit
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "/System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -deactivate -stop"
@@ -461,11 +657,21 @@
         description: "Remote Apple events are disabled."
         confidence: "required"
         reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
-        type: "exact match"
-        command: "systemsetup -getremoteappleevents"
-        sudo_command: "sudo systemsetup -getremoteappleevents"
-        expected_stdout: "Remote Apple Events: Off"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "systemsetup -getremoteappleevents"
+                command_pass: "Remote Apple Events: Off"
+                case_sensitive: "false"
+            },
+            {
+                type: "exact match"
+                command: "sudo systemsetup -getremoteappleevents"
+                command_pass: "Remote Apple Events: Off"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "systemsetup -setremoteappleevents off"
@@ -479,10 +685,15 @@
         description: "Internet Sharing is disabled on all network interfaces."
         confidence: "required"
         reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
-        type: "exact match"
-        command: "defaults read /Library/Preferences/SystemConfiguration/com.apple.nat NAT | grep -c 'Enabled = 1'"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults read /Library/Preferences/SystemConfiguration/com.apple.nat NAT | grep -c 'Enabled = 1'"
+                command_pass: "0"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults write /Library/Preferences/SystemConfiguration/com.apple.nat NAT -dict-add Enabled -bool false"
@@ -494,11 +705,21 @@
         //System Preferences->Energy Saver->Wake for network access
         description: "Wake on Network Access feature is disabled."
         confidence: "required"
-        type: "exact match"
-        command: "systemsetup getwakeonnetworkaccess"
-        sudo_command: "sudo systemsetup getwakeonnetworkaccess"
-        expected_stdout: "Wake On Network Access: Off"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "systemsetup getwakeonnetworkaccess"
+                command_pass: "Wake On Network Access: Off"
+                case_sensitive: "false"
+            },
+            {
+                type: "exact match"
+                command: "sudo systemsetup getwakeonnetworkaccess"
+                command_pass: "Wake On Network Access: Off"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "systemsetup -setwakeonnetworkaccess off"
@@ -510,11 +731,23 @@
         //Disables NTPd. There are definitely some downsides to this; some security software requires synchronized clocks, so this increases the risk of getting out of sync. I think most of this software will fail-safe, though. Disabling this has various benefits. See discussion here: https://github.com/SummitRoute/osxlockdown/issues/18
         description: "Automatic setting of time and date is disabled."
         confidence: "recommended"
-        type: "exact match"
-        command: "systemsetup getusingnetworktime"
-        sudo_command: "sudo systemsetup getusingnetworktime"
-        expected_stdout: "Network Time: Off"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "systemsetup getusingnetworktime"
+                command_pass: "Network Time: Off"
+                command_fail: "Network Time: On"
+                case_sensitive: "false"
+            },
+            {
+                type: "exact match"
+                command: "sudo systemsetup getusingnetworktime"
+                command_pass: "Network Time: Off"
+                command_fail: "Network Time: On"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "systemsetup setusingnetworktime off"
@@ -527,11 +760,17 @@
         description: "IPv6 is disabled on all network interfaces."
         confidence: "recommended"
         reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
-        type: "exact match"
-        command:
-            networksetup -listallnetworkservices | while read i; do SUPPORT=$(networksetup -getinfo "$i" | grep "IPv6: Automatic") && if [ -n "$SUPPORT" ]; then echo 1; fi; done; echo 0; exit
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command:
+                    networksetup -listallnetworkservices | while read i; do SUPPORT=$(networksetup -getinfo "$i" | grep "IPv6: Automatic") && if [ -n "$SUPPORT" ]; then echo 1; fi; done; echo 0; exit
+                command_pass: "0"
+                //command_fail would be one or more instances of the character "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command:
@@ -542,11 +781,17 @@
         description: "An administrator password is required to change system-wide preferences."
         confidence: "required"
         reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
-        type: "exact match"
-        command:
-            if [ -n "$(security authorizationdb read system.preferences 2> /dev/null | grep -A1 shared | grep -E '(true|false)' | grep 'false')" ]; then echo 0; else echo 1; fi
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command:
+                    if [ -n "$(security authorizationdb read system.preferences 2> /dev/null | grep -A1 shared | grep -E '(true|false)' | grep 'false')" ]; then echo 0; else echo 1; fi
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             //TODO: Add warning to user before fix command is run that she will be prompted for her admin credentials. this requires a new field
@@ -558,10 +803,16 @@
         description: "Documents are not stored to iCloud Drive by default. (May be mistaken if iCloud is disabled)"
         confidence: "required"
         reference: "http://mjtsai.com/blog/2014/10/26/yosemite-uploads-unsaved-documents-and-recent-addresses-to-icloud/"
-        type: "exact match"
-        command: "defaults read NSGlobalDomain NSDocumentSaveNewDocumentsToCloud"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults read NSGlobalDomain NSDocumentSaveNewDocumentsToCloud"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults write NSGlobalDomain NSDocumentSaveNewDocumentsToCloud -bool false"
@@ -573,10 +824,16 @@
         //Once this set of configurations is proven stable, this can be upgraded from "experimental" to "recommended". We may want to warn the user first that waking will be slower and require authenticating twice.
         confidence: "experimental"
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
-        type: "exact match"
-        command: "bash ./scripts/DestroyFVKeyOnStandby_check.sh"
-        expected_stdout: "1"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "bash ./scripts/DestroyFVKeyOnStandby_check.sh"
+                command_pass: "1"
+                command_fail: "0"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             //Additional configurations are required to make this setting not fight with powernap/standby/autopoweroff. See: https://github.com/drduh/OS-X-Security-and-Privacy-Guide/issues/124
@@ -588,10 +845,15 @@
         description: "The system will store a copy of memory to persistent storage, and will remove power to memory."
         confidence: "recommended"
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
-        type: "regex match"
-        command: "pmset -g"
-        expected_regex: ".*hibernatemode\\s+25.*"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "regex match"
+                command: "pmset -g"
+                command_pass: ".*hibernatemode\\s+25.*"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "pmset -a hibernatemode 25"
@@ -601,10 +863,15 @@
     {
         description: "git is up to date or is not installed"
         confidence: "required"
-        type: "regex match"
-        command: "git --version"
-        expected_regex: ".*(command not found|2\\.8\\.2).*"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "regex match"
+                command: "git --version"
+                command_pass: ".*(command not found|2\\.8\\.2).*"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             //This will make sure latest git is installed via homebrew and make make apple's version of git non-competitive
@@ -616,11 +883,21 @@
         description: "Apple Push Notifications are disabled."
         confidence: "recommended"
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
-        type: "regex match"
-        command: "launchctl list"
-        sudo_command: "sudo launchctl list"
-        expected_regex: "^((?!com\\.apple\\.apsd).)*$"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "regex match"
+                command: "launchctl list"
+                command_pass: "^((?!com\\.apple\\.apsd).)*$"
+                case_sensitive: "false"
+            },
+            {
+                type: "regex match"
+                command: "sudo launchctl list"
+                command_pass: "^((?!com\\.apple\\.apsd).)*$"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "launchctl unload -w /System/Library/LaunchDaemons/com.apple.apsd.plist"
@@ -631,10 +908,15 @@
     {
         description: "Google DNS servers are used by default on all network interfaces."
         confidence: "recommended"
-        type: "regex match"
-        command: "networksetup listallnetworkservices | grep -v 'An asterisk' | xargs -I{} networksetup -getdnsservers '{}' "
-        expected_regex: "^(8\\.8\\.8\\.8\\n8\\.8\\.4\\.4\n*)+$"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "regex match"
+                command: "networksetup listallnetworkservices | grep -v 'An asterisk' | xargs -I{} networksetup -getdnsservers '{}' "
+                command_pass: "^(8\\.8\\.8\\.8\\n8\\.8\\.4\\.4\n*)+$"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "networksetup listallnetworkservices | grep -v 'An asterisk' | xargs -I{} networksetup -setdnsservers '{}' 8.8.8.8 8.8.4.4"
@@ -643,10 +925,15 @@
     {
         description: "The curl utility is up to date or absent from the system."
         confidence: "required"
-        type: "regex match"
-        command: "curl --version"
-        expected_regex: ".*(command not found|7\\.48\\.0).*"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "regex match"
+                command: "curl --version"
+                command_pass: ".*(command not found|7\\.48\\.0).*"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "brew update ; brew install curl ; brew upgrade curl ; brew link curl --force"
@@ -657,10 +944,15 @@
         description: "FileVault file system encryption is enabled."
         confidence: "required"
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
-        type: "regex match"
-        command: "fdesetup status -verbose"
-        expected_regex: "^.*FileVault is On.*$"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "regex match"
+                command: "fdesetup status -verbose"
+                command_pass: "^.*FileVault is On.*$"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             /*
@@ -686,10 +978,15 @@
         description: "FileVault file system encryption is enabled at the root directory."
         confidence: "required"
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
-        type: "regex match"
-        command: "fdesetup status -verbose"
-        expected_regex: "^.*device path \\=\\s+.*$"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "regex match"
+                command: "fdesetup status -verbose"
+                command_pass: "^.*device path \\=\\s+.*$"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             manual: "Sorry, no instructions are currently available to remediate this issue."
@@ -700,12 +997,17 @@
         description: "The idle timer for screen saver activation is set to 10 minutes or less."
         confidence: "recommended"
         reference: "https://github.com/SummitRoute/osxlockdown/blob/58697f5162fe9e43df7dc9b6b94ffa34b0e11d4f/commands.yaml"
-        type: "regex match"
-        //This is a clever way for polling settings for multiple users from the current logged in user :-)
-        command:
-            UUID=`ioreg -rd1 -c IOPlatformExpertDevice | grep "IOPlatformUUID" | sed -e 's/^.*"\(.*\)"$/\1/'`; for i in $(find /Users -type d -maxdepth 1); do PREF=$i/Library/Preferences/ByHost/com.apple.screensaver.$UUID; if [ -e $PREF.plist ]; then TIMEOUT=$(defaults read $PREF.plist idleTime) && if [ $TIMEOUT -eq 0 ] || [ $TIMEOUT -gt 600 ]; then echo 1; fi; else echo 0; fi; done;
-        expected_regex: "^(0\n*)+$" //all zeroes
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "regex match"
+                //This is a clever way for polling settings for multiple users from the current logged in user :-)
+                command:
+                    UUID=`ioreg -rd1 -c IOPlatformExpertDevice | grep "IOPlatformUUID" | sed -e 's/^.*"\(.*\)"$/\1/'`; for i in $(find /Users -type d -maxdepth 1); do PREF=$i/Library/Preferences/ByHost/com.apple.screensaver.$UUID; if [ -e $PREF.plist ]; then TIMEOUT=$(defaults read $PREF.plist idleTime) && if [ $TIMEOUT -eq 0 ] || [ $TIMEOUT -gt 600 ]; then echo 1; fi; else echo 0; fi; done;
+                command_pass: "^(0\n*)+$" //all zeroes
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command:
@@ -720,10 +1022,15 @@
         description: "The Safari application is currently closed."
         confidence: "required"
         reference: "https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man1/defaults.1.html"
-        type: "exact match"
-        command: "ps ax | grep -c '/Applications/Safari.app/Contents/MacOS/Safari'"
-        expected_stdout: "2" //a value of "3" means it's running -- the other 2 are `/bin/sh` and the `grep` command.
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "ps ax | grep -c '/Applications/Safari.app/Contents/MacOS/Safari'"
+                command_pass: "2" //a value of "3" means it's running -- the other 2 are `/bin/sh` and the `grep` command.
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command:
@@ -734,10 +1041,16 @@
         //Safari->Preferences->AutoFill->Credit cards
         description: "Safari will not auto-fill credit card data."
         confidence: "recommended"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari AutoFillCreditCardData"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari AutoFillCreditCardData"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari AutoFillCreditCardData -bool false"
@@ -747,10 +1060,16 @@
         //Safari->Preferences->AutoFill->Using info from my Contacts card
         description: "Safari will not auto-fill your contact data."
         confidence: "recommended"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari AutoFillFromAddressBook"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari AutoFillFromAddressBook"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari AutoFillFromAddressBook -bool false"
@@ -760,10 +1079,16 @@
         //Safari->Preferences->AutoFill->Other forms
         description: "Safari will not auto-fill miscellaneous forms."
         confidence: "recommended"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari AutoFillMiscellaneousForms"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari AutoFillMiscellaneousForms"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari AutoFillMiscellaneousForms -bool false"
@@ -773,10 +1098,16 @@
         //Safari->Preferences->AutoFill->User names and passwords
         description: "Safari will not auto-fill usernames or passwords."
         confidence: "recommended"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari AutoFillPasswords"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari AutoFillPasswords"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari AutoFillPasswords -bool false"
@@ -786,10 +1117,16 @@
         //Safari->Preferences->General->Open "safe" files after downloading
         description: "Files downloaded in Safari are not automatically opened."
         confidence: "required"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari AutoOpenSafeDownloads"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari AutoOpenSafeDownloads"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari AutoOpenSafeDownloads -bool false"
@@ -799,10 +1136,16 @@
         //Safari->Preferences->Privacy->Cookies and website data->Always block
         description: "Cookies and local storage are always blocked in Safari."
         confidence: "recommended"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari BlockStoragePolicy"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari BlockStoragePolicy"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari BlockStoragePolicy -bool false"
@@ -813,10 +1156,16 @@
         //Note: Extensions are often a persistence mechanism for browser-based malware.
         description: "Safari extensions are disabled."
         confidence: "required"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari ExtensionsEnabled"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari ExtensionsEnabled"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari ExtensionsEnabled -bool false"
@@ -827,10 +1176,16 @@
         description: "The Safari web browser will warn when visiting known fraudulent websites."
         //I'm setting this to recommended for on the basis that there is like a privacy trade-off
         confidence: "recommended"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari WarnAboutFraudulentWebsites"
-        expected_stdout: "1"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari WarnAboutFraudulentWebsites"
+                command_pass: "1"
+                command_fail: "0"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari WarnAboutFraudulentWebsites -bool true"
@@ -841,10 +1196,16 @@
         //Safari->Preferences->Security->Web Content->Enable JavaScript
         description: "JavaScript disabled in the Safari web browser."
         confidence: "recommended"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaScriptEnabled"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaScriptEnabled"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaScriptEnabled -bool false"
@@ -854,10 +1215,16 @@
     {
         description: "JavaScript disabled in the Safari web browser (Legacy version)."
         confidence: "recommended"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari WebKitJavaScriptEnabled"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari WebKitJavaScriptEnabled"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari WebKitJavaScriptEnabled -bool false"
@@ -868,10 +1235,16 @@
         //Safari->Preferences->Security->Web Content->Block pop-up windows
         description: "Pop-up windows are blocked in the Safari web browser."
         confidence: "required"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaScriptCanOpenWindowsAutomatically"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaScriptCanOpenWindowsAutomatically"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaScriptCanOpenWindowsAutomatically -bool false"
@@ -882,10 +1255,16 @@
         //Safari->Preferences->Security->Web Content->Block pop-up windows
         description: "Pop-up windows are blocked in the Safari web browser (Legacy version)."
         confidence: "required"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari WebKitJavaScriptCanOpenWindowsAutomatically"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari WebKitJavaScriptCanOpenWindowsAutomatically"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari WebKitJavaScriptCanOpenWindowsAutomatically -bool false"
@@ -896,10 +1275,16 @@
         //Safari->Preferences->Security->Web Content->Allow WebGL
         description: "The WebGL plug-in is disabled in the Safari web browser."
         confidence: "recommended"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2WebGLEnabled"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2WebGLEnabled"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2WebGLEnabled -bool false"
@@ -910,10 +1295,16 @@
         //Safari->Preferences->Security->Internet plug-ins->Allow Plug-ins
         description: "Plug-ins are disabled in the Safari web browser."
         confidence: "recommended"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2PluginsEnabled"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2PluginsEnabled"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2PluginsEnabled -bool false"
@@ -923,10 +1314,16 @@
     {
         description: "Plug-ins are disabled in the Safari web browser (Legacy version)."
         confidence: "recommended"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari WebKitPluginsEnabled"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari WebKitPluginsEnabled"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari WebKitPluginsEnabled -bool false"
@@ -937,10 +1334,15 @@
         //Safari->Preferences->Security->Internet plug-ins->Plug-in Settings...->When visiting other websites
         description: "Plug-ins are blocked by default in the Safari web browser unless a site is explicitly added to a list of allowed sites."
         confidence: "required"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari PlugInFirstVisitPolicy"
-        expected_stdout: "PlugInPolicyBlock"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari PlugInFirstVisitPolicy"
+                command_pass: "PlugInPolicyBlock"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari PlugInFirstVisitPolicy PlugInPolicyBlock"
@@ -950,12 +1352,17 @@
         //Safari->Preferences->Security->Internet plug-ins->Plug-in Settings...->Java->When visiting other websites->Block
         description: "The Java plug-in for Safari web browser is blocked unless a site is explicitly added to a list of allowed sites."
         confidence: "required"
-        type: "exact match"
-        //Note: dictionary values for PList fields are easier to handle with `PlistBuddy` instead of `defaults`.
-        command:
-            /usr/libexec/PlistBuddy -c "Print :ManagedPlugInPolicies:com.oracle.java.JavaAppletPlugin:PlugInFirstVisitPolicy" ~/Library/Preferences/com.apple.Safari.plist
-        expected_stdout: "PlugInPolicyBlock"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                //Note: dictionary values for PList fields are easier to handle with `PlistBuddy` instead of `defaults`.
+                command:
+                    /usr/libexec/PlistBuddy -c "Print :ManagedPlugInPolicies:com.oracle.java.JavaAppletPlugin:PlugInFirstVisitPolicy" ~/Library/Preferences/com.apple.Safari.plist
+                command_pass: "PlugInPolicyBlock"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command:
@@ -966,10 +1373,16 @@
         //Safari->Preferences->Security->Internet plug-ins->Plug-in Settings...->Java
         description: "The Java plug-in is disabled in the Safari web browser."
         confidence: "required"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaEnabled"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaEnabled"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaEnabled -bool false"
@@ -980,10 +1393,16 @@
         //This appears to be an old method circa 2009 for disabling Java. See: http://alblue.bandlem.com/2009/05/disabling-java-in-webkit.html
         description: "The Java plug-in is disabled in the Safari web browser (Legacy version)."
         confidence: "required"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari WebKitJavaEnabled"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari WebKitJavaEnabled"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari WebKitJavaEnabled -bool false"
@@ -994,10 +1413,16 @@
         //Safari->Develop->Treat SHA-1 Certificates as Insecure
         description: "The Safari web browser is configured to treat SHA-1 certificates as insecure."
         confidence: "recommended"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari TreatSHA1CertificatesAsInsecure"
-        expected_stdout: "1"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari TreatSHA1CertificatesAsInsecure"
+                command_pass: "1"
+                command_fail: "0"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari TreatSHA1CertificatesAsInsecure -bool true"
@@ -1008,10 +1433,16 @@
         //Safari->Preferences->Search->Preload Top Hit in the background
         description: "The Safari web browser will not pre-load webpages that rank highly as search matches."
         confidence: "recommended"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari PreloadTopHit"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari PreloadTopHit"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari PreloadTopHit -bool false"
@@ -1022,10 +1453,16 @@
         //Safari->Preferences->Search->Search engine->Include search engine suggestions
         description: "The Safari web browser will not include search engine suggestions for text typed in the location bar."
         confidence: "required"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari SuppressSearchSuggestions"
-        expected_stdout: "1"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari SuppressSearchSuggestions"
+                command_pass: "1"
+                command_fail: "0"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari SuppressSearchSuggestions -bool true"
@@ -1036,10 +1473,16 @@
         //Safari->Preferences->Search->Smart Search Field->Include Safari Suggestions
         description: "The Safari web browser's search suggestions are disabled."
         confidence: "required"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari UniversalSearchEnabled"
-        expected_stdout: "0"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari UniversalSearchEnabled"
+                command_pass: "0"
+                command_fail: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari UniversalSearchEnabled -bool false"
@@ -1050,10 +1493,16 @@
         //Safari->Preferences->Privacy->Website tracking->Ask websites not to track me
         description: "The Safari web browser uses the Do-Not-Track HTTP header."
         confidence: "recommended"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari SendDoNotTrackHTTPHeader"
-        expected_stdout: "1"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari SendDoNotTrackHTTPHeader"
+                command_pass: "1"
+                command_fail: "0"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari SendDoNotTrackHTTPHeader -bool true"
@@ -1063,10 +1512,16 @@
     {
         description: "PDF viewing is disabled in the Safari web browser."
         confidence: "recommended"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari WebKitOmitPDFSupport"
-        expected_stdout: "1"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari WebKitOmitPDFSupport"
+                command_pass: "1"
+                command_fail: "0"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari WebKitOmitPDFSupport -bool true"
@@ -1078,10 +1533,16 @@
         //This might help prevent phishing attacks
         description: "Full website addresses are disabled in the location bar of the Safari web browser."
         confidence: "required"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari ShowFullURLInSmartSearchField"
-        expected_stdout: "1"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Preferences/com.apple.Safari ShowFullURLInSmartSearchField"
+                command_pass: "1"
+                command_fail: "0"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari ShowFullURLInSmartSearchField -bool true"
@@ -1096,10 +1557,15 @@
         description: "The Mail application is currently closed."
         confidence: "required"
         reference: "https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man1/defaults.1.html"
-        type: "exact match"
-        command: "ps ax | grep -c '/Applications/Mail.app/Contents/MacOS/Mail'"
-        expected_stdout: "2" //a value of "3" means it's running -- the other 2 are `/bin/sh` and the `grep` command.
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "ps ax | grep -c '/Applications/Mail.app/Contents/MacOS/Mail'"
+                command_pass: "2" //a value of "3" means it's running -- the other 2 are `/bin/sh` and the `grep` command.
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command:
@@ -1110,12 +1576,18 @@
         //Mail->Preferences->Viewing->Load remote content in messages
         description: "Apple Mail does not automatically load remote content in e-mails."
         confidence: "recommended"
-        type: "exact match"
-        //Either Apple Mail is not in use or remote content is disabled. I use "ls" here to resolve the "~" symbol to the fully qualified file path that "test" requires.
-        command:
-            REMOTELOAD=$(defaults read ~/Library/Preferences/com.apple.mail-shared DisableURLLoading | grep 1) ; if [ ! -e $(ls ~/Library/Preferences/com.apple.mail-shared.plist) ] || [ -n "$REMOTELOAD" ]; then echo 1; else echo 0; fi
-        expected_stdout: "1"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                //Either Apple Mail is not in use or remote content is disabled. I use "ls" here to resolve the "~" symbol to the fully qualified file path that "test" requires.
+                command:
+                    REMOTELOAD=$(defaults read ~/Library/Preferences/com.apple.mail-shared DisableURLLoading | grep 1) ; if [ ! -e $(ls ~/Library/Preferences/com.apple.mail-shared.plist) ] || [ -n "$REMOTELOAD" ]; then echo 1; else echo 0; fi
+                command_pass: "1"
+                command_fail: "0"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults write ~/Library/Preferences/com.apple.mail-shared DisableURLLoading -bool true"
@@ -1126,10 +1598,15 @@
         //Mail->Preferences->Junk Mail->Enable junk mail filtering AND When junk mail arrives: Move it to the Junk mailbox
         description: "Mail identified by Apple Mail as junk is sent to the Junk mailbox."
         confidence: "recommended"
-        type: "exact match"
-        command: "defaults -currentHost read ~/Library/Containers/com.apple.mail/Data/Library/Preferences/com.apple.mail JunkMailBehavior"
-        expected_stdout: "2"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "defaults -currentHost read ~/Library/Containers/com.apple.mail/Data/Library/Preferences/com.apple.mail JunkMailBehavior"
+                command_pass: "2"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults -currentHost write ~/Library/Containers/com.apple.mail/Data/Library/Preferences/com.apple.mail JunkMailBehavior -int 2"
@@ -1139,11 +1616,17 @@
         //Mail->Preferences->GPGMail->Composing->Encrypt new messages by default
         description: "New e-mails composed in Apple Mail are encrypted by GPGMail if the receiver's PGP is present in the keychain."
         confidence: "recommended"
-        type: "exact match"
-        command:
-            AUTOENCRYPT=$(defaults read ~/Library/Preferences/org.gpgtools.gpgmail EncryptNewEmailsByDefault | grep 1) ; if [ ! -e $(ls ~/Library/Preferences/org.gpgtools.gpgmail.plist) ] || [ -n "$AUTOENCRYPT" ]; then echo 1; else echo 0; fi
-        expected_stdout: "1"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command:
+                    AUTOENCRYPT=$(defaults read ~/Library/Preferences/org.gpgtools.gpgmail EncryptNewEmailsByDefault | grep 1) ; if [ ! -e $(ls ~/Library/Preferences/org.gpgtools.gpgmail.plist) ] || [ -n "$AUTOENCRYPT" ]; then echo 1; else echo 0; fi
+                command_pass: "1"
+                command_fail: "0"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults write ~/Library/Preferences/org.gpgtools.gpgmail.plist EncryptNewEmailsByDefault -bool true"
@@ -1154,11 +1637,17 @@
         //Mail->Preferences->GPGMail->Composing->Encrypt drafts
         description: "New e-mails composed in Apple Mail and saved as drafts are encrypted by GPGMail."
         confidence: "required"
-        type: "exact match"
-        command:
-            AUTOENCRYPTDRAFTS=$(defaults read ~/Library/Preferences/org.gpgtools.gpgmail OptionallyEncryptDrafts | grep 1) ; if [ ! -e $(ls ~/Library/Preferences/org.gpgtools.gpgmail.plist) ] || [ -n "$AUTOENCRYPTDRAFTS" ]; then echo 1; else echo 0; fi
-        expected_stdout: "1"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command:
+                    AUTOENCRYPTDRAFTS=$(defaults read ~/Library/Preferences/org.gpgtools.gpgmail OptionallyEncryptDrafts | grep 1) ; if [ ! -e $(ls ~/Library/Preferences/org.gpgtools.gpgmail.plist) ] || [ -n "$AUTOENCRYPTDRAFTS" ]; then echo 1; else echo 0; fi
+                command_pass: "1"
+                command_fail: "0"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults write ~/Library/Preferences/org.gpgtools.gpgmail.plist OptionallyEncryptDrafts -bool true"
@@ -1169,11 +1658,17 @@
         //Mail->Preferences->GPGMail->Composing->Sign new messages by default
         description: "New e-mails composed in Apple Mail are signed by GPGMail."
         confidence: "required"
-        type: "exact match"
-        command:
-            AUTOSIGN=$(defaults read ~/Library/Preferences/org.gpgtools.gpgmail SignNewEmailsByDefault | grep 1) ; if [ ! -e $(ls ~/Library/Preferences/org.gpgtools.gpgmail.plist) ] || [ -n "$AUTOSIGN" ]; then echo 1; else echo 0; fi
-        expected_stdout: "1"
-         case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command:
+                    AUTOSIGN=$(defaults read ~/Library/Preferences/org.gpgtools.gpgmail SignNewEmailsByDefault | grep 1) ; if [ ! -e $(ls ~/Library/Preferences/org.gpgtools.gpgmail.plist) ] || [ -n "$AUTOSIGN" ]; then echo 1; else echo 0; fi
+                command_pass: "1"
+                command_fail: "0"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults write ~/Library/Preferences/org.gpgtools.gpgmail.plist SignNewEmailsByDefault -bool true"
@@ -1184,11 +1679,17 @@
         //Mail->Preferences->GPGMail->Updates->Automatically check for updates
         description: "Apple Mail with automatically check for updates to GPGMail."
         confidence: "required"
-        type: "exact match"
-        command:
-            AUTOCHECK=$(defaults read ~/Library/Preferences/org.gpgtools.gpgmail SUEnableAutomaticChecks | grep 1) ; if [ ! -e $(ls ~/Library/Preferences/org.gpgtools.gpgmail.plist) ] || [ -n "$AUTOCHECK" ]; then echo 1; else echo 0; fi
-        expected_stdout: "1"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command:
+                    AUTOCHECK=$(defaults read ~/Library/Preferences/org.gpgtools.gpgmail SUEnableAutomaticChecks | grep 1) ; if [ ! -e $(ls ~/Library/Preferences/org.gpgtools.gpgmail.plist) ] || [ -n "$AUTOCHECK" ]; then echo 1; else echo 0; fi
+                command_pass: "1"
+                command_fail: "0"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command: "defaults write ~/Library/Preferences/org.gpgtools.gpgmail.plist SUEnableAutomaticChecks -bool true"
@@ -1202,11 +1703,21 @@
         //Check if the Chrome app is closed -- otherwise, it may override changes this app makes.
         description: "The Google Chrome browser is currently closed."
         confidence: "required"
-        type: "exact match"
-        command:
-            if [ $(chrome_is_installed) = "0" ] ; then echo "2" ; else ps ax | grep -c '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' ; fi
-        expected_stdout: "2" //a value of "3" means it's running -- the other 2 are `/bin/sh` and the `grep` command.
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: chrome_is_installed
+                command_pass: 0
+                case_sensitive: false
+            },
+            {
+                type: "exact match"
+                command: "ps ax | grep -c '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'"
+                command_pass: 2 //a value of "3" means it's running -- the other 2 are `/bin/sh` and the `grep` command.
+                case_sensitive: false
+            }
+        ]
         fix:
         {
             command:
@@ -1217,11 +1728,22 @@
         //Chrome->Preferences->Show Advanced Settings->Privacy->Use a web service to help resolve navigation errors
         description: "All Google Chrome web browser profiles prevent information leakage through navigation errors."
         confidence: "recommended"
-        type: "regex match"
-        command:
-            if [ $(chrome_is_installed) = "0" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' alternate_error_pages.enabled ; fi
-        expected_regex: "^(False\n?)+$"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: chrome_is_installed
+                command_pass: 0
+                case_sensitive: false
+            },
+            {
+                type: "regex match"
+                command:
+                    find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' alternate_error_pages.enabled
+                command_pass: "^(False\n?)+$"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command:
@@ -1232,11 +1754,22 @@
         //Chrome->Preferences->Show Advanced Settings->Privacy->Use a prediction service to help complete searches and URLs typed in the address bar or the app launcher
         description: "All Google Chrome web browser profiles prevent information leakage through URL suggestions."
         confidence: "required"
-        type: "regex match"
-        command:
-            if [ $(chrome_is_installed) = "0" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' search.suggest_enabled ; fi
-        expected_regex: "^(False\n?)+$"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: chrome_is_installed
+                command_pass: 0
+                case_sensitive: false
+            },
+            {
+                type: "regex match"
+                command:
+                    find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' search.suggest_enabled
+                command_pass: "^(False\n?)+$"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command:
@@ -1247,11 +1780,22 @@
         //Chrome->Preferences->Show Advanced Settings->Privacy->Use a prediction service to load pages more quickly
         description: "All Google Chrome web browser profiles prevent information leakage through network prediction."
         confidence: "required"
-        type: "regex match"
-        command:
-            if [ $(chrome_is_installed) = "0" ]; then echo "2"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' net.network_prediction_options ; fi
-        expected_regex: "^(2\n?)+$"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: chrome_is_installed
+                command_pass: 0
+                case_sensitive: false
+            },
+            {
+                type: "regex match"
+                command:
+                    find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' net.network_prediction_options
+                command_pass: "^(2\n?)+$"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command:
@@ -1262,11 +1806,22 @@
         //Chrome->Preferences->Show Advanced Settings->Privacy->Automatically report details of possible security incidents to Google
         description: "All Google Chrome web browser profiles prevent information leakage through report security incidents to Google."
         confidence: "recommended"
-        type: "regex match"
-        command:
-            if [ $(chrome_is_installed) = "0" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' safebrowsing.extended_reporting_enabled ; fi
-        expected_regex: "^(False\n?)+$"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: chrome_is_installed
+                command_pass: 0
+                case_sensitive: false
+            },
+            {
+                type: "regex match"
+                command:
+                    find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' safebrowsing.extended_reporting_enabled
+                command_pass: "^(False\n?)+$"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command:
@@ -1279,11 +1834,22 @@
         description: "All Google Chrome web browser profiles have Google Safe Browsing enabled."
         confidence: "recommended"
         reference: "https://en.wikipedia.org/wiki/Google_Safe_Browsing"
-        type: "regex match"
-        command:
-            if [ $(chrome_is_installed) = "0" ]; then echo "True"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' safebrowsing.enabled ; fi
-        expected_regex: "^(True\n?)+$"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: chrome_is_installed
+                command_pass: 0
+                case_sensitive: false
+            },
+            {
+                type: "regex match"
+                command:
+                    find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' safebrowsing.enabled
+                command_pass: "^(True\n?)+$"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command:
@@ -1294,11 +1860,22 @@
         //Chrome->Preferences->Show Advanced Settings->Privacy->Use a web service to help resolve spelling errors
         description: "All Google Chrome web browser profiles prevent information leakage through spell-checking network services."
         confidence: "recommended"
-        type: "regex match"
-        command:
-            if [ $(chrome_is_installed) = "0" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' spellcheck.use_spelling_service ; fi
-        expected_regex: "^(False\n?)+$"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: chrome_is_installed
+                command_pass: 0
+                case_sensitive: false
+            },
+            {
+                type: "regex match"
+                command:
+                    find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' spellcheck.use_spelling_service
+                command_pass: "^(False\n?)+$"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command:
@@ -1309,11 +1886,22 @@
         //Chrome->Preferences->Show Advanced Settings->Privacy->Automatically send usage statistics and crash reports to Google
         description: "All Google Chrome web browser profiles prevent information leakage through reporting usage statistics to Google."
         confidence: "required"
-        type: "regex match"
-        command:
-            if [ $(chrome_is_installed) = "0" ]; then echo "False"; exit; fi; if [ -e "$(ls ~/Library/Application\ Support/Google/Chrome/Consent\ To\ Send\ Stats)" ]; then echo "True"; exit; fi ; echo $(python ./scripts/chrome_defaults.py read ~/Library/Application\ Support/Google/Chrome/Local\ State user_experience_metrics.reporting_enabled)
-        expected_regex: ".*False$"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: chrome_is_installed
+                command_pass: 0
+                case_sensitive: false
+            },
+            {
+                type: "regex match"
+                command:
+                    if [ -e "$(ls ~/Library/Application\ Support/Google/Chrome/Consent\ To\ Send\ Stats)" ]; then echo "True"; exit; fi ; echo $(python ./scripts/chrome_defaults.py read ~/Library/Application\ Support/Google/Chrome/Local\ State user_experience_metrics.reporting_enabled)
+                command_pass: ".*False$"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command:
@@ -1324,12 +1912,23 @@
         //Chrome->Preferences->Show Advanced Settings->Privacy->Send a "Do Not Track" request with your browsing traffic
         description: "All Google Chrome web browser profiles use the Do-Not-Track HTTP header."
         confidence: "recommended"
-        type: "regex match"
-        //This check should short-circuit and match the regex if Chrome is not installed
-        command:
-            if [ $(chrome_is_installed) = "0" ]; then echo "True"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' enable_do_not_track ; fi
-        expected_regex: "^(True\n?)+$"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: chrome_is_installed
+                command_pass: 0
+                case_sensitive: false
+            },
+            {
+                type: "regex match"
+                //This check should short-circuit and match the regex if Chrome is not installed
+                command:
+                    find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' enable_do_not_track
+                command_pass: "^(True\n?)+$"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command:
@@ -1340,12 +1939,23 @@
         //Chrome->Preferences->Show Advanced Settings->Privacy->Content Settings->Pop-ups->Do not allow any site to show pop-ups (recommended)
         description: "All Google Chrome web browser profiles prevent pop-ups."
         confidence: "required"
-        type: "regex match"
-        command:
-            if [ $(chrome_is_installed) = "0" ]; then echo "The attribute 'profile.default_content_setting_values.popups' does not exist"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.default_content_setting_values.popups ; fi
-        expected_regex:
-            ^(The attribute 'profile.default_content_setting_values.popups' does not exist\n?)|(None\n?)+$
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: chrome_is_installed
+                command_pass: 0
+                case_sensitive: false
+            },
+            {
+                type: "regex match"
+                command:
+                    find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.default_content_setting_values.popups
+                command_pass:
+                    ^(The attribute 'profile.default_content_setting_values.popups' does not exist\n?)|(None\n?)+$
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command:
@@ -1356,11 +1966,22 @@
         //Chrome->Preferences->Show Advanced Settings->Privacy->Content Settings->Location->Do not allow any site to track your physical location
         description: "All Google Chrome web browser profiles prevent geolocation by websites."
         confidence: "recommended"
-        type: "regex match"
-        command:
-            if [ $(chrome_is_installed) = "0" ]; then echo "2"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.default_content_setting_values.geolocation ; fi
-        expected_regex: "^(2\n?)+$"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: chrome_is_installed
+                command_pass: 0
+                case_sensitive: false
+            },
+            {
+                type: "regex match"
+                command:
+                    find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.default_content_setting_values.geolocation
+                command_pass: "^(2\n?)+$"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command:
@@ -1373,11 +1994,22 @@
         description: "All Google Chrome web browser profiles block unsandboxed plug-in software."
         confidence: "recommended"
         reference: "http://superuser.com/questions/654595/adobe-flash-player-ppapi-vs-npapi-in-google-chrome"
-        type: "regex match"
-        command:
-            if [ $(chrome_is_installed) = "0" ]; then echo "2"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.default_content_setting_values.ppapi_broker ; fi
-        expected_regex: "^(2\n?)+$"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: chrome_is_installed
+                command_pass: 0
+                case_sensitive: false
+            },
+            {
+                type: "regex match"
+                command:
+                    find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.default_content_setting_values.ppapi_broker
+                command_pass: "^(2\n?)+$"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command:
@@ -1388,11 +2020,22 @@
         //Chrome->Preferences->Show Advanced Settings->Passwords and forms->Enable Autofill to fill out web forms in a single click
         description: "All Google Chrome web browser profiles prevent filling personal information into forms automatically."
         confidence: "required"
-        type: "regex match"
-        command:
-            if [ $(chrome_is_installed) = "0" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' autofill.enabled ; fi
-        expected_regex: "^(False\n?)+$"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: chrome_is_installed
+                command_pass: 0
+                case_sensitive: false
+            },
+            {
+                type: "regex match"
+                command:
+                    find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' autofill.enabled
+                command_pass: "^(False\n?)+$"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command:
@@ -1404,11 +2047,22 @@
         //Chrome->Preferences->Show Advanced Settings->Passwords and forms->Offer to save your web passwords.
         description: "All Google Chrome web browser profiles have disabled Password Manager."
         confidence: "recommended"
-        type: "regex match"
-        command:
-            if [ $(chrome_is_installed) = "0" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.password_manager_enabled ; fi
-        expected_regex: "^(False\n?)+$"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: chrome_is_installed
+                command_pass: 0
+                case_sensitive: false
+            },
+            {
+                type: "regex match"
+                command:
+                    find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.password_manager_enabled
+                command_pass: "^(False\n?)+$"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command:
@@ -1419,11 +2073,22 @@
         //Chrome->Preferences->Show Advanced Settings->Passwords and forms->Manage passwords->Auto Sign-In
         description: "All Google Chrome web browser profiles have disabled automatic sign-in for stored passwords."
         confidence: "required"
-        type: "regex match"
-        command:
-            if [ $(chrome_is_installed) = "0" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' credentials_enable_autosignin ; fi
-        expected_regex: "^(False\n?)+$"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: chrome_is_installed
+                command_pass: 0
+                case_sensitive: false
+            },
+            {
+                type: "regex match"
+                command:
+                    find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' credentials_enable_autosignin
+                command_pass: "^(False\n?)+$"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command:
@@ -1434,11 +2099,22 @@
         //Chrome->Preferences->Show Advanced Settings->Google CloudPrint->Show notifications when new printers are detected on network
         description: "All Google Chrome web browser profiles have disabled Google CloudPrint."
         confidence: "required"
-        type: "regex match"
-        command:
-            if [ $(chrome_is_installed) = "0" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' local_discovery.notifications_enabled ; fi
-        expected_regex: "^(False\n?)+$"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: chrome_is_installed
+                command_pass: 0
+                case_sensitive: false
+            },
+            {
+                type: "regex match"
+                command:
+                    find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' local_discovery.notifications_enabled
+                command_pass: "^(False\n?)+$"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command:
@@ -1451,11 +2127,22 @@
         description: "All Google Chrome web browser profiles have disabled Flash cookies."
         confidence: "required"
         reference: "https://en.wikipedia.org/wiki/Local_shared_object"
-        type: "regex match"
-        command:
-            if [ $(chrome_is_installed) = "0" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' browser.clear_lso_data_enabled ; fi
-        expected_regex: "^(False\n?)+$"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: chrome_is_installed
+                command_pass: 0
+                case_sensitive: false
+            },
+            {
+                type: "regex match"
+                command:
+                    find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' browser.clear_lso_data_enabled
+                command_pass: "^(False\n?)+$"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command:
@@ -1467,11 +2154,22 @@
         description: "All Google Chrome web browser profiles have disabled the Chrome Pepper Flash Player plug-in."
         confidence: "required"
         reference: "http://www.newtriks.com/2012/12/01/how-to-disable-the-chrome-pepper-flash-player/"
-        type: "regex match"
-        command:
-            if [ $(chrome_is_installed) = "0" ]; then echo "False"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' browser.pepper_flash_settings_enabled ; fi
-        expected_regex: "^(False\n?)+$"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: chrome_is_installed
+                command_pass: 0
+                case_sensitive: false
+            },
+            {
+                type: "regex match"
+                command:
+                    find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' browser.pepper_flash_settings_enabled
+                command_pass: "^(False\n?)+$"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             command:
@@ -1482,12 +2180,23 @@
         //chrome://plugins/->Adobe Flash Player->Disable
         description: "All Google Chrome web browser profiles have disabled the Adobe Shockwave Flash plug-in."
         confidence: "required"
-        type: "regex match"
-        command:
-            if [ $(chrome_is_installed) = "0" ]; then echo "'enabled': False, 'name': 'Shockwave Flash'"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' plugins.plugins_list ; fi
-        expected_regex:
-            ^(\[[^\[]+'enabled': False, 'name': 'Shockwave Flash'[^\]]+\]\n?)+$
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: chrome_is_installed
+                command_pass: 0
+                case_sensitive: false
+            },
+            {
+                type: "regex match"
+                command:
+                    find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' plugins.plugins_list
+                command_pass:
+                    ^(\[[^\[]+'enabled': False, 'name': 'Shockwave Flash'[^\]]+\]\n?)+$
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             //To simplify syntax, most of this logic has been stored in the "chrome_flash.sh" script
@@ -1499,12 +2208,23 @@
         //chrome://plugins/->Adobe Flash Player->Disable
         description: "All Google Chrome web browser profiles have disabled the Adobe Flash Player plug-in."
         confidence: "required"
-        type: "regex match"
-        command:
-            if [ $(chrome_is_installed) = "0" ]; then echo "'enabled': False, 'name': 'Adobe Flash Player'"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' plugins.plugins_list ; fi
-        expected_regex:
-            ^(\[[^\[]+'enabled': False, 'name': 'Adobe Flash Player'[^\]]+\]\n?)+$
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: chrome_is_installed
+                command_pass: 0
+                case_sensitive: false
+            },
+            {
+                type: "regex match"
+                command:
+                    find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' plugins.plugins_list
+                command_pass:
+                    ^(\[[^\[]+'enabled': False, 'name': 'Adobe Flash Player'[^\]]+\]\n?)+$
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             //To simplify syntax, most of this logic has been stored in the "chrome_flash.sh" script
@@ -1517,12 +2237,23 @@
         description: "All Google Chrome web browser profiles have disabled the Native Client plug-in."
         confidence: "required"
         reference: "https://developer.chrome.com/native-client"
-        type: "regex match"
-        command:
-            if [ $(chrome_is_installed) = "0" ]; then echo "'enabled': False, 'name': 'Native Client'"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' plugins.plugins_list ; fi
-        expected_regex:
-            ^(\[[^\[]+'enabled': False, 'name': 'Native Client'[^\]]+\]\n?)+$
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: chrome_is_installed
+                command_pass: 0
+                case_sensitive: false
+            },
+            {
+                type: "regex match"
+                command:
+                    find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' plugins.plugins_list
+                command_pass:
+                    ^(\[[^\[]+'enabled': False, 'name': 'Native Client'[^\]]+\]\n?)+$
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             //To simplify syntax, most of this logic has been stored in the "chrome_nativeclient.sh" script
@@ -1534,12 +2265,23 @@
         //chrome://plugins/->Widevine Content Decryption Module->Disable
         description: "All Google Chrome web browser profiles have disabled the Widevine Content Decryption Module plug-in."
         confidence: "recommended"
-        type: "regex match"
-        command:
-            if [ $(chrome_is_installed) = "0" ]; then echo "'enabled': False, 'name': 'Widevine Content Decryption Module'"; else find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' plugins.plugins_list ; fi
-        expected_regex:
-            ^(\[[^\[]+'enabled': False, 'name': 'Widevine Content Decryption Module'[^\]]+\]\n?)+$
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: chrome_is_installed
+                command_pass: 0
+                case_sensitive: false
+            },
+            {
+                type: "regex match"
+                command:
+                    find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' plugins.plugins_list
+                command_pass:
+                    ^(\[[^\[]+'enabled': False, 'name': 'Widevine Content Decryption Module'[^\]]+\]\n?)+$
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             //To simplify syntax, most of this logic has been stored in the "chrome_widevine.sh" script
@@ -1551,12 +2293,23 @@
         //chrome://extensions/->uBlock Origin
         description: "All Google Chrome web browser profiles have enabled the uBlock Origin extension."
         confidence: "recommended"
-        type: "exact match"
-        //This style of bash command basically prints "False" and exits any time it detects a problem in any Chrome profile, since we're looking for 100% compliance. We'll create an exception for the default System and Guest profiles, since these are not configurable through the GUI.
-        command:
-            if [ $(chrome_is_installed) = "0" ]; then echo "True" ; exit ; fi ; DISABLEREASONS=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.cjpalhdlnbpafiamejdnhcphjbkeiagm.disable_reasons | grep -v "does not exist" | grep -v "not found") ; if [[ -n $DISABLEREASONS ]] ; then echo "False" ; exit ; fi ; BADSTATE=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | grep -v "Guest Profile" | grep -v "System Profile" | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.cjpalhdlnbpafiamejdnhcphjbkeiagm.state | grep -v "1") ; if [[ -n $BADSTATE ]] ; then echo "False" ; fi ; echo "True" ;
-        expected_stdout: "True"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: chrome_is_installed
+                command_pass: 0
+                case_sensitive: false
+            },
+            {
+                type: "exact match"
+                //This style of bash command basically prints "False" and exits any time it detects a problem in any Chrome profile, since we're looking for 100% compliance. We'll create an exception for the default System and Guest profiles, since these are not configurable through the GUI.
+                command:
+                    DISABLEREASONS=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.cjpalhdlnbpafiamejdnhcphjbkeiagm.disable_reasons | grep -v "does not exist" | grep -v "not found") ; if [[ -n $DISABLEREASONS ]] ; then echo "False" ; exit ; fi ; BADSTATE=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | grep -v "Guest Profile" | grep -v "System Profile" | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.cjpalhdlnbpafiamejdnhcphjbkeiagm.state | grep -v "1") ; if [[ -n $BADSTATE ]] ; then echo "False" ; fi ; echo "True" ;
+                command_pass: "True"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             manual:
@@ -1571,12 +2324,23 @@
         //chrome://extensions/->Ghostery
         description: "All Google Chrome web browser profiles have enabled the Ghostery extension."
         confidence: "recommended"
-        type: "exact match"
-        //This style of bash command basically prints "False" and exits any time it detects a problem in any Chrome profile, since we're looking for 100% compliance. We'll create an exception for the default System and Guest profiles, since these are not configurable through the GUI.
-        command:
-            if [ $(chrome_is_installed) = "0" ]; then echo "True" ; exit ; fi ; DISABLEREASONS=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.mlomiejdfkolichcflejclcbmpeaniij.disable_reasons | grep -v "does not exist" | grep -v "not found") ; if [[ -n $DISABLEREASONS ]] ; then echo "False" ; exit ; fi ; BADSTATE=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | grep -v "Guest Profile" | grep -v "System Profile" | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.mlomiejdfkolichcflejclcbmpeaniij.state | grep -v "1") ; if [[ -n $BADSTATE ]] ; then echo "False" ; fi ; echo "True" ;
-        expected_stdout: "True"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: chrome_is_installed
+                command_pass: 0
+                case_sensitive: false
+            },
+            {
+                type: "exact match"
+                //This style of bash command basically prints "False" and exits any time it detects a problem in any Chrome profile, since we're looking for 100% compliance. We'll create an exception for the default System and Guest profiles, since these are not configurable through the GUI.
+                command:
+                    DISABLEREASONS=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.mlomiejdfkolichcflejclcbmpeaniij.disable_reasons | grep -v "does not exist" | grep -v "not found") ; if [[ -n $DISABLEREASONS ]] ; then echo "False" ; exit ; fi ; BADSTATE=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | grep -v "Guest Profile" | grep -v "System Profile" | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.mlomiejdfkolichcflejclcbmpeaniij.state | grep -v "1") ; if [[ -n $BADSTATE ]] ; then echo "False" ; fi ; echo "True" ;
+                command_pass: "True"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             manual:
@@ -1591,12 +2355,23 @@
         //chrome://extensions/->ScriptSafe
         description: "All Google Chrome web browser profiles have enabled the ScriptSafe extension."
         confidence: "experimental"
-        type: "exact match"
-        //This style of bash command basically prints "False" and exits any time it detects a problem in any Chrome profile, since we're looking for 100% compliance. We'll create an exception for the default System and Guest profiles, since these are not configurable through the GUI.
-        command:
-            if [ $(chrome_is_installed) = "0" ]; then echo "True" ; exit ; fi ; DISABLEREASONS=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.oiigbmnaadbkfbmpbfijlflahbdbdgdf.disable_reasons | grep -v "does not exist" | grep -v "not found") ; if [[ -n $DISABLEREASONS ]] ; then echo "False" ; exit ; fi ; BADSTATE=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | grep -v "Guest Profile" | grep -v "System Profile" | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.oiigbmnaadbkfbmpbfijlflahbdbdgdf.state | grep -v "1") ; if [[ -n $BADSTATE ]] ; then echo "False" ; fi ; echo "True" ;
-        expected_stdout: "True"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: chrome_is_installed
+                command_pass: 0
+                case_sensitive: false
+            },
+            {
+                type: "exact match"
+                //This style of bash command basically prints "False" and exits any time it detects a problem in any Chrome profile, since we're looking for 100% compliance. We'll create an exception for the default System and Guest profiles, since these are not configurable through the GUI.
+                command:
+                    DISABLEREASONS=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.oiigbmnaadbkfbmpbfijlflahbdbdgdf.disable_reasons | grep -v "does not exist" | grep -v "not found") ; if [[ -n $DISABLEREASONS ]] ; then echo "False" ; exit ; fi ; BADSTATE=$(find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | grep -v "Guest Profile" | grep -v "System Profile" | xargs -I{} python ./scripts/chrome_defaults.py read '{}' extensions.settings.oiigbmnaadbkfbmpbfijlflahbdbdgdf.state | grep -v "1") ; if [[ -n $BADSTATE ]] ; then echo "False" ; fi ; echo "True" ;
+                command_pass: "True"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             manual:
@@ -1610,11 +2385,16 @@
     {
         description: "Google Chrome is the default web browser."
         confidence: "recommended"
-        type: "exact match"
-        command:
-            VERSIONER_PERL_PREFER_32_BIT=true perl -MMac::InternetConfig -le 'print +(GetICHelper "http")[1]'
-        expected_stdout: "Google Chrome"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command:
+                    VERSIONER_PERL_PREFER_32_BIT=true perl -MMac::InternetConfig -le 'print +(GetICHelper "http")[1]'
+                command_pass: "Google Chrome"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             manual:
@@ -1633,11 +2413,21 @@
     {
         description: "Can read /private/var/root"
         confidence: "required"
-        type: "regex match"
-        command: "ls /private/var/root"
-        sudo_command: "sudo ls /private/var/root"
-        expected_regex: ".*Library.*"
-        case_sensitive: true
+        tests:
+        [
+            {
+                type: "regex match"
+                command: "ls /private/var/root"
+                command_pass: ".*Library.*"
+                case_sensitive: "true"
+            },
+            {
+                type: "regex match"
+                command: "sudo ls /private/var/root"
+                command_pass: ".*Library.*"
+                case_sensitive: "true"
+            }
+        ]
         fix:
         {
             manual: ""
@@ -1648,11 +2438,16 @@
     {
         description: "DEBUG for api.sh"
         confidence: "required"
-        type: "exact match"
-        command:
-            echo $(homebrew_is_installed)
-        expected_stdout: "1"
-        case_sensitive: "false"
+        tests:
+        [
+            {
+                type: "exact match"
+                command:
+                    echo $(homebrew_is_installed)
+                command_pass: "1"
+                case_sensitive: "false"
+            }
+        ]
         fix:
         {
             manual: "blah"
