@@ -257,7 +257,7 @@ def run_check(config_check, last_attempt=False, quiet_fail=False):
         msg = ("\nCHECK #%d: %s... %s" % (glob_check_num,
                                         config_check.description,
                                         _get_result_str(passed)))
-        print msg
+        print(msg)
         if const.WRITE_TO_LOG_FILE:
             log_to_file(msg)
 
@@ -423,7 +423,7 @@ def main():
               (const.COLORS['BOLD'], const.LOG_FILE_LOC, const.COLORS['ENDC']))
 
     if len(completely_failed_tests) > 0:
-        print "=========================="
+        print("==========================")
         print(("%s%d tests could not be automatically fixed, but manual "
                "instructions are available. Please manually remediate these "
                "problems and re-run the tool:%s") %
@@ -432,9 +432,9 @@ def main():
         for test_num in completely_failed_tests:
             description = config_checks[test_num - 1].description
             instructions = config_checks[test_num - 1].manual_fix
-            print "TEST #%d: %s" % (test_num, description)
-            print "%s" % _underline_hyperlink(instructions)
-            print "=========================="
+            print("TEST #%d: %s" % (test_num, description))
+            print("%s" % _underline_hyperlink(instructions))
+            print("==========================")
     else:
         dprint("List of completely failed tests is empty.")
 
@@ -452,7 +452,8 @@ def _bool_to_yes_no(boolean):
 def dprint(msg):
     """Debug print statements."""
     if const.ENABLE_DEBUG_PRINT:
-        print "DEBUG: %s" % msg
+        print("DEBUG: %s" % msg)
+
 
 def is_match(regex, string, ignore_case=False):
     """Check if regex matches string."""
@@ -476,7 +477,8 @@ def _print_banner():
                "---------------------------\n") %
               (const.COLORS['BOLD'], const.COLORS['OKBLUE'],
                const.COLORS['ENDC']))
-    print _underline_hyperlink(banner)
+    print(_underline_hyperlink(banner))
+
 
 if __name__ == "__main__":
     main()
