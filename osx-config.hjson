@@ -33,6 +33,27 @@
     * back-slashes '\' must be escaped with a double black-slash, i.e. '\\'
 */
 [
+    {
+        //Install Homebrew as a useful tool for semi-securely install or updating other tools
+        description: "Homebrew is installed."
+        confidence: "required"
+        tests:
+        [
+            {
+                type: "exact match"
+                command:
+                    echo $(homebrew_is_installed)
+                command_pass: "1"
+                command_fail: "0"
+                case_sensitive: "false"
+            }
+        ]
+        fix:
+        {
+            //This homebrew script requries sudo privs and so the user of this tool should be alerted as to why she is being prompted for a password
+            sudo_command: "/usr/bin/ruby ./scripts/homebrew_install_ed33f044812cc9c509a4d8e6997c44441b06dd4e1fc87f131ee9f319d77fcd50.rb"
+        }
+    }
     /* --- BEGIN SYSTEM SETTINGS --- */
     {
         //Check if the System Preferences app is closed -- otherwise, it may override changes this app makes.
