@@ -386,7 +386,14 @@ def _try_fix(config_check, use_sudo=False):
     dprint("Command executed: '%s'" % str(command))
 
 def do_fix_and_test(config_check):
-    """Attempt to fix misconfiguration w/ and w/o sudo privs, returning result.
+    """Attempt to fix misconfiguration, returning the result.
+
+    If a non-sudo fix is specified, this will be attempted first.
+    If a non-sudo fix fails or there is none specified and a sudo fix is
+    specified, this will be attempted next.
+    If all previous attempts have failed or none have been specified and
+    instructions for manually fixing the configuration have been specified,
+    these will be printed out at the end of execution by another function.
 
     Args:
         config_check (`ConfigCheck`): The check to perform.
@@ -394,12 +401,16 @@ def do_fix_and_test(config_check):
     Returns:
         bool: Whether an attempted fix was successful.
     """
-    _try_fix(config_check, use_sudo=False)
-    if run_check(config_check, last_attempt=False, quiet_fail=True):
-        return True
-    else:
+    if config_check.fix is not None:
+        _try_fix(config_check, use_sudo=False)
+        if run_check(config_check, last_attempt=False, quiet_fail=True):
+            return True
+
+    if config_check.sudo_fix is not None:
         _try_fix(config_check, use_sudo=True)
         return run_check(config_check, last_attempt=True, quiet_fail=False)
+    else:
+        return False
 
 def main():
     """Main function."""
@@ -430,9 +441,14 @@ def main():
                     elif config_check.confidence == Confidence.experimental:
                         prompt_default = const.FIX_EXPERIMENTAL_BY_DEFAULT
                         descriptor = const.EXPERIMENTAL_STR + ' '
+
+                    next_fix_command = config_check.fix
+                    if next_fix_command is None:
+                        next_fix_command = config_check.sudo_fix
+
                     question = (("\tApply the following %s fix? This will "
                                  "execute  this command:\n\t\t'%s'") %
-                                (descriptor, config_check.fix))
+                                (descriptor, next_fix_command))
                     if prompt.query_yes_no(question=question,
                                            default=_bool_to_yes_no(prompt_default)):
                         fixed = do_fix_and_test(config_check)
