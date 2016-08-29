@@ -446,10 +446,14 @@
         ]
         fix:
         {
-            command: "brew update ; brew install openssl ; brew upgrade openssl ; brew link openssl --force ; mv /usr/bin/openssl /usr/bin/openssl-apple"
-            sudo_command: "brew update ; brew install openssl ; brew upgrade openssl ; brew link openssl --force ; sudo mv /usr/bin/openssl /usr/bin/openssl-apple"
+            command: "brew update ; brew install openssl ; brew upgrade openssl ; bash ./scripts/set_openssl_latest_path.sh"
+            manual:
+                '''
+                1. Bring the Terminal application to the foreground if it is not already. You should see the word "Terminal" in the top left corner of your screen.
+                2. Select Terminal->Quit
+                3. Re-open the Terminal application and run the tool again; this check should now pass.
+                '''
         }
-        undo: "sudo mv /usr/bin/openssl-apple /usr/bin/openssl ; brew unlink openssl"
     },
     {
         description: "Hidden files are displayed in Finder."
