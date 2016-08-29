@@ -448,7 +448,7 @@
             {
                 type: "exact match"
                 command:
-                    LASTUPDATE=$(defaults read /Library/Preferences/com.apple.SoftwareUpdate | grep LastSuccessfulDate | sed -e 's@^.* "\([0-9\\-]*\) .*$@\1@'); if [ "$LASTUPDATE" = "$(date +%Y-%m-%d)" ];then echo 1 && exit; fi; exit 0 && exit
+                    LASTUPDATE=$(defaults read /Library/Preferences/com.apple.SoftwareUpdate | grep LastSuccessfulDate | sed -e 's@^.* "\([0-9\\-]*\) .*$@\1@'); if [ "$LASTUPDATE" = "$(date +%Y-%m-%d)" ];then echo 1 && exit; fi; echo 0 && exit
                 command_pass: "1"
                 command_fail: "0"
                 case_sensitive: "false"
