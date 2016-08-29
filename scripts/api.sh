@@ -33,3 +33,21 @@ function chrome_is_installed {
         echo 0
     fi
 }
+
+function java_is_installed {
+    #detects whether JRE/JDK is installed or osx's placeholder is sitting there,
+    #waiting to annoy us with pop-up windows if 'java' is invoked
+    JAVA_WHICH=$(which java)
+    LINK=$(readlink "$JAVA_WHICH")
+    if [ "$LINK" = "/System/Library/Frameworks/JavaVM.framework/Versions/Current/Commands/java" ] ; then
+        #fake java binary
+        echo 0
+    else
+        IS_JAVA=$(java -version 2>&1 >/dev/null | grep -c 'java version')
+        if [ "$IS_JAVA" = "1" ] ; then
+            echo 1
+        else
+            echo 0
+        fi
+    fi
+}
