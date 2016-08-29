@@ -94,6 +94,39 @@
     }
     /* ---- END HOMEBREW SETTINGS ---- */
 
+    {
+        //JRE is a scourge
+        description: "Java Runtime Environment is up to date."
+        confidence: recommended
+        tests:
+        [
+            {
+                //Pass test if `java` is not installed
+                type: "exact match"
+                command: java_is_installed
+                command_pass: 0
+                case_sensitive: false
+            }
+            {
+                //Past test if the latest version available via `brew cask install java` is installed
+                type: "exact match"
+                command: java -version 2>&1 >/dev/null | grep 'java version'
+                command_pass:
+                    java version "1.8.0_102"
+                case_sensitive: false
+            }
+        ]
+        fix:
+        {
+            manual:
+                '''
+                1. Your installation of Java is not up to date. You can either update it or remove it.
+                2. To update Java, see: https://www.java.com/en/download/faq/java_mac.xml
+                3. To remove Java, see: https://www.java.com/en/download/help/mac_uninstall_java.xml
+                '''
+        }
+    }
+
     /* --- BEGIN SYSTEM SETTINGS --- */
     {
         //Check if the System Preferences app is closed -- otherwise, it may override changes this app makes.
