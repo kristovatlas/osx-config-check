@@ -381,11 +381,15 @@ def _try_fix(config_check, use_sudo=False):
         print(("\tAttempting configuration fix with elevated privileges; %syou "
                "may be prompted for your OS X login password%s...") %
               (const.COLORS['BOLD'], const.COLORS['ENDC']))
+    stdoutdata = ""
+    stderrdata = ""
     if command is not None:
         process = Popen(command, stdout=PIPE, stderr=STDOUT, shell=True)
-        process.communicate()
+        stdoutdata, stderrdata = process.communicate()
 
     dprint("Command executed: '%s'" % str(command))
+    dprint("Command STDOUT: '%s'" % str(stdoutdata))
+    dprint("Command STDERR: '%s'" % str(stderrdata))
 
 def do_fix_and_test(config_check):
     """Attempt to fix misconfiguration, returning the result.
