@@ -991,7 +991,7 @@
             {
                 type: "regex match"
                 command: "curl --version"
-                command_pass: ".*(command not found|7\\.48\\.0).*"
+                command_pass: ".*(command not found|7\\.50\\.1).*"
                 case_sensitive: "false"
             }
         ]
