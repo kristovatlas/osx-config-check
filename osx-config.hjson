@@ -33,6 +33,7 @@
     * back-slashes '\' must be escaped with a double black-slash, i.e. '\\'
 */
 [
+    /* --- BEGIN HOMEBREW SETTINGS --- */
     {
         //Install Homebrew as a useful tool for semi-securely install or updating other tools
         description: "Homebrew is installed."
@@ -61,6 +62,38 @@
                 '''
         }
     }
+    {
+        //Tools installed by Homebrew should be preferred according to the PATH
+        //environment variable.
+        "description": "Binaries installed to /usr/local/bin are preferred over those in /usr/bin (Note: If this check does not pass, other tests will fail)"
+        confidence: "required"
+        tests:
+        [
+            {
+                type: "exact match"
+                command: "bash ./scripts/check_usr_local_bin_pos.sh"
+                command_pass: 1
+                command_fail: 0
+                case_sensitive: false
+            }
+        ]
+        fix:
+        {
+            //Only "fix" this PATH preference if we haven't already applied the
+            //fix to the ~/.profile file. Otherwise, the user will need to
+            //restart Terminal in order for this take effect.
+            command:
+                TEST=$(grep "PATH=/usr/local/bin" ~/.profile) ; if [ ! -n "$TEST" ] ; then echo export PATH="/usr/local/bin:$PATH" >> ~/.profile ; fi
+            manual:
+                '''
+                1. Bring the Terminal application to the foreground if it is not already. You should see the word "Terminal" in the top left corner of your screen.
+                2. Select Terminal->Quit
+                3. Re-open the Terminal application and run the tool again; this check should now pass.
+                '''
+        }
+    }
+    /* ---- END HOMEBREW SETTINGS ---- */
+
     /* --- BEGIN SYSTEM SETTINGS --- */
     {
         //Check if the System Preferences app is closed -- otherwise, it may override changes this app makes.
