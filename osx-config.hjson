@@ -83,7 +83,7 @@
             //fix to the ~/.profile file. Otherwise, the user will need to
             //restart Terminal in order for this take effect.
             command:
-                TEST=$(grep "PATH=/usr/local/bin" ~/.profile) ; if [ ! -n "$TEST" ] ; then echo export PATH="/usr/local/bin:$PATH" >> ~/.profile ; fi
+                python ./scripts/set_path_precedence.py "/usr/local/bin" "/usr/bin"
             manual:
                 '''
                 1. Bring the Terminal application to the foreground if it is not already. You should see the word "Terminal" in the top left corner of your screen.
@@ -939,9 +939,17 @@
         ]
         fix:
         {
-            //This will make sure latest git is installed via homebrew and make make apple's version of git non-competitive
-            command: "brew update && brew install git && brew upgrade git && mv /usr/bin/git /usr/bin/git-apple"
-            sudo_command: "brew update && brew install git && brew upgrade git && sudo mv /usr/bin/git /usr/bin/git-apple"
+            //Only "fix" this PATH preference if we haven't already applied the
+            //fix to the ~/.profile file. Otherwise, the user will need to
+            //restart Terminal in order for this take effect.
+            command:
+                brew update ; brew install git ; brew upgrade git ; python ./scripts/set_path_precedence.py "/usr/local/bin" "/usr/bin"
+            manual:
+                '''
+                1. Bring the Terminal application to the foreground if it is not already. You should see the word "Terminal" in the top left corner of your screen.
+                2. Select Terminal->Quit
+                3. Re-open the Terminal application and run the tool again; this check should now pass.
+                '''
         }
     },
     {
