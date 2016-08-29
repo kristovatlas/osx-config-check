@@ -21,6 +21,8 @@ const.WARN_FOR_EXPERIMENTAL = True #TODO: command line flag
 const.FIX_RECOMMENDED_BY_DEFAULT = True #TODO: command line flag
 const.FIX_EXPERIMENTAL_BY_DEFAULT = False #TODO: command line flag
 
+const.VERSION = "v0.0.0-alpha (rattata)"
+
 const.API_FILENAME = './scripts/api.sh'
 
 const.COLORS = {
@@ -473,6 +475,7 @@ def main():
         glob_check_num += 1
 
     if const.WRITE_TO_LOG_FILE:
+        log_to_file("osx-config %s" % const.VERSION)
         print("Wrote results to %s'%s'%s." %
               (const.COLORS['BOLD'], const.LOG_FILE_LOC, const.COLORS['ENDC']))
 
@@ -519,7 +522,7 @@ def is_match(regex, string, ignore_case=False):
 def _print_banner():
     banner = (("---------------------------------------------------------------"
                "---------------------------\n"
-               "%s%sosx-config-check%s\n"
+               "%s%sosx-config-check%s %s\n"
                "Download the latest copy of this tool at: "
                "https://github.com/kristovatlas/osx-config-check \n"
                "Report bugs/issues:\n"
@@ -529,7 +532,7 @@ def _print_banner():
                "---------------------------------------------------------------"
                "---------------------------\n") %
               (const.COLORS['BOLD'], const.COLORS['OKBLUE'],
-               const.COLORS['ENDC']))
+               const.COLORS['ENDC'], const.VERSION))
     print _underline_hyperlink(banner)
 
 if __name__ == "__main__":
