@@ -52,6 +52,13 @@
         {
             //This homebrew script requries sudo privs and so the user of this tool should be alerted as to why she is being prompted for a password
             sudo_command: "/usr/bin/ruby ./scripts/homebrew_install_ed33f044812cc9c509a4d8e6997c44441b06dd4e1fc87f131ee9f319d77fcd50.rb"
+            manual:
+                '''
+                Homebrew is a useful tool for installing and updating programs from the command line.
+                There are various things that can go wrong when attempting to install Homebrew.
+                Please review their installation guide here:
+                https://github.com/Homebrew/brew/blob/master/share/doc/homebrew/Installation.md
+                '''
         }
     }
     /* --- BEGIN SYSTEM SETTINGS --- */
