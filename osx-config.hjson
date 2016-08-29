@@ -1009,7 +1009,8 @@
         ]
         fix:
         {
-            command: "brew update ; brew install curl ; brew upgrade curl ; brew link curl --force"
+            command:
+                brew update ; brew install curl ; brew upgrade curl ; python ./scripts/set_path_precedence.py "/usr/local/bin" "/usr/bin"
         }
         undo: "brew unlink curl"
     },
