@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """Checks the configuration of various osx options."""
 
+import sys
 import time
 import datetime
 from os.path import expanduser
@@ -11,11 +12,8 @@ import json
 import const #const.py
 import prompt #prompt.py
 
-const.ENABLE_DEBUG_PRINT = False
 const.DEFAULT_OUTPUT_LOCATION = "~/Documents/"
-const.WRITE_TO_LOG_FILE = True #TODO: Allow user to pass command line arg
 const.DEFAULT_CONFIG_FILE = "osx-config.json"
-const.PROMPT_FOR_FIXES = True #TODO: allow user to pass command line arg
 const.WARN_FOR_RECOMMENDED = True #TODO: command line flag
 const.WARN_FOR_EXPERIMENTAL = True #TODO: command line flag
 const.FIX_RECOMMENDED_BY_DEFAULT = True #TODO: command line flag
@@ -39,6 +37,7 @@ const.COLORS = {
 
 const.PASSED_STR = const.COLORS['OKGREEN'] + "PASSED!" + const.COLORS['ENDC']
 const.FAILED_STR = const.COLORS['FAIL'] + "FAILED!" + const.COLORS['ENDC']
+const.SKIPPED_STR = const.COLORS['OKBLUE'] + "SKIPPED!" + const.COLORS['ENDC']
 const.NO_SUDO_STR = ("%s%s%s" %
                      (const.COLORS['WARNING'],
                       ("Insufficient privileges to perform this check. "
@@ -221,42 +220,53 @@ def run_check(config_check, last_attempt=False, quiet_fail=False):
     passed = False
     for test in config_check.tests:
         #alert user if he might get prompted for admin privs due to sudo use
+        result_str = None
         if 'sudo ' in test['command']:
-            fancy_sudo_command = re.sub("sudo", const.SUDO_STR, test['command'])
-            print(("The next configuration check requires elevated privileges; "
-                   "%syou may be prompted for your current OS X user's "
-                   "password  below%s. The command to be executed is: '%s'") %
-                  (const.COLORS['BOLD'], const.COLORS['ENDC'],
-                   fancy_sudo_command))
+            if const.NON_INTERACTIVE:
+                dprint("Skipping test because app is in non-interactive mode.")
+                passed = False
+                result_str = const.SKIPPED_STR
+            else:
+                fancy_sudo_command = re.sub(
+                    "sudo", const.SUDO_STR, test['command'])
+                print(("The next configuration check requires elevated "
+                       "privileges; %syou may be prompted for your current OS "
+                       "X user's password  below%s. The command to be executed "
+                       "is: '%s'") %
+                      (const.COLORS['BOLD'], const.COLORS['ENDC'],
+                       fancy_sudo_command))
 
-        command_pass = None
-        if 'command_pass' in test:
-            command_pass = str(test['command_pass'])
-        command_fail = None
-        if 'command_fail' in test:
-            command_fail = str(test['command_fail'])
-        result = _execute_check(command=test['command'],
-                                comparison_type=test['type'],
-                                case_sensitive=test['case_sensitive'],
-                                command_pass=command_pass,
-                                command_fail=command_fail)
-        if result == CheckResult.explicit_pass:
-            dprint("Test passed exlicitly for '%s'" % test['command'])
-            passed = True
-            break
-        elif result == CheckResult.explicit_fail:
-            dprint("Test failed exlicitly for '%s'" % test['command'])
-            break
-        elif result == CheckResult.no_pass:
-            dprint("Test did not pass for '%s'" % test['command'])
-            continue
-        else:
-            raise ValueError("Invalid return value from _execute_check.")
+        if 'sudo ' not in test['command'] or not const.NON_INTERACTIVE:
+            command_pass = None
+            if 'command_pass' in test:
+                command_pass = str(test['command_pass'])
+            command_fail = None
+            if 'command_fail' in test:
+                command_fail = str(test['command_fail'])
+            result = _execute_check(command=test['command'],
+                                    comparison_type=test['type'],
+                                    case_sensitive=test['case_sensitive'],
+                                    command_pass=command_pass,
+                                    command_fail=command_fail)
+            if result == CheckResult.explicit_pass:
+                dprint("Test passed exlicitly for '%s'" % test['command'])
+                passed = True
+                break
+            elif result == CheckResult.explicit_fail:
+                dprint("Test failed exlicitly for '%s'" % test['command'])
+                break
+            elif result == CheckResult.no_pass:
+                dprint("Test did not pass for '%s'" % test['command'])
+                continue
+            else:
+                raise ValueError("Invalid return value from _execute_check.")
 
     if passed or not quiet_fail:
+        if result_str is None:
+            result_str = _get_result_str(passed)
         msg = ("\nCHECK #%d: %s... %s" % (glob_check_num,
                                           config_check.description,
-                                          _get_result_str(passed)))
+                                          result_str))
         print msg
         if const.WRITE_TO_LOG_FILE:
             log_to_file(msg)
@@ -422,6 +432,13 @@ def main():
     """Main function."""
     global glob_check_num
 
+    args = get_sys_args()
+    const.ENABLE_DEBUG_PRINT = args['debug-print']
+    const.WRITE_TO_LOG_FILE = args['write-to-log-file']
+    const.PROMPT_FOR_FIXES = not args['no-prompt']
+    const.ATTEMPT_FIXES = not args['report-only']
+    const.NON_INTERACTIVE = args['skip-sudo-checks']
+
     _print_banner()
 
     config_checks = read_config(const.DEFAULT_CONFIG_FILE)
@@ -429,6 +446,10 @@ def main():
     for config_check in config_checks:
         if not run_check(config_check):
             #config failed check
+            if not const.ATTEMPT_FIXES:
+                glob_check_num += 1
+                continue
+
             if config_check.fix is None and config_check.sudo_fix is None:
                 #no automatic fix available
                 if config_check.manual_fix is not None:
@@ -538,6 +559,59 @@ def _print_banner():
               (const.COLORS['BOLD'], const.COLORS['OKBLUE'],
                const.COLORS['ENDC'], const.VERSION))
     print _underline_hyperlink(banner)
+
+def print_usage():
+    """Prints usage for this command-line tool and exits."""
+    print("Usage: python app.py [OPTIONS]\n"
+          "OPTIONS:\n"
+          "\t--debug-print        Enables verbose output for debugging the "
+          "tool.\n"
+          "\t--report-only        Only reports on compliance and does not "
+          "offer to fix broken configurations.\n"
+          "\t--disable-logs       Refrain from creating a log file with the "
+          "results.\n"
+          "\t--disable-prompt     Refrain from prompting user before applying "
+          "fixes.\n"
+          "\t--skip-sudo-checks   Do not perform checks that require sudo "
+          "privileges.\n"
+          "\t--help -h            Print this usage information.\n")
+    sys.exit()
+
+def get_sys_args():
+    """Parses command line args, setting defaults where not specified.
+
+    Returns: dict:
+        * debug-print (bool)
+        * report-only (bool)
+        * write-to-log-file (bool)
+        * no-prompt (bool)
+        * skip-sudo-checks (bool)
+    """
+    args = {'debug-print': False,
+            'report-only': False,
+            'write-to-log-file': True,
+            'no-prompt': False,
+            'skip-sudo-checks': False}
+    unprocessed_args = sys.argv[1:]
+    while len(unprocessed_args) > 0:
+        flag = unprocessed_args.pop(0)
+        if flag == '--debug-print':
+            args['debug-print'] = True
+        elif flag == '--report-only':
+            args['report-only'] = True
+        elif flag == '--disable-logs':
+            args['write-to-log-file'] = False
+        elif flag == '--disable-prompt':
+            args['no-prompt'] = True
+        elif flag == '--skip-sudo-checks':
+            args['skip-sudo-checks'] = True
+        elif flag == '-h' or flag == '--help':
+            print_usage()
+        else:
+            print "ERROR: Unrecognized option '%s'" % flag
+            print_usage()
+
+    return args
 
 if __name__ == "__main__":
     main()
