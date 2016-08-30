@@ -182,6 +182,13 @@
         tests:
         [
             {
+                //Exempt users who are using Little Snitch
+                type: "exact match"
+                command: little_snitch_is_installed
+                command_pass: 1
+                case_sensitive: false
+            }
+            {
                 type: "exact match"
                 command: "defaults -currentHost read /Library/Preferences/com.apple.alf globalstate"
                 command_pass: "1"
@@ -202,6 +209,13 @@
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
         tests:
         [
+            {
+                //Exempt users who are using Little Snitch
+                type: "exact match"
+                command: little_snitch_is_installed
+                command_pass: 1
+                case_sensitive: false
+            }
             {
                 type: "exact match"
                 command: "defaults -currentHost read ~/Library/Preferences/com.apple.alf globalstate"
