@@ -31,7 +31,7 @@ Next run the app as follows:
 python app.py
 ```
 
-This will take you through a series of interactive steps that checks your machine's configuration, and offers to fix mixconfigurations for you.
+This will take you through a series of interactive steps that checks your machine's configuration, and offers to fix misconfigurations for you.
 
 Intermediate users and advanced users can also invoke various command-line arguments:
 ```
