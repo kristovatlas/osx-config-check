@@ -2519,6 +2519,77 @@
 
     /* ----END GOOGLE CHROME SETTINGS---- */
 
+    /* --- BEGIN COMMON MALWARE DETECTION --- */
+
+    {
+        description: "OSX/Keydnap malware is not present."
+        confidence: "required"
+        reference: "http://www.welivesecurity.com/2016/08/30/osxkeydnap-spreads-via-signed-transmission-application/"
+        tests:
+        [
+            {
+                type: "exact match"
+                command:
+                    if [ -e "/Applications/Transmission.app/Contents/Resources/License.rtf" ] ; then echo 1 ; else echo 0 ; fi
+                command_fail: 1
+                case_sensitive: false
+            }
+            {
+                type: "exact match"
+                command:
+                    if [ -e "/Volumes/Transmission/Transmission.app/Contents/Resources/License.rtf" ] ; then echo 1 ; else echo 0 ; fi
+                command_fail: 1
+                case_sensitive: false
+            }
+            {
+                type: "exact match"
+                command:
+                    if [ -e "$HOME/Library/Application Support/com.apple.iCloud.sync.daemon/icloudsyncd" ] ; then echo 1 ; else echo 0 ; fi
+                command_fail: 1
+                case_sensitive: false
+            }
+            {
+                type: "exact match"
+                command:
+                    if [ -e "$HOME/Library/Application Support/com.apple.iCloud.sync.daemon/process.id" ] ; then echo 1 ; else echo 0 ; fi
+                command_fail: 1
+                case_sensitive: false
+            }
+            {
+                type: "exact match"
+                command:
+                    if [ -e "$HOME/Library/LaunchAgents/com.apple.iCloud.sync.daemon.plist" ] ; then echo 1 ; else echo 0 ; fi
+                command_fail: 1
+                case_sensitive: false
+            }
+            {
+                type: "exact match"
+                command:
+                    if [ -e "/Library/Application Support/com.apple.iCloud.sync.daemon/" ] ; then echo 1 ; else echo 0 ; fi
+                command_fail: 1
+                case_sensitive: false
+            }
+            {
+                type: "exact match"
+                command:
+                    if [ -e "/Library/Application Support/com.apple.iCloud.sync.daemon/" ] ; then echo 1 ; else echo 0 ; fi
+                command_pass: 0
+                command_fail: 1
+                case_sensitive: false
+            }
+        ]
+        fix:
+        {
+            manual:
+                '''
+                1. One or more of the files associated with the OSX/Keydnap malware was found. Please report this to the authors of osx-config-check via GitHub (https://github.com/kristovatlas/osx-config-check) or Twitter (https://twitter.com/kristovatlas).
+                2. Refer to this link: http://www.welivesecurity.com/2016/08/30/osxkeydnap-spreads-via-signed-transmission-application/
+                '''
+        }
+    }
+
+    /* ---- END COMMON MALWARE DETECTION ---- */
+
     /* useful for debugging `sudo_command`
     {
         description: "Can read /private/var/root"
