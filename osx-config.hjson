@@ -349,10 +349,13 @@
         ]
         fix:
         {
-            //TODO: This fix works if you login/logout, but I haven't been able to get a fix working that doesn't require login/logout. The enironment variable is context dependent, and it's not clear how to set the variable in the parent-most environment without this action.
             command: "grep -q 'export HOMEBREW_NO_ANALYTICS=1' ~/.profile || echo 'export HOMEBREW_NO_ANALYTICS=1' >> ~/.profile ; source ~/.profile"
             manual:
-                1. In order for the automatic fix to be applied, you must logout of the current user and log back in. Sorry for the inconvenience!
+                '''
+                1. Bring the Terminal application to the foreground if it is not already. You should see the word "Terminal" in the top left corner of your screen.
+                2. Select Terminal->Quit
+                3. Re-open the Terminal application and run the tool again; this check should now pass.
+                '''
         }
     },
     {
