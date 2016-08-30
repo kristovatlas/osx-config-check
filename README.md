@@ -33,6 +33,18 @@ python app.py
 
 This will take you through a series of interactive steps that checks your machine's configuration, and offers to fix mixconfigurations for you.
 
+Intermediate users and advanced users can also invoke various command-line arguments:
+```
+Usage: python app.py [OPTIONS]
+OPTIONS:
+	--debug-print        Enables verbose output for debugging the tool.
+	--report-only        Only reports on compliance and does not offer to fix broken configurations.
+	--disable-logs       Refrain from creating a log file with the results.
+	--disable-prompt     Refrain from prompting user before applying fixes.
+	--skip-sudo-checks   Do not perform checks that require sudo privileges.
+	--help -h            Print this usage information.
+```
+
 ## Sample Output
 
 ```bash
