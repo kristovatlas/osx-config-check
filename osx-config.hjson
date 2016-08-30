@@ -1028,7 +1028,7 @@
         ]
         fix:
         {
-            command: "networksetup listallnetworkservices | grep -v 'An asterisk' | xargs -I{} networksetup -setdnsservers '{}' 8.8.8.8 8.8.4.4"
+            sudo_command: sudo bash ./scripts/use_google_dns.sh
         }
     },
     {
