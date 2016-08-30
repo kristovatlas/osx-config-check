@@ -51,3 +51,12 @@ function java_is_installed {
         fi
     fi
 }
+
+function little_snitch_is_installed {
+    RUNNING=$(pgrep "Little Snitch Daemon")
+    if [ -n "$RUNNING" ]; then
+        echo 1
+    else
+        echo 0
+    fi
+}
