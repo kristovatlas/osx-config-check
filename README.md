@@ -199,5 +199,5 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting pull requests t
 * https://github.com/SummitRoute/osxlockdown
 
 ## Contributors
- 
+
 * [Kristov Atlas](https://twitter.com/kristovatlas/) (maintainer)
