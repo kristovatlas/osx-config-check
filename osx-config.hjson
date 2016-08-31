@@ -1679,15 +1679,15 @@
     {
         //Check if the Mail app is closed -- otherwise, it may override changes this app makes.
         description: "The Mail application is currently closed."
-        confidence: "required"
+        confidence: required
         reference: "https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man1/defaults.1.html"
         tests:
         [
             {
                 type: "exact match"
                 command: "ps ax | grep -c '/Applications/Mail.app/Contents/MacOS/Mail'"
-                command_pass: "2" //a value of "3" means it's running -- the other 2 are `/bin/sh` and the `grep` command.
-                case_sensitive: "false"
+                command_pass: 2 //a value of "3" means it's running -- the other 2 are `/bin/sh` and the `grep` command.
+                case_sensitive: false
             }
         ]
         fix:
@@ -1699,17 +1699,22 @@
     {
         //Mail->Preferences->Viewing->Load remote content in messages
         description: "Apple Mail does not automatically load remote content in e-mails."
-        confidence: "recommended"
+        confidence: recommended
         tests:
         [
             {
+                //If Apple Mail is not in use by the user, this test passes
                 type: "exact match"
-                //Either Apple Mail is not in use or remote content is disabled. I use "ls" here to resolve the "~" symbol to the fully qualified file path that "test" requires.
-                command:
-                    REMOTELOAD=$(defaults read ~/Library/Preferences/com.apple.mail-shared DisableURLLoading | grep 1) ; if [ ! -e $(ls ~/Library/Preferences/com.apple.mail-shared.plist) ] || [ -n "$REMOTELOAD" ]; then echo 1; else echo 0; fi
-                command_pass: "1"
-                command_fail: "0"
-                case_sensitive: "false"
+                command: apple_mail_in_use
+                command_pass: 0
+                case_sensitive: false
+            }
+            {
+                type: "exact match"
+                command: "defaults read ~/Library/Preferences/com.apple.mail-shared DisableURLLoading"
+                command_pass: 1
+                command_fail: 0
+                case_sensitive: false
             }
         ]
         fix:
@@ -1721,14 +1726,21 @@
     {
         //Mail->Preferences->Junk Mail->Enable junk mail filtering AND When junk mail arrives: Move it to the Junk mailbox
         description: "Mail identified by Apple Mail as junk is sent to the Junk mailbox."
-        confidence: "recommended"
+        confidence: recommended
         tests:
         [
             {
+                //If Apple Mail is not in use by the user, this test passes
+                type: "exact match"
+                command: apple_mail_in_use
+                command_pass: 0
+                case_sensitive: false
+            }
+            {
                 type: "exact match"
                 command: "defaults -currentHost read ~/Library/Containers/com.apple.mail/Data/Library/Preferences/com.apple.mail JunkMailBehavior"
-                command_pass: "2"
-                case_sensitive: "false"
+                command_pass: 2
+                case_sensitive: false
             }
         ]
         fix:
@@ -1737,18 +1749,52 @@
         }
     },
     {
-        //Mail->Preferences->GPGMail->Composing->Encrypt new messages by default
-        description: "New e-mails composed in Apple Mail are encrypted by GPGMail if the receiver's PGP is present in the keychain."
-        confidence: "recommended"
+        description: "GPGMail is in use."
+        confidence: recommended
         tests:
         [
             {
                 type: "exact match"
-                command:
-                    AUTOENCRYPT=$(defaults read ~/Library/Preferences/org.gpgtools.gpgmail EncryptNewEmailsByDefault | grep 1) ; if [ ! -e $(ls ~/Library/Preferences/org.gpgtools.gpgmail.plist) ] || [ -n "$AUTOENCRYPT" ]; then echo 1; else echo 0; fi
-                command_pass: "1"
-                command_fail: "0"
-                case_sensitive: "false"
+                command: gpg_mail_in_use
+                command_pass: 1
+                command_fail: 0
+                case_sensitive: false
+            }
+        ]
+        fix:
+        {
+            manual:
+                '''
+                1. Visit https://gpgtools.org/ and install GPG Suite. This tool can be used to encrypted and sign emails sent to other PGP users.
+                '''
+        }
+    }
+    {
+        //Mail->Preferences->GPGMail->Composing->Encrypt new messages by default
+        description: "New e-mails composed in Apple Mail are encrypted by GPGMail if the receiver's PGP is present in the keychain."
+        confidence: recommended
+        tests:
+        [
+            {
+                //If Apple Mail is not in use by the user, this test passes
+                type: "exact match"
+                command: apple_mail_in_use
+                command_pass: 0
+                case_sensitive: false
+            }
+            {
+                //If GPG Mail is not in use by the user, this test passes
+                type: "exact match"
+                command: gpg_mail_in_use
+                command_pass: 0
+                case_sensitive: false
+            }
+            {
+                type: "exact match"
+                command: "defaults read ~/Library/Preferences/org.gpgtools.gpgmail EncryptNewEmailsByDefault"
+                command_pass: 1
+                command_fail: 0
+                case_sensitive: false
             }
         ]
         fix:
@@ -1760,16 +1806,29 @@
     {
         //Mail->Preferences->GPGMail->Composing->Encrypt drafts
         description: "New e-mails composed in Apple Mail and saved as drafts are encrypted by GPGMail."
-        confidence: "required"
+        confidence: required
         tests:
         [
             {
+                //If Apple Mail is not in use by the user, this test passes
                 type: "exact match"
-                command:
-                    AUTOENCRYPTDRAFTS=$(defaults read ~/Library/Preferences/org.gpgtools.gpgmail OptionallyEncryptDrafts | grep 1) ; if [ ! -e $(ls ~/Library/Preferences/org.gpgtools.gpgmail.plist) ] || [ -n "$AUTOENCRYPTDRAFTS" ]; then echo 1; else echo 0; fi
-                command_pass: "1"
-                command_fail: "0"
-                case_sensitive: "false"
+                command: apple_mail_in_use
+                command_pass: 0
+                case_sensitive: false
+            }
+            {
+                //If GPG Mail is not in use by the user, this test passes
+                type: "exact match"
+                command: gpg_mail_in_use
+                command_pass: 0
+                case_sensitive: false
+            }
+            {
+                type: "exact match"
+                command: "defaults read ~/Library/Preferences/org.gpgtools.gpgmail OptionallyEncryptDrafts"
+                command_pass: 1
+                command_fail: 0
+                case_sensitive: false
             }
         ]
         fix:
@@ -1781,16 +1840,29 @@
     {
         //Mail->Preferences->GPGMail->Composing->Sign new messages by default
         description: "New e-mails composed in Apple Mail are signed by GPGMail."
-        confidence: "required"
+        confidence: required
         tests:
         [
             {
+                //If Apple Mail is not in use by the user, this test passes
                 type: "exact match"
-                command:
-                    AUTOSIGN=$(defaults read ~/Library/Preferences/org.gpgtools.gpgmail SignNewEmailsByDefault | grep 1) ; if [ ! -e $(ls ~/Library/Preferences/org.gpgtools.gpgmail.plist) ] || [ -n "$AUTOSIGN" ]; then echo 1; else echo 0; fi
-                command_pass: "1"
-                command_fail: "0"
-                case_sensitive: "false"
+                command: apple_mail_in_use
+                command_pass: 0
+                case_sensitive: false
+            }
+            {
+                //If GPG Mail is not in use by the user, this test passes
+                type: "exact match"
+                command: gpg_mail_in_use
+                command_pass: 0
+                case_sensitive: false
+            }
+            {
+                type: "exact match"
+                command: "defaults read ~/Library/Preferences/org.gpgtools.gpgmail SignNewEmailsByDefault"
+                command_pass: 1
+                command_fail: 0
+                case_sensitive: false
             }
         ]
         fix:
@@ -1802,16 +1874,29 @@
     {
         //Mail->Preferences->GPGMail->Updates->Automatically check for updates
         description: "Apple Mail with automatically check for updates to GPGMail."
-        confidence: "required"
+        confidence: required
         tests:
         [
             {
+                //If Apple Mail is not in use by the user, this test passes
                 type: "exact match"
-                command:
-                    AUTOCHECK=$(defaults read ~/Library/Preferences/org.gpgtools.gpgmail SUEnableAutomaticChecks | grep 1) ; if [ ! -e $(ls ~/Library/Preferences/org.gpgtools.gpgmail.plist) ] || [ -n "$AUTOCHECK" ]; then echo 1; else echo 0; fi
-                command_pass: "1"
-                command_fail: "0"
-                case_sensitive: "false"
+                command: apple_mail_in_use
+                command_pass: 0
+                case_sensitive: false
+            }
+            {
+                //If GPG Mail is not in use by the user, this test passes
+                type: "exact match"
+                command: gpg_mail_in_use
+                command_pass: 0
+                case_sensitive: false
+            }
+            {
+                type: "exact match"
+                command: "defaults read ~/Library/Preferences/org.gpgtools.gpgmail SUEnableAutomaticChecks"
+                command_pass: 1
+                command_fail: 0
+                case_sensitive: false
             }
         ]
         fix:
