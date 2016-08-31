@@ -60,3 +60,25 @@ function little_snitch_is_installed {
         echo 0
     fi
 }
+
+function apple_mail_in_use {
+    #I use "ls" here to resolve the "~" symbol to the fully qualified file path
+    #that "test" requires.
+    IN_USE=$(ls ~/Library/Preferences/com.apple.mail-shared.plist)
+    if [ -e $IN_USE ]; then
+        echo 1
+    else
+        echo 0
+    fi
+}
+
+function gpg_mail_in_use {
+    #I use "ls" here to resolve the "~" symbol to the fully qualified file path
+    #that "test" requires.
+    IN_USE=$(ls ~/Library/Preferences/org.gpgtools.gpgmail.plist)
+    if [ -e $IN_USE ]; then
+        echo 1
+    else
+        echo 0
+    fi
+}
