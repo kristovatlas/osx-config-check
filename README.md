@@ -187,7 +187,7 @@ If you receive an error message referencing these terms, the user you are curren
 This tool encourages users to use DNS servers run by the Google corporation. This can break some wi-fi networks that use "active portals" to login, like those found at cafes, airports, etc. If you're having trouble connecting to a wi-fi network after using this tool, please use the "dns_helper" tool included. From the terminal application, run:
 
     bash dns_helper.sh
-    
+
 And follow the instructions on the screen carefully.
 
 ## Contributing
