@@ -182,6 +182,14 @@ TEST #101: All Google Chrome web browser profiles have enabled the Ghostery exte
 
 If you receive an error message referencing these terms, the user you are currently logged in as may not be permitted to temporarily assume elevated privileges, preventing this tool from fully auditing and/or fixing your user's configuration. If you have added a non-Administrator user to your machine to help secure it, you will find that your non-Administrator user is not part of the "sudoers" list by default. To learn about how to add your user to the "sudoers" list, please [refer to this link](http://osxdaily.com/2014/02/06/add-user-sudoers-file-mac/).
 
+### Trouble Connecting to Wi-Fi
+
+This tool encourages users to use DNS servers run by the Google corporation. This can break some wi-fi networks that use "active portals" to login, like those found at cafes, airports, etc. If you're having trouble connecting to a wi-fi network after using this tool, please use the "dns_helper" tool included. From the terminal application, run:
+
+    bash dns_helper.sh
+    
+And follow the instructions on the screen carefully.
+
 ## Contributing
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting pull requests to the repository.
