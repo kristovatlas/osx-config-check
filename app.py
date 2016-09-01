@@ -19,7 +19,7 @@ const.WARN_FOR_EXPERIMENTAL = True #TODO: command line flag
 const.FIX_RECOMMENDED_BY_DEFAULT = True #TODO: command line flag
 const.FIX_EXPERIMENTAL_BY_DEFAULT = False #TODO: command line flag
 
-const.VERSION = "v0.0.0-alpha (rattata)"
+const.VERSION = "v1.0.0-alpha (pidgeotto)"
 
 const.API_FILENAME = './scripts/api.sh'
 
