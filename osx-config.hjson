@@ -7,7 +7,7 @@
 /* syntax:
 [
     {
-        `description` is a human-readable string describing the configuration being checked. (REQUIRED FIELD)
+        `description` is a human-readable string describing the configuration being checked; it should be a present-tense statement about a positive security configuration. (REQUIRED FIELD)
         `confidence` indicates subjective estimation of negative side-effects. valid values: "required", "recommended", "experimental". (REQUIRED FIELD)
         `reference` provides a link to where a user can find more information about this configuration, or a citation of where this configuration was taken from. (OPTIONAL FIELD)
         `tests`: // is an ordered array of test objects. (REQUIRED FIELD, should not be empty)
@@ -419,7 +419,7 @@
     },
     {
         //System Preferences->Security & Privacy->Firewall->Firewall Options...->Automatically allow signed software to receive incoming connections
-        description: "Automatic whitelisting of Apple-signed applications for firewall is disabled (system-wide)."
+        description: "Automatic whitelisting of Apple-signed applications through the firewall is disabled (system-wide)."
         confidence: "required"
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
         tests:
@@ -441,7 +441,7 @@
     },
     {
         //System Preferences->Security & Privacy->Firewall->Firewall Options...->Automatically allow signed software to receive incoming connections
-        description: "Automatic whitelisting of Apple-signed applications for firewall is disabled (current user only)."
+        description: "Automatic whitelisting of Apple-signed applications through the firewall is disabled (current user only)."
         confidence: "required"
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
         tests:
@@ -482,7 +482,7 @@
         undo: "sudo defaults -currentHost write /Library/Preferences/SystemConfiguration/com.apple.captive.control Active -bool true"
     },
     {
-        description: "OpenSSL is up-to-date."
+        description: "OpenSSL is up to date."
         confidence: "required"
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
         tests:
@@ -928,7 +928,7 @@
         undo: "defaults write NSGlobalDomain NSDocumentSaveNewDocumentsToCloud -bool true"
     },
     {
-        description: "The File Vault key is destroyed when going to standby mode."
+        description: "The File Vault key is protected when going to standby mode."
         //Once this set of configurations is proven stable, this can be upgraded from "experimental" to "recommended". We may want to warn the user first that waking will be slower and require authenticating twice.
         confidence: "experimental"
         reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide"
@@ -1340,7 +1340,7 @@
     },
     {
         //Safari->Preferences->Security->Web Content->Enable JavaScript
-        description: "JavaScript disabled in the Safari web browser."
+        description: "JavaScript is disabled in the Safari web browser."
         confidence: "recommended"
         tests:
         [
@@ -1359,7 +1359,7 @@
         undo: "defaults -currentHost write ~/Library/Preferences/com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaScriptEnabled -bool true"
     },
     {
-        description: "JavaScript disabled in the Safari web browser (Legacy version)."
+        description: "JavaScript is disabled in the Safari web browser (Legacy version)."
         confidence: "recommended"
         tests:
         [
@@ -1677,7 +1677,7 @@
     {
         //Safari->Preferences->Advanced->Smart Search Field->Show full website address
         //This might help prevent phishing attacks
-        description: "Full website addresses are disabled in the location bar of the Safari web browser."
+        description: "Full website addresses are displayed in the location bar of the Safari web browser."
         confidence: "required"
         tests:
         [
@@ -1895,7 +1895,7 @@
     },
     {
         //Mail->Preferences->GPGMail->Updates->Automatically check for updates
-        description: "Apple Mail with automatically check for updates to GPGMail."
+        description: "Apple Mail automatically checks for updates to GPGMail."
         confidence: required
         tests:
         [
@@ -2035,7 +2035,7 @@
     },
     {
         //Chrome->Preferences->Show Advanced Settings->Privacy->Automatically report details of possible security incidents to Google
-        description: "All Google Chrome web browser profiles prevent information leakage through report security incidents to Google."
+        description: "All Google Chrome web browser profiles prevent information leakage by blocking security incidents reports to Google."
         confidence: "recommended"
         tests:
         [
@@ -2355,7 +2355,7 @@
     {
         //Note: I'm not so clear on what 'clear_lso_data_enabled' does. Maybe it should typically be set to true? 'False' is the setting achieved when you disable Flash through the plugins GUI.
         //chrome://plugins/->Adobe Flash Player->Disable
-        description: "All Google Chrome web browser profiles have disabled Flash cookies."
+        description: "All Google Chrome web browser profiles block Flash cookies."
         confidence: "required"
         reference: "https://en.wikipedia.org/wiki/Local_shared_object"
         tests:
