@@ -556,12 +556,6 @@
         [
             {
                 type: "exact match"
-                command: "softwareupdate --schedule | grep -i 'Automatic check is on'"
-                command_pass: "Automatic check is on"
-                case_sensitive: "false"
-            },
-            {
-                type: "exact match"
                 command: "sudo softwareupdate --schedule | grep -i 'Automatic check is on'"
                 command_pass: "Automatic check is on"
                 case_sensitive: "false"
