@@ -1922,8 +1922,8 @@
             },
             {
                 type: "exact match"
-                command: "ps ax | grep -c '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'"
-                command_pass: 2 //a value of "3" means it's running -- the other 2 are `/bin/sh` and the `grep` command.
+                command: "ps ax | grep -c 'Google Chrome.app'"
+                command_pass: 2 //a value of "3" or higher means it's running -- the first 2 are `/bin/sh` and the `grep` command.
                 case_sensitive: false
             }
         ]
