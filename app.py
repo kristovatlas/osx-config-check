@@ -477,7 +477,7 @@ def main():
     completely_failed_tests = []
     for config_check in config_checks:
         check_result = run_check(config_check)
-        if check_result == CheckResult.explicit_fail:
+        if check_result in (CheckResult.explicit_fail, CheckResult.no_pass):
             if not const.ATTEMPT_FIXES:
                 glob_check_num += 1
                 continue
