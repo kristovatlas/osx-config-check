@@ -92,3 +92,37 @@ function is_el_capitan {
         echo 0
     fi
 }
+
+function does_defaults_domain_exist {
+    DOMAIN=$1
+    READ_VAL=$(defaults read $DOMAIN 2>&1 | tail -n 1 )
+    if [[ $READ_VAL =~ "Domain $DOMAIN does not exist" ]]; then
+        echo 0
+    else
+        echo 1
+    fi
+}
+export -f does_defaults_domain_exist
+
+function defaults_write_ignore_missing {
+    #Usage: defaults_write_ignore_missing mydomain key -type value
+    #e.g.: defaults_write_ignore_missing com.apple.NetworkBrowser DisableAirDrop -bool true
+    #Writes to the specified domain using the 'defaults' utility, but will
+    #initialize the domain with a blank plist value if the domain does not
+    #already exist.
+    DOMAIN=$1
+    KEY=$2
+    DATA_TYPE=$3
+    VAL=$4
+
+    DOMAIN_EXISTS=$(does_defaults_domain_exist $DOMAIN)
+    if [ "$DOMAIN_EXISTS" = "0" ]; then
+        defaults write $DOMAIN '{"osxconfig-reserved" = 1;}'
+        DOMAIN_EXISTS=$(does_defaults_domain_exist $DOMAIN)
+        if [ "$DOMAIN_EXISTS" = "0" ]; then
+            echo "Could not successfully create the specified domain."
+            exit
+        fi
+    fi
+    defaults write $DOMAIN $KEY $DATA_TYPE $VAL
+}
