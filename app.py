@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 """Checks the configuration of various osx options."""
 
+import sys
 import time
 import datetime
 from os.path import expanduser
-import sys
 import re
 from subprocess import Popen, PIPE, STDOUT
 from warnings import warn
@@ -12,15 +12,16 @@ import json
 import const #const.py
 import prompt #prompt.py
 
-const.ENABLE_DEBUG_PRINT = False
 const.DEFAULT_OUTPUT_LOCATION = "~/Documents/"
-const.WRITE_TO_LOG_FILE = True #TODO: Allow user to pass command line arg
 const.DEFAULT_CONFIG_FILE = "osx-config.json"
-const.PROMPT_FOR_FIXES = True #TODO: allow user to pass command line arg
 const.WARN_FOR_RECOMMENDED = True #TODO: command line flag
 const.WARN_FOR_EXPERIMENTAL = True #TODO: command line flag
 const.FIX_RECOMMENDED_BY_DEFAULT = True #TODO: command line flag
 const.FIX_EXPERIMENTAL_BY_DEFAULT = False #TODO: command line flag
+
+const.VERSION = "v1.0.0-alpha (pidgeotto)"
+
+const.API_FILENAME = './scripts/api.sh'
 
 const.COLORS = {
     'HEADER': '\033[95m',
@@ -36,6 +37,7 @@ const.COLORS = {
 
 const.PASSED_STR = const.COLORS['OKGREEN'] + "PASSED!" + const.COLORS['ENDC']
 const.FAILED_STR = const.COLORS['FAIL'] + "FAILED!" + const.COLORS['ENDC']
+const.SKIPPED_STR = const.COLORS['OKBLUE'] + "SKIPPED!" + const.COLORS['ENDC']
 const.NO_SUDO_STR = ("%s%s%s" %
                      (const.COLORS['WARNING'],
                       ("Insufficient privileges to perform this check. "
@@ -48,6 +50,10 @@ const.EXPERIMENTAL_STR = ("%s%s%s" % (const.COLORS['BOLD'],
                                       'EXPERIMENTAL',
                                       const.COLORS['ENDC']))
 
+const.SUDO_STR = ("%s%ssudo%s" %
+                  (const.COLORS['BOLD'], const.COLORS['RED'],
+                   const.COLORS['ENDC']))
+
 def get_timestamp():
     """Genereate a current timestamp that won't break a filename."""
     timestamp_format = '%Y-%m-%d_%H-%M-%S'
@@ -58,6 +64,26 @@ const.LOG_FILE_NAME = 'osx-config-check_%s.log' % get_timestamp()
 const.LOG_FILE_LOC = const.DEFAULT_OUTPUT_LOCATION + const.LOG_FILE_NAME
 
 glob_check_num = 1
+
+class CheckResult(object):
+    """Each test can have one of three results, informing the next step."""
+    explicit_pass = 1
+    explicit_fail = 2
+    no_pass = 3
+    all_skipped = 4
+
+def check_result_to_str(val):
+    """Convert enum to string representation"""
+    if val == CheckResult.explicit_pass:
+        return const.PASSED_STR
+    elif val == CheckResult.explicit_fail:
+        return const.FAILED_STR
+    elif val == CheckResult.no_pass:
+        return const.FAILED_STR
+    elif val == CheckResult.all_skipped:
+        return const.SKIPPED_STR
+    else:
+        raise ValueError
 
 class Confidence(object):
     """Likelihood that a configuration will create negative side-effects.
@@ -71,21 +97,19 @@ class Confidence(object):
 
 class ConfigCheck(object):
     """Encapsulates configuration to check in operating system."""
-    check_type = ''
-    expected_stdout = ''
-
-    def __init__(self, command, comparison_type, expected, case_sensitive,
-                 description, confidence, fix=None, sudo_fix=None,
-                 manual_fix=None, sudo_command=None):
+    def __init__(self, tests, description, confidence, fix=None, sudo_fix=None,
+                 manual_fix=None):
         """
         Args:
 
-            command (str): The command to run to check OS configuration.
-            comparison_type (str): "exact match" or "regex match"
-            expected (str): The expected string to match or regex to match
-                against the stdout of the specified `command`.
-            case_senstive (bool): Specifies whether `expected` is a
-                case-sensitive comparison.
+            tests (List[dict]): The ordered list of tests to be performed, each
+                a `dict` with these attributes including command_pass and/or
+                command_fail:
+                    * type (str): "exact match" or "regex match"
+                    * command (str)
+                    * command_pass (Optional[str])
+                    * command_fail (Optional[str])
+                    * case_sensitive (bool)
             description (str): A human-readable description of the configuration
                 being checked.
             confidence (str): "required", "recommended", or "experimental"
@@ -97,16 +121,17 @@ class ConfigCheck(object):
                 change.
             manual_fix (Optional[str]): Instructions to output to the user to
                 manually remediate if a config cannot be fixed automatically.
-            sudo_command (Optional[str]): A version of `command` that
-                requests administrative privileges from the operating system.
-                This will only be executed if `command` does not produce the
-                desired results.
         """
-        assert comparison_type in ('exact match', 'regex match')
-        self.command = command
-        self.comparison_type = comparison_type
-        self.expected = expected
-        self.case_sensitive = case_sensitive
+        assert isinstance(tests, list)
+        assert len(tests) > 0
+        for test in tests:
+            assert isinstance(test, dict), "%s" % str(test)
+            assert test['type'] in ('exact match', 'regex match')
+            assert 'command' in test
+            assert 'command_pass' in test or 'command_fail' in test
+            test['case_sensitive'] = bool(test['case_sensitive'])
+        self.tests = tests
+
         self.description = description
         if confidence == 'required':
             self.confidence = Confidence.required
@@ -121,7 +146,6 @@ class ConfigCheck(object):
         self.fix = fix #default: None
         self.sudo_fix = sudo_fix #default: None
         self.manual_fix = manual_fix #default: None
-        self.sudo_command = sudo_command #default: None
 
     def __str__(self):
         return str(self.__dict__)
@@ -147,34 +171,15 @@ def read_config(config_filename):
         if '_comment' in config_check:
             continue
 
-        #Config MUST specify a command to check the status of the system
-        command = config_check['command']
-
-        #Config MUST specify either expected STDOUT or regex pattern
-        expected = None
-        comparison_type = None
-        if config_check['type'] == 'exact match':
-            comparison_type = 'exact match'
-            expected = config_check['expected_stdout']
-        elif config_check['type'] == 'regex match':
-            comparison_type = 'regex match'
-            expected = config_check['expected_regex']
-        else:
-            sys.exit("Expected comparison string does not match 'type' field.")
-
-        #Config MUST specify whether the commands checking the status are case
-        #sensitive
-        case_sensitive = False
-        assert config_check['case_sensitive'] in ('true', True, 'false', False)
-        if config_check['case_sensitive'] in ('true', True):
-            case_sensitive = True
-
         #Config MUST specify a description of the check
         description = config_check['description']
         dprint("Description: %s" % description)
 
         #Config MUST indicate the confidence of the configuration check
         confidence = config_check['confidence']
+
+        #Config MUST include at least one test obj
+        tests = config_check['tests']
 
         #Config MUST specify a fix object
         assert 'fix' in config_check
@@ -195,22 +200,13 @@ def read_config(config_filename):
         if 'manual' in config_check['fix']:
             manual_fix = config_check['fix']['manual']
 
-        #Config MAY specify a sudo_command, a sudo version of "command"
-        sudo_command = None
-        if 'sudo_command' in config_check:
-            sudo_command = config_check['sudo_command']
-
         config_check_obj = ConfigCheck(
-            command=command,
-            comparison_type=comparison_type,
-            expected=expected,
-            case_sensitive=case_sensitive,
+            tests=tests,
             description=description,
             confidence=confidence,
             fix=fix,
             sudo_fix=sudo_fix,
-            manual_fix=manual_fix,
-            sudo_command=sudo_command)
+            manual_fix=manual_fix)
         config_checks.append(config_check_obj)
 
     return config_checks
@@ -218,53 +214,86 @@ def read_config(config_filename):
 def run_check(config_check, last_attempt=False, quiet_fail=False):
     """Perform the specified configuration check against the OS.
 
-    This will perform the check once without sudo privileges; if that fails and
-    a sudo version of this check has been specified, that will be performed,
-    with the final result value being a logical-or of the outcomes.
+    Each config check may specify multiple test cases with early-succeed and/or
+    early-fail parameters.
+
+    These are the possible conditions resulting from run_check:
+    1. One of the tests explicitly passed.
+    2. One of the tests explicitly failed.
+    3. All of the tests were run and none of them passed or failed. (This
+        should be considered a fail.)
+    4. All of the tests were skipped because we're skipping sudo checks and
+        the only tests available require sudo privs.
 
     Args:
-        config_check (`ConfigCheck`): The check to perform.
+        config_check (`ConfigCheck`): The check to perform. May contain multiple
+            commands to test.
         last_attempt (bool): Is this the last time the script checks this
             configuration, or will we check again during this run?
         quiet_fail (bool): Suppress print failed results to stdout?
             Default: False.
 
-    Returns:
-        bool: Whether check passed.
+    Returns: `CheckResult`: The check explicitly passed, explicitly
+        failed, never passed, or all checks were skipped.
+
+    Raises: ValueError if result of _execute_check is not valid.
     """
     assert isinstance(config_check, ConfigCheck)
 
-    passed = _execute_check(config_check.command, config_check.comparison_type,
-                            config_check.expected, config_check.case_sensitive)
+    #Assume all tests have been skipped until demonstrated otherwise.
+    result = CheckResult.all_skipped
+    for test in config_check.tests:
+        #alert user if he might get prompted for admin privs due to sudo use
+        if 'sudo ' in test['command']:
+            if const.SKIP_SUDO_TESTS:
+                dprint("Skipping test because app skipping sudo tests.")
+            else:
+                fancy_sudo_command = re.sub(
+                    "sudo", const.SUDO_STR, test['command'])
+                print(("The next configuration check requires elevated "
+                       "privileges; %syou may be prompted for your current OS "
+                       "X user's password  below%s. The command to be executed "
+                       "is: '%s'") %
+                      (const.COLORS['BOLD'], const.COLORS['ENDC'],
+                       fancy_sudo_command))
 
-    if not passed and config_check.sudo_command is not None:
-        fancy_sudo_command = re.sub("sudo",
-                                    ("%s%ssudo%s" % (const.COLORS['BOLD'],
-                                                     const.COLORS['RED'],
-                                                     const.COLORS['ENDC'])),
-                                    config_check.sudo_command)
-        print(("The next configuration check requires elevated privileges; %s"
-               "you may be prompted for your current OS X user's password "
-               "below%s. The command to be executed is: '%s'") %
-              (const.COLORS['BOLD'], const.COLORS['ENDC'],
-               fancy_sudo_command))
-        passed = _execute_check(config_check.sudo_command,
-                                config_check.comparison_type,
-                                config_check.expected,
-                                config_check.case_sensitive)
+        if 'sudo ' not in test['command'] or not const.SKIP_SUDO_TESTS:
+            command_pass = None
+            if 'command_pass' in test:
+                command_pass = str(test['command_pass'])
+            command_fail = None
+            if 'command_fail' in test:
+                command_fail = str(test['command_fail'])
+            result = _execute_check(command=test['command'],
+                                    comparison_type=test['type'],
+                                    case_sensitive=test['case_sensitive'],
+                                    command_pass=command_pass,
+                                    command_fail=command_fail)
+            if result == CheckResult.explicit_pass:
+                dprint("Test passed exlicitly for '%s'" % test['command'])
+                break
+            elif result == CheckResult.explicit_fail:
+                dprint("Test failed exlicitly for '%s'" % test['command'])
+                break
+            elif result == CheckResult.no_pass:
+                dprint("Test did not pass for '%s'" % test['command'])
+                continue
+            else:
+                raise ValueError("Invalid return value from _execute_check.")
 
-    if passed or not quiet_fail:
+    if result == CheckResult.explicit_pass or not quiet_fail:
         msg = ("\nCHECK #%d: %s... %s" % (glob_check_num,
-                                        config_check.description,
-                                        _get_result_str(passed)))
+                                          config_check.description,
+                                          check_result_to_str(result)))
         print msg
         if const.WRITE_TO_LOG_FILE:
             log_to_file(msg)
 
-    if not passed and last_attempt and do_warn(config_check):
+    if (result not in (CheckResult.explicit_pass, CheckResult.all_skipped) and
+            last_attempt and do_warn(config_check)):
         warn("Attempted fix %s" % const.FAILED_STR)
 
-    return passed
+    return result
 
 def log_to_file(string):
     """Append string, followed by newline character, to log file.
@@ -279,23 +308,39 @@ def log_to_file(string):
     with open(log_file_loc, 'a+') as log_file:
         log_file.write("%s\n" % string)
 
-def _get_result_str(result_bool):
-    return const.PASSED_STR if result_bool else const.FAILED_STR
-
-def _execute_check(command, comparison_type, expected, case_sensitive):
+def _execute_check(command, comparison_type, case_sensitive, command_pass=None,
+                   command_fail=None):
     """Helper function for `run_check` -- executes command and checks result.
+
+    This check can result in three conditions:
+    1. The check explicitly passed, and no subsequent tests need to be performed
+        for this check. Returns True.
+    2. The check explicitly failed, and no subsequent tests need to be performed
+        for this check. Raises ConfigCheckFailedExplicitly.
+    3. The check produced another result, and if there is another test
+        available, it
 
     Args:
         command (str): The command to execute to perform the check.
         comparison_type (str): 'exact match' or 'regex match'
-        expected (str): Result expected in output, either exact match or regex.
         case_sensitive (bool): Whether the comparison to output is case
-            senstive.
+            sensitive.
+        command_pass (str or None): The output of the command which constitutes
+            an explicit pass for the test, either as an exact string or regex
+            depending on `comparison_type`.
+        command_fail (str or None): The output of the command which constitutes
+            an explicit fail for the test, either as an exact string or regex
+            depending on `comparison_type`.
 
     Returns:
-       bool: Whether the output matched the expected output of the command.
+       `CheckResult`: explicit pass, explicit failure, or lacking of passing for
+            this test only.
+
+    Raises:
+        ValueError if `comparison_type` is not an expected value
     """
     #http://stackoverflow.com/questions/7129107/python-how-to-suppress-the-output-of-os-system
+    command = "source %s ; %s" % (const.API_FILENAME, command)
     process = Popen(command, stdout=PIPE, stderr=STDOUT, shell=True)
     stdout, _ = process.communicate()
 
@@ -303,15 +348,36 @@ def _execute_check(command, comparison_type, expected, case_sensitive):
 
     dprint("Command executed to check config: '%s'" % str(command))
     dprint("Result of command: '%s'" % str(stdout))
-    dprint("Expected this result: '%s'" % str(expected))
+    dprint("Explicit pass condition for command: '%s'" % str(command_pass))
+    dprint("Explicit fail condition for command: '%s'" % str(command_fail))
 
     if comparison_type == 'exact match':
         if case_sensitive:
-            return stdout == expected
+            if command_fail is not None and stdout == command_fail:
+                return CheckResult.explicit_fail
+            if command_pass is not None and stdout == command_pass:
+                return CheckResult.explicit_pass
+            else:
+                return CheckResult.no_pass
         else:
-            return stdout.lower() == str(expected).lower()
+            if (command_fail is not None and
+                    stdout.lower() == str(command_fail.lower())):
+                return CheckResult.explicit_fail
+            if (command_pass is not None and
+                    stdout.lower() == str(command_pass).lower()):
+                return CheckResult.explicit_pass
+            else:
+                return CheckResult.no_pass
     elif comparison_type == 'regex match':
-        return is_match(expected, stdout, ignore_case=(not case_sensitive))
+        ignore_case = not case_sensitive
+        if (command_fail is not None and
+                is_match(command_fail, stdout, ignore_case=ignore_case)):
+            return CheckResult.explicit_fail
+        if (command_pass is not None and
+                is_match(command_pass, stdout, ignore_case=ignore_case)):
+            return CheckResult.explicit_pass
+        else:
+            return CheckResult.no_pass
     else:
         raise ValueError
 
@@ -341,14 +407,26 @@ def _try_fix(config_check, use_sudo=False):
         print(("\tAttempting configuration fix with elevated privileges; %syou "
                "may be prompted for your OS X login password%s...") %
               (const.COLORS['BOLD'], const.COLORS['ENDC']))
+    stdoutdata = ""
+    stderrdata = ""
     if command is not None:
+        command = "source %s ; %s" % (const.API_FILENAME, command)
         process = Popen(command, stdout=PIPE, stderr=STDOUT, shell=True)
-        process.communicate()
+        stdoutdata, stderrdata = process.communicate()
 
     dprint("Command executed: '%s'" % str(command))
+    dprint("Command STDOUT: '%s'" % str(stdoutdata))
+    dprint("Command STDERR: '%s'" % str(stderrdata))
 
 def do_fix_and_test(config_check):
-    """Attempt to fix misconfiguration w/ and w/o sudo privs, returning result.
+    """Attempt to fix misconfiguration, returning the result.
+
+    If a non-sudo fix is specified, this will be attempted first.
+    If a non-sudo fix fails or there is none specified and a sudo fix is
+    specified, this will be attempted next.
+    If all previous attempts have failed or none have been specified and
+    instructions for manually fixing the configuration have been specified,
+    these will be printed out at the end of execution by another function.
 
     Args:
         config_check (`ConfigCheck`): The check to perform.
@@ -356,24 +434,55 @@ def do_fix_and_test(config_check):
     Returns:
         bool: Whether an attempted fix was successful.
     """
-    _try_fix(config_check, use_sudo=False)
-    if run_check(config_check, last_attempt=False, quiet_fail=True):
-        return True
-    else:
+    dprint("Entered do_fix_and_test()")
+
+    if config_check.fix is not None:
+        _try_fix(config_check, use_sudo=False)
+        check_result = run_check(
+            config_check, last_attempt=False, quiet_fail=True)
+        if check_result == CheckResult.explicit_pass:
+            return True
+
+    if config_check.sudo_fix is not None:
         _try_fix(config_check, use_sudo=True)
-        return run_check(config_check, last_attempt=True, quiet_fail=False)
+        check_result = run_check(
+            config_check, last_attempt=True, quiet_fail=False)
+        return True if check_result == CheckResult.explicit_pass else False
+    else:
+        return False
+
+def dprint_settings():
+    """Prints current global flags when debug printing is enabled."""
+    dprint("ENABLE_DEBUG_PRINT: %s" % str(const.ENABLE_DEBUG_PRINT))
+    dprint("WRITE_TO_LOG_FILE: %s" % str(const.WRITE_TO_LOG_FILE))
+    dprint("PROMPT_FOR_FIXES: %s" % str(const.PROMPT_FOR_FIXES))
+    dprint("ATTEMPT_FIXES: %s" % str(const.ATTEMPT_FIXES))
+    dprint("SKIP_SUDO_TESTS: %s" % str(const.SKIP_SUDO_TESTS))
 
 def main():
     """Main function."""
     global glob_check_num
+
+    args = get_sys_args()
+    const.ENABLE_DEBUG_PRINT = args['debug-print']
+    const.WRITE_TO_LOG_FILE = args['write-to-log-file']
+    const.PROMPT_FOR_FIXES = not args['no-prompt']
+    const.ATTEMPT_FIXES = not args['report-only']
+    const.SKIP_SUDO_TESTS = args['skip-sudo-checks']
+
+    dprint_settings()
 
     _print_banner()
 
     config_checks = read_config(const.DEFAULT_CONFIG_FILE)
     completely_failed_tests = []
     for config_check in config_checks:
-        if not run_check(config_check):
-            #config failed check
+        check_result = run_check(config_check)
+        if check_result in (CheckResult.explicit_fail, CheckResult.no_pass):
+            if not const.ATTEMPT_FIXES:
+                glob_check_num += 1
+                continue
+
             if config_check.fix is None and config_check.sudo_fix is None:
                 #no automatic fix available
                 if config_check.manual_fix is not None:
@@ -392,9 +501,14 @@ def main():
                     elif config_check.confidence == Confidence.experimental:
                         prompt_default = const.FIX_EXPERIMENTAL_BY_DEFAULT
                         descriptor = const.EXPERIMENTAL_STR + ' '
+
+                    next_fix_command = config_check.fix
+                    if next_fix_command is None:
+                        next_fix_command = config_check.sudo_fix
+
                     question = (("\tApply the following %s fix? This will "
                                  "execute  this command:\n\t\t'%s'") %
-                                (descriptor, config_check.fix))
+                                (descriptor, next_fix_command))
                     if prompt.query_yes_no(question=question,
                                            default=_bool_to_yes_no(prompt_default)):
                         fixed = do_fix_and_test(config_check)
@@ -419,6 +533,7 @@ def main():
         glob_check_num += 1
 
     if const.WRITE_TO_LOG_FILE:
+        log_to_file("osx-config %s" % const.VERSION)
         print("Wrote results to %s'%s'%s." %
               (const.COLORS['BOLD'], const.LOG_FILE_LOC, const.COLORS['ENDC']))
 
@@ -465,7 +580,7 @@ def is_match(regex, string, ignore_case=False):
 def _print_banner():
     banner = (("---------------------------------------------------------------"
                "---------------------------\n"
-               "%s%sosx-config-check%s\n"
+               "%s%sosx-config-check%s %s\n"
                "Download the latest copy of this tool at: "
                "https://github.com/kristovatlas/osx-config-check \n"
                "Report bugs/issues:\n"
@@ -475,8 +590,61 @@ def _print_banner():
                "---------------------------------------------------------------"
                "---------------------------\n") %
               (const.COLORS['BOLD'], const.COLORS['OKBLUE'],
-               const.COLORS['ENDC']))
+               const.COLORS['ENDC'], const.VERSION))
     print _underline_hyperlink(banner)
+
+def print_usage():
+    """Prints usage for this command-line tool and exits."""
+    print("Usage: python app.py [OPTIONS]\n"
+          "OPTIONS:\n"
+          "\t--debug-print        Enables verbose output for debugging the "
+          "tool.\n"
+          "\t--report-only        Only reports on compliance and does not "
+          "offer to fix broken configurations.\n"
+          "\t--disable-logs       Refrain from creating a log file with the "
+          "results.\n"
+          "\t--disable-prompt     Refrain from prompting user before applying "
+          "fixes.\n"
+          "\t--skip-sudo-checks   Do not perform checks that require sudo "
+          "privileges.\n"
+          "\t--help -h            Print this usage information.\n")
+    sys.exit()
+
+def get_sys_args():
+    """Parses command line args, setting defaults where not specified.
+
+    Returns: dict:
+        * debug-print (bool)
+        * report-only (bool)
+        * write-to-log-file (bool)
+        * no-prompt (bool)
+        * skip-sudo-checks (bool)
+    """
+    args = {'debug-print': False,
+            'report-only': False,
+            'write-to-log-file': True,
+            'no-prompt': False,
+            'skip-sudo-checks': False}
+    unprocessed_args = sys.argv[1:]
+    while len(unprocessed_args) > 0:
+        flag = unprocessed_args.pop(0)
+        if flag == '--debug-print':
+            args['debug-print'] = True
+        elif flag == '--report-only':
+            args['report-only'] = True
+        elif flag == '--disable-logs':
+            args['write-to-log-file'] = False
+        elif flag == '--disable-prompt':
+            args['no-prompt'] = True
+        elif flag == '--skip-sudo-checks':
+            args['skip-sudo-checks'] = True
+        elif flag == '-h' or flag == '--help':
+            print_usage()
+        else:
+            print "ERROR: Unrecognized option '%s'" % flag
+            print_usage()
+
+    return args
 
 if __name__ == "__main__":
     main()
