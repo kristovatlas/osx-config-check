@@ -1137,7 +1137,36 @@
             command:
                 UUID=`ioreg -rd1 -c IOPlatformExpertDevice | grep "IOPlatformUUID" | sed -e 's/^.*"\(.*\)"$/\1/'`; for i in $(find /Users -type d -maxdepth 1); do PREF=$i/Library/Preferences/ByHost/com.apple.screensaver.$UUID; if [ -e $PREF.plist ]; then defaults -currentHost write $PREF.plist idleTime -int 600; fi; done
         }
-    },
+    }
+    {
+        description: "System Integrity Protection (SIP) is enabled."
+        confidence: required
+        reference: "https://github.com/drduh/OS-X-Security-and-Privacy-Guide#system-integrity-protection"
+        tests:
+        [
+            {
+                //SIP is not available for OS X before 10.11
+                //TODO: not sure about 10.12
+                type: "exact match"
+                command: is_el_capitan
+                command_pass: 0
+                case_sensitive: false
+            }
+            {
+                type: "exact match"
+                command: "csrutil status"
+                command_pass: "System Integrity Protection status: enabled."
+                case_sensitive: false
+            }
+        ]
+        fix:
+        {
+            manual:
+                '''
+                1. SIP should be enabled by default on your El Capitan machine. You must boot into "Recovery OS" in order to use the "csrutil enable" command. See: https://derflounder.wordpress.com/2015/10/01/system-integrity-protection-adding-another-layer-to-apples-security-model/
+                '''
+        }
+    }
     /* ---- END SYSTEM SETTINGS ---- */
 
     /* ---BEGIN SAFARI BROWSER SETTINGS--- */
