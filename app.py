@@ -70,6 +70,20 @@ class CheckResult(object):
     explicit_pass = 1
     explicit_fail = 2
     no_pass = 3
+    all_skipped = 4
+
+def check_result_to_str(val):
+    """Convert enum to string representation"""
+    if val == CheckResult.explicit_pass:
+        return const.PASSED_STR
+    elif val == CheckResult.explicit_fail:
+        return const.FAILED_STR
+    elif val == CheckResult.no_pass:
+        return const.FAILED_STR
+    elif val == CheckResult.all_skipped:
+        return const.SKIPPED_STR
+    else:
+        raise ValueError
 
 class Confidence(object):
     """Likelihood that a configuration will create negative side-effects.
@@ -203,6 +217,14 @@ def run_check(config_check, last_attempt=False, quiet_fail=False):
     Each config check may specify multiple test cases with early-succeed and/or
     early-fail parameters.
 
+    These are the possible conditions resulting from run_check:
+    1. One of the tests explicitly passed.
+    2. One of the tests explicitly failed.
+    3. All of the tests were run and none of them passed or failed. (This
+        should be considered a fail.)
+    4. All of the tests were skipped because we're skipping sudo checks and
+        the only tests available require sudo privs.
+
     Args:
         config_check (`ConfigCheck`): The check to perform. May contain multiple
             commands to test.
@@ -211,21 +233,20 @@ def run_check(config_check, last_attempt=False, quiet_fail=False):
         quiet_fail (bool): Suppress print failed results to stdout?
             Default: False.
 
-    Returns: bool: Whether check passed.
+    Returns: `CheckResult`: The check explicitly passed, explicitly
+        failed, never passed, or all checks were skipped.
 
     Raises: ValueError if result of _execute_check is not valid.
     """
     assert isinstance(config_check, ConfigCheck)
 
-    passed = False
+    #Assume all tests have been skipped until demonstrated otherwise.
+    result = CheckResult.all_skipped
     for test in config_check.tests:
         #alert user if he might get prompted for admin privs due to sudo use
-        result_str = None
         if 'sudo ' in test['command']:
-            if const.NON_INTERACTIVE:
-                dprint("Skipping test because app is in non-interactive mode.")
-                passed = False
-                result_str = const.SKIPPED_STR
+            if const.SKIP_SUDO_TESTS:
+                dprint("Skipping test because app skipping sudo tests.")
             else:
                 fancy_sudo_command = re.sub(
                     "sudo", const.SUDO_STR, test['command'])
@@ -236,7 +257,7 @@ def run_check(config_check, last_attempt=False, quiet_fail=False):
                       (const.COLORS['BOLD'], const.COLORS['ENDC'],
                        fancy_sudo_command))
 
-        if 'sudo ' not in test['command'] or not const.NON_INTERACTIVE:
+        if 'sudo ' not in test['command'] or not const.SKIP_SUDO_TESTS:
             command_pass = None
             if 'command_pass' in test:
                 command_pass = str(test['command_pass'])
@@ -250,7 +271,6 @@ def run_check(config_check, last_attempt=False, quiet_fail=False):
                                     command_fail=command_fail)
             if result == CheckResult.explicit_pass:
                 dprint("Test passed exlicitly for '%s'" % test['command'])
-                passed = True
                 break
             elif result == CheckResult.explicit_fail:
                 dprint("Test failed exlicitly for '%s'" % test['command'])
@@ -261,20 +281,19 @@ def run_check(config_check, last_attempt=False, quiet_fail=False):
             else:
                 raise ValueError("Invalid return value from _execute_check.")
 
-    if passed or not quiet_fail:
-        if result_str is None:
-            result_str = _get_result_str(passed)
+    if result == CheckResult.explicit_pass or not quiet_fail:
         msg = ("\nCHECK #%d: %s... %s" % (glob_check_num,
                                           config_check.description,
-                                          result_str))
+                                          check_result_to_str(result)))
         print msg
         if const.WRITE_TO_LOG_FILE:
             log_to_file(msg)
 
-    if not passed and last_attempt and do_warn(config_check):
+    if (result not in (CheckResult.explicit_pass, CheckResult.all_skipped) and
+            last_attempt and do_warn(config_check)):
         warn("Attempted fix %s" % const.FAILED_STR)
 
-    return passed
+    return result
 
 def log_to_file(string):
     """Append string, followed by newline character, to log file.
@@ -288,9 +307,6 @@ def log_to_file(string):
         log_file_loc = expanduser(log_file_loc)
     with open(log_file_loc, 'a+') as log_file:
         log_file.write("%s\n" % string)
-
-def _get_result_str(result_bool):
-    return const.PASSED_STR if result_bool else const.FAILED_STR
 
 def _execute_check(command, comparison_type, case_sensitive, command_pass=None,
                    command_fail=None):
@@ -417,16 +433,30 @@ def do_fix_and_test(config_check):
     Returns:
         bool: Whether an attempted fix was successful.
     """
+    dprint("Entered do_fix_and_test()")
+
     if config_check.fix is not None:
         _try_fix(config_check, use_sudo=False)
-        if run_check(config_check, last_attempt=False, quiet_fail=True):
+        check_result = run_check(
+            config_check, last_attempt=False, quiet_fail=True)
+        if check_result == CheckResult.explicit_pass:
             return True
 
     if config_check.sudo_fix is not None:
         _try_fix(config_check, use_sudo=True)
-        return run_check(config_check, last_attempt=True, quiet_fail=False)
+        check_result = run_check(
+            config_check, last_attempt=True, quiet_fail=False)
+        return True if check_result == CheckResult.explicit_pass else False
     else:
         return False
+
+def dprint_settings():
+    """Prints current global flags when debug printing is enabled."""
+    dprint("ENABLE_DEBUG_PRINT: %s" % str(const.ENABLE_DEBUG_PRINT))
+    dprint("WRITE_TO_LOG_FILE: %s" % str(const.WRITE_TO_LOG_FILE))
+    dprint("PROMPT_FOR_FIXES: %s" % str(const.PROMPT_FOR_FIXES))
+    dprint("ATTEMPT_FIXES: %s" % str(const.ATTEMPT_FIXES))
+    dprint("SKIP_SUDO_TESTS: %s" % str(const.SKIP_SUDO_TESTS))
 
 def main():
     """Main function."""
@@ -437,15 +467,17 @@ def main():
     const.WRITE_TO_LOG_FILE = args['write-to-log-file']
     const.PROMPT_FOR_FIXES = not args['no-prompt']
     const.ATTEMPT_FIXES = not args['report-only']
-    const.NON_INTERACTIVE = args['skip-sudo-checks']
+    const.SKIP_SUDO_TESTS = args['skip-sudo-checks']
+
+    dprint_settings()
 
     _print_banner()
 
     config_checks = read_config(const.DEFAULT_CONFIG_FILE)
     completely_failed_tests = []
     for config_check in config_checks:
-        if not run_check(config_check):
-            #config failed check
+        check_result = run_check(config_check)
+        if check_result == CheckResult.explicit_fail:
             if not const.ATTEMPT_FIXES:
                 glob_check_num += 1
                 continue
