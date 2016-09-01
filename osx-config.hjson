@@ -2183,7 +2183,7 @@
                 command:
                     find ~/Library/Application\ Support/Google/Chrome -name "Preferences" -maxdepth 2 | xargs -I{} python ./scripts/chrome_defaults.py read '{}' profile.default_content_setting_values.popups
                 command_pass:
-                    ^(The attribute 'profile.default_content_setting_values.popups' does not exist\n?)|(None\n?)+$
+                    ^((The attribute 'profile.default_content_setting_values.popups' does not exist in '[^']+'\.\n?)|(None\n?))+$
                 case_sensitive: "false"
             }
         ]
