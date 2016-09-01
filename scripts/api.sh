@@ -82,3 +82,13 @@ function gpg_mail_in_use {
         echo 0
     fi
 }
+
+function is_el_capitan {
+    #Detects whether this system is El Capitan
+    SW_VERSION=$(sw_vers -productVersion)
+    if [[ $SW_VERSION =~ 10.11.[0-9]+ ]] ; then
+        echo 1
+    else
+        echo 0
+    fi
+}
