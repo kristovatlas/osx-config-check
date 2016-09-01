@@ -410,6 +410,7 @@ def _try_fix(config_check, use_sudo=False):
     stdoutdata = ""
     stderrdata = ""
     if command is not None:
+        command = "source %s ; %s" % (const.API_FILENAME, command)
         process = Popen(command, stdout=PIPE, stderr=STDOUT, shell=True)
         stdoutdata, stderrdata = process.communicate()
 
