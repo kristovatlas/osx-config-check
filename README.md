@@ -326,6 +326,10 @@ This tool encourages users to use DNS servers run by the Google corporation. Thi
 
 And follow the instructions on the screen carefully.
 
+### Something in OS X broke!
+
+A few users have observed that features like screen saver activation with hot corners stopped working after applying configuration fixes. These problems have so far been remedied simply by restarting the system.
+
 ## Contributing
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting pull requests to the repository.
