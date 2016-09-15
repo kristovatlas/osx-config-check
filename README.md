@@ -25,6 +25,8 @@ In the `Terminal` application, navigate to the directory that contains this app.
 cd ~/Downloads/osx-config-check
 ```
 
+If that directory doesn't exist because the folder you retrieved is named slightly different (such as 'osx-config-check-master' or 'osx-config-check-1.0.0'), you can always type in a portion of the directory name and hit the [TAB] key in Terminal to auto-complete the rest.
+
 Next run the app as follows:
 
 ```bash
