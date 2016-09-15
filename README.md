@@ -49,9 +49,8 @@ OPTIONS:
 
 ## Sample Output
 
-```bash
-$ python app.py
-osx-config-check v1.0.0-alpha (pidgeotto)
+```
+osx-config-check v1.1.0 (ivysaur)
 Download the latest copy of this tool at: https://github.com/kristovatlas/osx-config-check
 Report bugs/issues:
 	* GitHub: https://github.com/kristovatlas/osx-config-check/issues
@@ -233,7 +232,7 @@ CHECK #86: All Google Chrome web browser profiles prevent information leakage th
 
 CHECK #87: All Google Chrome web browser profiles prevent information leakage by blocking security incidents reports to Google.... FAILED!
 
-CHECK #88: All Google Chrome web browser profiles have Google Safe Browsing enabled.... PASSED!
+CHECK #88: All Google Chrome web browser profiles have Google Safe Browsing enabled.... FAILED!
 
 CHECK #89: All Google Chrome web browser profiles prevent information leakage through spell-checking network services.... FAILED!
 
@@ -276,15 +275,15 @@ CHECK #107: All Google Chrome web browser profiles have enabled the ScriptSafe e
 CHECK #108: Google Chrome is the default web browser.... PASSED!
 
 CHECK #109: OSX/Keydnap malware is not present.... PASSED!
-Configurations passed total:                 92 (84.40%)
-Configurations failed or skipped total:      17 (15.60%)
-Configurations passed without applying fix:  92 (84.40%)
+Configurations passed total:                 91 (83.49%)
+Configurations failed or skipped total:      18 (16.51%)
+Configurations passed without applying fix:  91 (83.49%)
 Configurations passed after applying fix:    0 (0.00%)
 Configurations failed and fix failed:        0 (0.00%)
-Configurations failed and fix skipped:       16 (14.68%)
+Configurations failed and fix skipped:       17 (15.60%)
 Configurations failed and fix declined:      0 (0.00%)
 Configuration checks skipped:                1 (0.92%)
-Wrote results to '~/Documents/osx-config-check_2016-09-14_18-50-04.log'.
+Wrote results to '~/Documents/osx-config-check_2016-09-15_17-44-48.log'. Please review the contents before submitting them to third parties, as they may contain sensitive information about your system.
 ==========================
 ```
 
