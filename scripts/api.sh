@@ -126,3 +126,14 @@ function defaults_write_ignore_missing {
     fi
     defaults write $DOMAIN $KEY $DATA_TYPE $VAL
 }
+
+function is_sudoer {
+    #Usage: is_sudoer
+    #Prints "1" to stdout if the user is in the sudoers group, otherwise "0"
+    SUDOER=$(sudo -vn 2>&1 >/dev/null | grep -c "may not run sudo on")
+    if [ "$SUDOER" = "1" ]; then
+        echo 0
+    else
+        echo 1
+    fi
+}
