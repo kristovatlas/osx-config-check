@@ -20,7 +20,7 @@ const.FIX_RECOMMENDED_BY_DEFAULT = True #TODO: command line flag
 const.FIX_EXPERIMENTAL_BY_DEFAULT = False #TODO: command line flag
 const.LOG_DEBUG_ALWAYS = True #TODO: command line flag
 
-const.VERSION = "v1.1.0 (ivysaur)"
+const.VERSION = "v1.2.0 (charmeleon)"
 
 const.API_FILENAME = './scripts/api.sh'
 
@@ -73,6 +73,7 @@ glob_fail_fix_fail = 0
 glob_fail_fix_skipped = 0
 glob_fail_fix_declined = 0
 glob_check_skipped = 0
+glob_fix_skipped_no_sudoer = 0
 
 class CheckResult(object):
     """Each test can have one of three results, informing the next step."""
@@ -406,6 +407,18 @@ def do_warn(config_check):
         return True
     return False
 
+def run_quick_command(command):
+    """Runs a quick shell command and returns stdout."""
+    command = "source %s ; %s" % (const.API_FILENAME, command)
+    process = Popen(command, stdout=PIPE, stderr=STDOUT, shell=True)
+    stdoutdata, stderrdata = process.communicate()
+
+    write_str("Quick command executed: '%s'" % str(command), debug=True)
+    write_str("Command STDOUT: '%s'" % str(stdoutdata), debug=True)
+    write_str("Command STDERR: '%s'" % str(stderrdata), debug=True)
+
+    return stdoutdata
+
 def _try_fix(config_check, use_sudo=False):
     """Attempt to fix a misconfiguration.
 
@@ -415,6 +428,7 @@ def _try_fix(config_check, use_sudo=False):
             no sudo version of this command has been specified in the config
             file, this will simply return without executing anything.
     """
+    global glob_fix_skipped_no_sudoer
     command = config_check.sudo_fix if use_sudo else config_check.fix
     if use_sudo:
         write_str(("\tAttempting configuration fix with elevated privileges; %s"
@@ -423,13 +437,20 @@ def _try_fix(config_check, use_sudo=False):
     stdoutdata = ""
     stderrdata = ""
     if command is not None:
+
+        if use_sudo and run_quick_command("is_sudoer").strip() == "0":
+            write_str(("User is not in sudoers, and therefore need not attempt "
+                       "this fix: '%s'") % command)
+            glob_fix_skipped_no_sudoer += 1
+            return
+
         command = "source %s ; %s" % (const.API_FILENAME, command)
         process = Popen(command, stdout=PIPE, stderr=STDOUT, shell=True)
         stdoutdata, stderrdata = process.communicate()
 
-    write_str("Command executed: '%s'" % str(command), debug=True)
-    write_str("Command STDOUT: '%s'" % str(stdoutdata), debug=True)
-    write_str("Command STDERR: '%s'" % str(stderrdata), debug=True)
+        write_str("Command executed: '%s'" % str(command), debug=True)
+        write_str("Command STDOUT: '%s'" % str(stdoutdata), debug=True)
+        write_str("Command STDERR: '%s'" % str(stderrdata), debug=True)
 
 def do_fix_and_test(config_check):
     """Attempt to fix misconfiguration, returning the result.
@@ -675,14 +696,15 @@ def print_tallies():
                     glob_fail_fix_declined + glob_check_skipped)
 
     out = trim_block('''
-    Configurations passed total:                 %s
-    Configurations failed or skipped total:      %s
-    Configurations passed without applying fix:  %s
-    Configurations passed after applying fix:    %s
-    Configurations failed and fix failed:        %s
-    Configurations failed and fix skipped:       %s
-    Configurations failed and fix declined:      %s
-    Configuration checks skipped:                %s
+    Configurations passed total:                          %s
+    Configurations failed or skipped total:               %s
+    Configurations passed without applying fix:           %s
+    Configurations passed after applying fix:             %s
+    Configurations failed and fix failed:                 %s
+    Configurations failed and fix skipped:                %s
+    Configurations failed and fix declined:               %s
+    Configurations failed and fix failed for non-sudoer:  %s
+    Configuration checks skipped:                         %s
     ''' % (_number_and_pct(total_passed, total_checks, 'pass'),
            _number_and_pct(total_failed, total_checks, 'fail'),
            _number_and_pct(glob_pass_no_fix, total_checks, 'pass'),
@@ -690,6 +712,7 @@ def print_tallies():
            _number_and_pct(glob_fail_fix_fail, total_checks, 'fail'),
            _number_and_pct(glob_fail_fix_skipped, total_checks, 'fail'),
            _number_and_pct(glob_fail_fix_declined, total_checks, 'fail'),
+           _number_and_pct(glob_fix_skipped_no_sudoer, total_checks, 'fail'),
            _number_and_pct(glob_check_skipped, total_checks, 'skip')))
 
     write_str(out)
