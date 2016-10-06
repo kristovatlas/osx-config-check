@@ -20,7 +20,7 @@ const.FIX_RECOMMENDED_BY_DEFAULT = True #TODO: command line flag
 const.FIX_EXPERIMENTAL_BY_DEFAULT = False #TODO: command line flag
 const.LOG_DEBUG_ALWAYS = True #TODO: command line flag
 
-const.VERSION = "v1.0.0-alpha (pidgeotto)"
+const.VERSION = "v1.1.0 (ivysaur)"
 
 const.API_FILENAME = './scripts/api.sh'
 
