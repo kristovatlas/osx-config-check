@@ -242,7 +242,14 @@
                 command_pass: "1"
                 command_fail: "0"
                 case_sensitive: "false"
-            },
+            }
+            {
+                //If the previous test did not result in a pass, then the next one will also not pass if the user is not a sudoer.
+                type: exact match
+                command: is_sudoer
+                command_fail: 0
+                case_sensitive: false
+            }
             {
                 type: "exact match"
                 command: "sudo defaults read /Library/Preferences/com.apple.screensaver askForPassword"
@@ -288,7 +295,14 @@
                 command_pass: "0"
                 command_fail: "1"
                 case_sensitive: "false"
-            },
+            }
+            {
+                //If the previous test did not result in a pass, then the next one will also not pass if the user is not a sudoer.
+                type: exact match
+                command: is_sudoer
+                command_fail: 0
+                case_sensitive: false
+            }
             {
                 type: "exact match"
                 command: "sudo defaults -currentHost read /Library/Preferences/com.apple.screensaver askForPasswordDelay"
@@ -555,6 +569,13 @@
         tests:
         [
             {
+                //The next test will not pass if the user is not a sudoer.
+                type: exact match
+                command: is_sudoer
+                command_fail: 0
+                case_sensitive: false
+            }
+            {
                 type: "exact match"
                 command: "sudo softwareupdate --schedule | grep -i 'Automatic check is on'"
                 command_pass: "Automatic check is on"
@@ -599,7 +620,14 @@
                 command_pass: "0"
                 command_fail: "1"
                 case_sensitive: "false"
-            },
+            }
+            {
+                //If the previous test did not result in a pass, then the next one will also not pass if the user is not a sudoer.
+                type: exact match
+                command: is_sudoer
+                command_fail: 0
+                case_sensitive: false
+            }
             {
                 type: "exact match"
                 command: "sudo defaults read /Library/Preferences/com.apple.Bluetooth ControllerPowerState"
@@ -626,7 +654,14 @@
                 command_pass: "0"
                 command_fail: "1"
                 case_sensitive: "false"
-            },
+            }
+            {
+                //If the previous test did not result in a pass, then the next one will also not pass if the user is not a sudoer.
+                type: exact match
+                command: is_sudoer
+                command_fail: 0
+                case_sensitive: false
+            }
             {
                 type: "exact match"
                 command: "sudo defaults read /Library/Preferences/com.apple.driver.AppleIRController DeviceEnabled"
@@ -653,7 +688,14 @@
                 command_pass: "1"
                 command_fail: "0"
                 case_sensitive: "false"
-            },
+            }
+            {
+                //If the previous test did not result in a pass, then the next one will also not pass if the user is not a sudoer.
+                type: exact match
+                command: is_sudoer
+                command_fail: 0
+                case_sensitive: false
+            }
             {
                 type: "exact match"
                 command: "sudo defaults read com.apple.NetworkBrowser DisableAirDrop"
@@ -723,7 +765,14 @@
                 command: "systemsetup -getremotelogin"
                 command_pass: "Remote Login: Off"
                 case_sensitive: "false"
-            },
+            }
+            {
+                //If the previous test did not result in a pass, then the next one will also not pass if the user is not a sudoer.
+                type: exact match
+                command: is_sudoer
+                command_fail: 0
+                case_sensitive: false
+            }
             {
                 type: "exact match"
                 command: "sudo systemsetup -getremotelogin"
@@ -772,7 +821,14 @@
                 command: "systemsetup -getremoteappleevents"
                 command_pass: "Remote Apple Events: Off"
                 case_sensitive: "false"
-            },
+            }
+            {
+                //If the previous test did not result in a pass, then the next one will also not pass if the user is not a sudoer.
+                type: exact match
+                command: is_sudoer
+                command_fail: 0
+                case_sensitive: false
+            }
             {
                 type: "exact match"
                 command: "sudo systemsetup -getremoteappleevents"
@@ -820,7 +876,14 @@
                 command: "systemsetup getwakeonnetworkaccess"
                 command_pass: "Wake On Network Access: Off"
                 case_sensitive: "false"
-            },
+            }
+            {
+                //If the previous test did not result in a pass, then the next one will also not pass if the user is not a sudoer.
+                type: exact match
+                command: is_sudoer
+                command_fail: 0
+                case_sensitive: false
+            }
             {
                 type: "exact match"
                 command: "sudo systemsetup getwakeonnetworkaccess"
@@ -847,7 +910,14 @@
                 command_pass: "Network Time: Off"
                 command_fail: "Network Time: On"
                 case_sensitive: "false"
-            },
+            }
+            {
+                //If the previous test did not result in a pass, then the next one will also not pass if the user is not a sudoer.
+                type: exact match
+                command: is_sudoer
+                command_fail: 0
+                case_sensitive: false
+            }
             {
                 type: "exact match"
                 command: "sudo systemsetup getusingnetworktime"
@@ -1006,7 +1076,14 @@
                 command: "launchctl list"
                 command_pass: "^((?!com\\.apple\\.apsd).)*$"
                 case_sensitive: "false"
-            },
+            }
+            {
+                //If the previous test did not result in a pass, then the next one will also not pass if the user is not a sudoer.
+                type: exact match
+                command: is_sudoer
+                command_fail: 0
+                case_sensitive: false
+            }
             {
                 type: "regex match"
                 command: "sudo launchctl list"
