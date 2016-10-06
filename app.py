@@ -18,8 +18,9 @@ const.WARN_FOR_RECOMMENDED = True #TODO: command line flag
 const.WARN_FOR_EXPERIMENTAL = True #TODO: command line flag
 const.FIX_RECOMMENDED_BY_DEFAULT = True #TODO: command line flag
 const.FIX_EXPERIMENTAL_BY_DEFAULT = False #TODO: command line flag
+const.LOG_DEBUG_ALWAYS = True #TODO: command line flag
 
-const.VERSION = "v1.0.0-alpha (pidgeotto)"
+const.VERSION = "v1.1.0 (ivysaur)"
 
 const.API_FILENAME = './scripts/api.sh'
 
@@ -64,6 +65,14 @@ const.LOG_FILE_NAME = 'osx-config-check_%s.log' % get_timestamp()
 const.LOG_FILE_LOC = const.DEFAULT_OUTPUT_LOCATION + const.LOG_FILE_NAME
 
 glob_check_num = 1
+
+#counters
+glob_pass_no_fix = 0
+glob_pass_after_fix = 0
+glob_fail_fix_fail = 0
+glob_fail_fix_skipped = 0
+glob_fail_fix_declined = 0
+glob_check_skipped = 0
 
 class CheckResult(object):
     """Each test can have one of three results, informing the next step."""
@@ -173,7 +182,7 @@ def read_config(config_filename):
 
         #Config MUST specify a description of the check
         description = config_check['description']
-        dprint("Description: %s" % description)
+        write_str("Description: %s" % description, debug=True)
 
         #Config MUST indicate the confidence of the configuration check
         confidence = config_check['confidence']
@@ -246,16 +255,17 @@ def run_check(config_check, last_attempt=False, quiet_fail=False):
         #alert user if he might get prompted for admin privs due to sudo use
         if 'sudo ' in test['command']:
             if const.SKIP_SUDO_TESTS:
-                dprint("Skipping test because app skipping sudo tests.")
+                write_str("Skipping test because app skipping sudo tests.",
+                          debug=True)
             else:
                 fancy_sudo_command = re.sub(
                     "sudo", const.SUDO_STR, test['command'])
-                print(("The next configuration check requires elevated "
-                       "privileges; %syou may be prompted for your current OS "
-                       "X user's password  below%s. The command to be executed "
-                       "is: '%s'") %
-                      (const.COLORS['BOLD'], const.COLORS['ENDC'],
-                       fancy_sudo_command))
+                write_str(("The next configuration check requires elevated "
+                           "privileges; %syou may be prompted for your current "
+                           "OS X user's password  below%s. The command to be "
+                           "executed is: '%s'") %
+                          (const.COLORS['BOLD'], const.COLORS['ENDC'],
+                           fancy_sudo_command))
 
         if 'sudo ' not in test['command'] or not const.SKIP_SUDO_TESTS:
             command_pass = None
@@ -270,24 +280,24 @@ def run_check(config_check, last_attempt=False, quiet_fail=False):
                                     command_pass=command_pass,
                                     command_fail=command_fail)
             if result == CheckResult.explicit_pass:
-                dprint("Test passed exlicitly for '%s'" % test['command'])
+                write_str("Test passed exlicitly for '%s'" % test['command'],
+                          debug=True)
                 break
             elif result == CheckResult.explicit_fail:
-                dprint("Test failed exlicitly for '%s'" % test['command'])
+                write_str("Test failed exlicitly for '%s'" % test['command'],
+                          debug=True)
                 break
             elif result == CheckResult.no_pass:
-                dprint("Test did not pass for '%s'" % test['command'])
+                write_str("Test did not pass for '%s'" % test['command'],
+                          debug=True)
                 continue
             else:
                 raise ValueError("Invalid return value from _execute_check.")
 
     if result == CheckResult.explicit_pass or not quiet_fail:
-        msg = ("\nCHECK #%d: %s... %s" % (glob_check_num,
-                                          config_check.description,
-                                          check_result_to_str(result)))
-        print msg
-        if const.WRITE_TO_LOG_FILE:
-            log_to_file(msg)
+        write_str("\nCHECK #%d: %s... %s" % (glob_check_num,
+                                             config_check.description,
+                                             check_result_to_str(result)))
 
     if (result not in (CheckResult.explicit_pass, CheckResult.all_skipped) and
             last_attempt and do_warn(config_check)):
@@ -346,10 +356,13 @@ def _execute_check(command, comparison_type, case_sensitive, command_pass=None,
 
     stdout = stdout.strip()
 
-    dprint("Command executed to check config: '%s'" % str(command))
-    dprint("Result of command: '%s'" % str(stdout))
-    dprint("Explicit pass condition for command: '%s'" % str(command_pass))
-    dprint("Explicit fail condition for command: '%s'" % str(command_fail))
+    write_str("Command executed to check config: '%s'" % str(command),
+              debug=True)
+    write_str("Result of command: '%s'" % str(stdout), debug=True)
+    write_str("Explicit pass condition for command: '%s'" % str(command_pass),
+              debug=True)
+    write_str("Explicit fail condition for command: '%s'" % str(command_fail),
+              debug=True)
 
     if comparison_type == 'exact match':
         if case_sensitive:
@@ -404,9 +417,9 @@ def _try_fix(config_check, use_sudo=False):
     """
     command = config_check.sudo_fix if use_sudo else config_check.fix
     if use_sudo:
-        print(("\tAttempting configuration fix with elevated privileges; %syou "
-               "may be prompted for your OS X login password%s...") %
-              (const.COLORS['BOLD'], const.COLORS['ENDC']))
+        write_str(("\tAttempting configuration fix with elevated privileges; %s"
+                   "you may be prompted for your OS X login password%s...") %
+                  (const.COLORS['BOLD'], const.COLORS['ENDC']))
     stdoutdata = ""
     stderrdata = ""
     if command is not None:
@@ -414,9 +427,9 @@ def _try_fix(config_check, use_sudo=False):
         process = Popen(command, stdout=PIPE, stderr=STDOUT, shell=True)
         stdoutdata, stderrdata = process.communicate()
 
-    dprint("Command executed: '%s'" % str(command))
-    dprint("Command STDOUT: '%s'" % str(stdoutdata))
-    dprint("Command STDERR: '%s'" % str(stderrdata))
+    write_str("Command executed: '%s'" % str(command), debug=True)
+    write_str("Command STDOUT: '%s'" % str(stdoutdata), debug=True)
+    write_str("Command STDERR: '%s'" % str(stderrdata), debug=True)
 
 def do_fix_and_test(config_check):
     """Attempt to fix misconfiguration, returning the result.
@@ -434,7 +447,7 @@ def do_fix_and_test(config_check):
     Returns:
         bool: Whether an attempted fix was successful.
     """
-    dprint("Entered do_fix_and_test()")
+    write_str("Entered do_fix_and_test()", debug=True)
 
     if config_check.fix is not None:
         _try_fix(config_check, use_sudo=False)
@@ -447,21 +460,25 @@ def do_fix_and_test(config_check):
         _try_fix(config_check, use_sudo=True)
         check_result = run_check(
             config_check, last_attempt=True, quiet_fail=False)
-        return True if check_result == CheckResult.explicit_pass else False
+        return bool(check_result == CheckResult.explicit_pass)
     else:
         return False
 
 def dprint_settings():
     """Prints current global flags when debug printing is enabled."""
-    dprint("ENABLE_DEBUG_PRINT: %s" % str(const.ENABLE_DEBUG_PRINT))
-    dprint("WRITE_TO_LOG_FILE: %s" % str(const.WRITE_TO_LOG_FILE))
-    dprint("PROMPT_FOR_FIXES: %s" % str(const.PROMPT_FOR_FIXES))
-    dprint("ATTEMPT_FIXES: %s" % str(const.ATTEMPT_FIXES))
-    dprint("SKIP_SUDO_TESTS: %s" % str(const.SKIP_SUDO_TESTS))
+    write_str("ENABLE_DEBUG_PRINT: %s" % str(const.ENABLE_DEBUG_PRINT),
+              debug=True)
+    write_str("WRITE_TO_LOG_FILE: %s" % str(const.WRITE_TO_LOG_FILE),
+              debug=True)
+    write_str("PROMPT_FOR_FIXES: %s" % str(const.PROMPT_FOR_FIXES), debug=True)
+    write_str("ATTEMPT_FIXES: %s" % str(const.ATTEMPT_FIXES), debug=True)
+    write_str("SKIP_SUDO_TESTS: %s" % str(const.SKIP_SUDO_TESTS), debug=True)
 
 def main():
     """Main function."""
-    global glob_check_num
+    global glob_check_num, glob_fail_fix_declined, glob_pass_after_fix, \
+           glob_fail_fix_fail, glob_fail_fix_skipped, glob_pass_no_fix, \
+           glob_check_skipped
 
     args = get_sys_args()
     const.ENABLE_DEBUG_PRINT = args['debug-print']
@@ -480,6 +497,8 @@ def main():
         check_result = run_check(config_check)
         if check_result in (CheckResult.explicit_fail, CheckResult.no_pass):
             if not const.ATTEMPT_FIXES:
+                #report-only mode
+                glob_fail_fix_skipped += 1
                 glob_check_num += 1
                 continue
 
@@ -488,8 +507,8 @@ def main():
                 if config_check.manual_fix is not None:
                     completely_failed_tests.append(glob_check_num)
                 else:
-                    dprint(("Could not satisfy test #%d but no manual fix "
-                            "specified.") % glob_check_num)
+                    write_str(("Could not satisfy test #%d but no manual fix "
+                               "specified.") % glob_check_num, debug=True)
             else:
                 #attempt fix, but prompt user first if appropriate
                 if const.PROMPT_FOR_FIXES:
@@ -512,46 +531,65 @@ def main():
                     if prompt.query_yes_no(question=question,
                                            default=_bool_to_yes_no(prompt_default)):
                         fixed = do_fix_and_test(config_check)
-                        dprint("Value of fixed is: %s" % str(fixed))
-                        if not fixed:
+                        write_str("Value of fixed is: %s" % str(fixed),
+                                  debug=True)
+                        if fixed:
+                            glob_pass_after_fix += 1
+                        else:
+                            glob_fail_fix_fail += 1
                             if config_check.manual_fix is not None:
                                 completely_failed_tests.append(glob_check_num)
                             else:
-                                dprint(("Could not satisfy test #%d but no "
-                                        "manual fix specified.") %
-                                       glob_check_num)
+                                write_str(("Could not satisfy test #%d but no "
+                                           "manual fix specified.") %
+                                          glob_check_num, debug=True)
+                    else:
+                        #user declined fix
+                        glob_fail_fix_declined += 1
                 else:
                     fixed = do_fix_and_test(config_check)
-                    dprint("Value of fixed is: %s" % str(fixed))
-                    if not fixed:
+                    write_str("Value of fixed is: %s" % str(fixed), debug=True)
+                    if fixed:
+                        glob_pass_after_fix += 1
+                    else:
+                        glob_fail_fix_fail += 1
                         if config_check.manual_fix is not None:
                             completely_failed_tests.append(glob_check_num)
                         else:
-                            dprint(("Could not satisfy test #%d but no manual "
-                                    "fix specified.") % glob_check_num)
+                            write_str(("Could not satisfy test #%d but no "
+                                       "manual fix specified.") %
+                                      glob_check_num, debug=True)
+
+        elif check_result == CheckResult.explicit_pass:
+            glob_pass_no_fix += 1
+        elif check_result == CheckResult.all_skipped:
+            glob_check_skipped += 1
 
         glob_check_num += 1
 
-    if const.WRITE_TO_LOG_FILE:
-        log_to_file("osx-config %s" % const.VERSION)
-        print("Wrote results to %s'%s'%s." %
-              (const.COLORS['BOLD'], const.LOG_FILE_LOC, const.COLORS['ENDC']))
+    print_tallies()
 
     if len(completely_failed_tests) > 0:
-        print "=========================="
-        print(("%s%d tests could not be automatically fixed, but manual "
-               "instructions are available. Please manually remediate these "
-               "problems and re-run the tool:%s") %
-              (const.COLORS['BOLD'], len(completely_failed_tests),
-               const.COLORS['ENDC']))
+        write_str("==========================")
+        write_str(("%s%d tests could not be automatically fixed, but manual "
+                   "instructions are available. Please manually remediate these"
+                   " problems and re-run the tool:%s") %
+                  (const.COLORS['BOLD'], len(completely_failed_tests),
+                   const.COLORS['ENDC']))
         for test_num in completely_failed_tests:
             description = config_checks[test_num - 1].description
             instructions = config_checks[test_num - 1].manual_fix
-            print "TEST #%d: %s" % (test_num, description)
-            print "%s" % _underline_hyperlink(instructions)
-            print "=========================="
+            write_str("TEST #%d: %s" % (test_num, description))
+            write_str("%s" % _underline_hyperlink(instructions))
+            write_str("==========================")
     else:
-        dprint("List of completely failed tests is empty.")
+        write_str("List of completely failed tests is empty.", debug=True)
+
+    if const.WRITE_TO_LOG_FILE:
+        print("Wrote results to %s'%s'%s. Please review the contents before "
+              "submitting them to third parties, as they may contain sensitive "
+              "information about your system." %
+              (const.COLORS['BOLD'], const.LOG_FILE_LOC, const.COLORS['ENDC']))
 
 def _underline_hyperlink(string):
     """Insert underlines into hyperlinks"""
@@ -564,8 +602,27 @@ def _underline_hyperlink(string):
 def _bool_to_yes_no(boolean):
     return 'yes' if boolean else 'no'
 
+
+def write_str(msg, debug=False):
+    """Print and logs the specified message unless prohibited by settings.
+
+    Args:
+        msg (str): The message to be written.
+        debug (bool): Whether the message is normal or debug-only info.
+            Default: False
+    """
+    if debug:
+        dprint(msg)
+        if ((const.ENABLE_DEBUG_PRINT or const.LOG_DEBUG_ALWAYS) and
+                const.WRITE_TO_LOG_FILE):
+            log_to_file("DEBUG: %s" % msg)
+    else:
+        print "%s" % msg
+        if const.WRITE_TO_LOG_FILE:
+            log_to_file(msg)
+
 def dprint(msg):
-    """Debug print statements."""
+    """Print debug statements."""
     if const.ENABLE_DEBUG_PRINT:
         print "DEBUG: %s" % msg
 
@@ -591,7 +648,7 @@ def _print_banner():
                "---------------------------\n") %
               (const.COLORS['BOLD'], const.COLORS['OKBLUE'],
                const.COLORS['ENDC'], const.VERSION))
-    print _underline_hyperlink(banner)
+    write_str(_underline_hyperlink(banner))
 
 def print_usage():
     """Prints usage for this command-line tool and exits."""
@@ -609,6 +666,56 @@ def print_usage():
           "privileges.\n"
           "\t--help -h            Print this usage information.\n")
     sys.exit()
+
+def print_tallies():
+    """Prints totals of the various possible outcomes of config checks."""
+    total_checks = glob_check_num - 1
+    total_passed = glob_pass_no_fix + glob_pass_after_fix
+    total_failed = (glob_fail_fix_fail + glob_fail_fix_skipped +
+                    glob_fail_fix_declined + glob_check_skipped)
+
+    out = trim_block('''
+    Configurations passed total:                 %s
+    Configurations failed or skipped total:      %s
+    Configurations passed without applying fix:  %s
+    Configurations passed after applying fix:    %s
+    Configurations failed and fix failed:        %s
+    Configurations failed and fix skipped:       %s
+    Configurations failed and fix declined:      %s
+    Configuration checks skipped:                %s
+    ''' % (_number_and_pct(total_passed, total_checks, 'pass'),
+           _number_and_pct(total_failed, total_checks, 'fail'),
+           _number_and_pct(glob_pass_no_fix, total_checks, 'pass'),
+           _number_and_pct(glob_pass_after_fix, total_checks, 'pass'),
+           _number_and_pct(glob_fail_fix_fail, total_checks, 'fail'),
+           _number_and_pct(glob_fail_fix_skipped, total_checks, 'fail'),
+           _number_and_pct(glob_fail_fix_declined, total_checks, 'fail'),
+           _number_and_pct(glob_check_skipped, total_checks, 'skip')))
+
+    write_str(out)
+
+def _number_and_pct(num, total, result):
+    assert result in ('pass', 'fail', 'skip')
+    if result == 'pass':
+        color = const.COLORS['OKGREEN']
+    elif result == 'fail':
+        color = const.COLORS['FAIL']
+    elif result == 'skip':
+        color = const.COLORS['OKBLUE']
+    end_color = '' if color == '' else const.COLORS['ENDC']
+    return "%s%d (%s)%s" % (color, num, _pct(num, total), end_color)
+
+def _pct(num, total):
+    return "{0:.2f}".format(100.0 * num / total) + '%'
+
+def trim_block(multiline_str):
+    """Remove empty lines and leading whitespace"""
+    result = ""
+    for line in multiline_str.split("\n"):
+        line = line.lstrip()
+        if line != '':
+            result += "%s\n" % line
+    return result.rstrip() #remove trailing newline
 
 def get_sys_args():
     """Parses command line args, setting defaults where not specified.

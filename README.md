@@ -25,6 +25,8 @@ In the `Terminal` application, navigate to the directory that contains this app.
 cd ~/Downloads/osx-config-check
 ```
 
+If that directory doesn't exist because the folder you retrieved is named slightly different (such as 'osx-config-check-master' or 'osx-config-check-1.0.0'), you can always type in a portion of the directory name and hit the [TAB] key in Terminal to auto-complete the rest.
+
 Next run the app as follows:
 
 ```bash
@@ -47,10 +49,8 @@ OPTIONS:
 
 ## Sample Output
 
-```bash
-$ python app.py
-------------------------------------------------------------------------------------------
-osx-config-check v1.0.0-alpha (pidgeotto)
+```
+osx-config-check v1.1.0 (ivysaur)
 Download the latest copy of this tool at: https://github.com/kristovatlas/osx-config-check
 Report bugs/issues:
 	* GitHub: https://github.com/kristovatlas/osx-config-check/issues
@@ -66,7 +66,7 @@ CHECK #3: Java Runtime Environment is up to date.... PASSED!
 
 CHECK #4: The System Preferences application is currently closed.... PASSED!
 
-CHECK #5: Current user is a non-admin account.... PASSED!
+CHECK #5: Current user is a non-admin account.... FAILED!
 
 CHECK #6: The OSX application firewall is enabled (system-wide).... PASSED!
 
@@ -88,12 +88,6 @@ CHECK #14: Stealth mode is enabled for OSX: Computer does not respond to ICMP pi
 
 CHECK #15: Stealth mode is enabled for OSX: Computer does not respond to ICMP ping requests or connection attempts from a closed TCP/UDP port. (current user only)... PASSED!
 
-CHECK #16: Automatic whitelisting of Apple-signed applications through the firewall is disabled (system-wide).... FAILED!
-	Apply the following  fix? This will execute  this command:
-		'defaults -currentHost write /Library/Preferences/com.apple.alf allowsignedenabled -bool false' [Y/n] y
-	Attempting configuration fix with elevated privileges; you may be prompted for your OS X login password...
-Password:
-
 CHECK #16: Automatic whitelisting of Apple-signed applications through the firewall is disabled (system-wide).... PASSED!
 
 CHECK #17: Automatic whitelisting of Apple-signed applications through the firewall is disabled (current user only).... PASSED!
@@ -105,15 +99,12 @@ CHECK #19: OpenSSL is up to date.... PASSED!
 CHECK #20: Hidden files are displayed in Finder.... PASSED!
 
 CHECK #21: All application software is currently up to date.... PASSED!
-The next configuration check requires elevated privileges; you may be prompted for your current OS X user's password  below. The command to be executed is: 'sudo softwareupdate --schedule | grep -i 'Automatic check is on''
 
-CHECK #22: Automatic check for software updates is enabled.... PASSED!
+CHECK #22: Automatic check for software updates is enabled.... SKIPPED!
 
 CHECK #23: GateKeeper protection against untrusted applications is enabled.... PASSED!
 
 CHECK #24: Bluetooth is disabled.... FAILED!
-	Apply the following EXPERIMENTAL  fix? This will execute  this command:
-		'defaults write /Library/Preferences/com.apple.Bluetooth ControllerPowerState -bool false; killall -HUP blued' [y/N] n
 
 CHECK #25: The infrared receiver is disabled.... PASSED!
 
@@ -122,22 +113,18 @@ CHECK #26: AirDrop file sharing is disabled.... PASSED!
 CHECK #27: File sharing is disabled.... PASSED!
 
 CHECK #28: Printer sharing is disabled.... PASSED!
-The next configuration check requires elevated privileges; you may be prompted for your current OS X user's password  below. The command to be executed is: 'sudo systemsetup -getremotelogin'
 
-CHECK #29: Remote login is disabled.... PASSED!
+CHECK #29: Remote login is disabled.... FAILED!
 
 CHECK #30: Remote Management is disabled.... PASSED!
-The next configuration check requires elevated privileges; you may be prompted for your current OS X user's password  below. The command to be executed is: 'sudo systemsetup -getremoteappleevents'
 
-CHECK #31: Remote Apple events are disabled.... PASSED!
+CHECK #31: Remote Apple events are disabled.... FAILED!
 
 CHECK #32: Internet Sharing is disabled on all network interfaces.... PASSED!
-The next configuration check requires elevated privileges; you may be prompted for your current OS X user's password  below. The command to be executed is: 'sudo systemsetup getwakeonnetworkaccess'
 
-CHECK #33: Wake on Network Access feature is disabled.... PASSED!
-The next configuration check requires elevated privileges; you may be prompted for your current OS X user's password  below. The command to be executed is: 'sudo systemsetup getusingnetworktime'
+CHECK #33: Wake on Network Access feature is disabled.... FAILED!
 
-CHECK #34: Automatic setting of time and date is disabled.... PASSED!
+CHECK #34: Automatic setting of time and date is disabled.... FAILED!
 
 CHECK #35: IPv6 is disabled on all network interfaces.... PASSED!
 
@@ -236,10 +223,6 @@ CHECK #81: New e-mails composed in Apple Mail are signed by GPGMail.... PASSED!
 CHECK #82: Apple Mail automatically checks for updates to GPGMail.... PASSED!
 
 CHECK #83: The Google Chrome browser is currently closed.... FAILED!
-	Apply the following  fix? This will execute  this command:
-		'killall "Google Chrome" ; sleep 3' [Y/n] y
-
-CHECK #83: The Google Chrome browser is currently closed.... PASSED!
 
 CHECK #84: All Google Chrome web browser profiles prevent information leakage through navigation errors.... PASSED!
 
@@ -247,11 +230,11 @@ CHECK #85: All Google Chrome web browser profiles prevent information leakage th
 
 CHECK #86: All Google Chrome web browser profiles prevent information leakage through network prediction.... PASSED!
 
-CHECK #87: All Google Chrome web browser profiles prevent information leakage by blocking security incidents reports to Google.... PASSED!
+CHECK #87: All Google Chrome web browser profiles prevent information leakage by blocking security incidents reports to Google.... FAILED!
 
-CHECK #88: All Google Chrome web browser profiles have Google Safe Browsing enabled.... PASSED!
+CHECK #88: All Google Chrome web browser profiles have Google Safe Browsing enabled.... FAILED!
 
-CHECK #89: All Google Chrome web browser profiles prevent information leakage through spell-checking network services.... PASSED!
+CHECK #89: All Google Chrome web browser profiles prevent information leakage through spell-checking network services.... FAILED!
 
 CHECK #90: All Google Chrome web browser profiles prevent information leakage through reporting usage statistics to Google.... PASSED!
 
@@ -265,9 +248,9 @@ CHECK #94: All Google Chrome web browser profiles block unsandboxed plug-in soft
 
 CHECK #95: All Google Chrome web browser profiles prevent filling personal information into forms automatically.... PASSED!
 
-CHECK #96: All Google Chrome web browser profiles have disabled Password Manager.... PASSED!
+CHECK #96: All Google Chrome web browser profiles have disabled Password Manager.... FAILED!
 
-CHECK #97: All Google Chrome web browser profiles have disabled automatic sign-in for stored passwords.... PASSED!
+CHECK #97: All Google Chrome web browser profiles have disabled automatic sign-in for stored passwords.... FAILED!
 
 CHECK #98: All Google Chrome web browser profiles have disabled Google CloudPrint.... PASSED!
 
@@ -275,11 +258,11 @@ CHECK #99: All Google Chrome web browser profiles block Flash cookies.... PASSED
 
 CHECK #100: All Google Chrome web browser profiles have disabled the Chrome Pepper Flash Player plug-in.... PASSED!
 
-CHECK #101: All Google Chrome web browser profiles have disabled the Adobe Shockwave Flash plug-in.... PASSED!
+CHECK #101: All Google Chrome web browser profiles have disabled the Adobe Shockwave Flash plug-in.... FAILED!
 
 CHECK #102: All Google Chrome web browser profiles have disabled the Adobe Flash Player plug-in.... PASSED!
 
-CHECK #103: All Google Chrome web browser profiles have disabled the Native Client plug-in.... PASSED!
+CHECK #103: All Google Chrome web browser profiles have disabled the Native Client plug-in.... FAILED!
 
 CHECK #104: All Google Chrome web browser profiles have disabled the Widevine Content Decryption Module plug-in.... PASSED!
 
@@ -292,23 +275,15 @@ CHECK #107: All Google Chrome web browser profiles have enabled the ScriptSafe e
 CHECK #108: Google Chrome is the default web browser.... PASSED!
 
 CHECK #109: OSX/Keydnap malware is not present.... PASSED!
-Wrote results to '~/Documents/osx-config-check_2016-09-01_17-09-36.log'.
-==========================
-3 tests could not be automatically fixed, but manual instructions are available. Please manually remediate these problems and re-run the tool:
-TEST #105: All Google Chrome web browser profiles have enabled the uBlock Origin extension.
-1. For each of your Chrome profiles, visit https://chrome.google.com/webstore/detail/ublock-origin/cjpalhdlnbpafiamejdnhcphjbkeiagm in Google Chrome.
-2. Select "Add to Chrome".
-3. Complete any required follow-up steps as instructed on the screen.
-==========================
-TEST #106: All Google Chrome web browser profiles have enabled the Ghostery extension.
-1. For each of your Chrome profiles, visit https://chrome.google.com/webstore/detail/ghostery/mlomiejdfkolichcflejclcbmpeaniij in Google Chrome.
-2. Select "Add to Chrome".
-3. Complete any required follow-up steps as instructed on the screen.
-==========================
-TEST #107: All Google Chrome web browser profiles have enabled the ScriptSafe extension.
-1. For each of your Chrome profiles, visit https://chrome.google.com/webstore/detail/scriptsafe/oiigbmnaadbkfbmpbfijlflahbdbdgdf in Google Chrome.
-2. Select "Add to Chrome".
-3. Complete any required follow-up steps as instructed on the screen.
+Configurations passed total:                 91 (83.49%)
+Configurations failed or skipped total:      18 (16.51%)
+Configurations passed without applying fix:  91 (83.49%)
+Configurations passed after applying fix:    0 (0.00%)
+Configurations failed and fix failed:        0 (0.00%)
+Configurations failed and fix skipped:       17 (15.60%)
+Configurations failed and fix declined:      0 (0.00%)
+Configuration checks skipped:                1 (0.92%)
+Wrote results to '~/Documents/osx-config-check_2016-09-15_17-44-48.log'. Please review the contents before submitting them to third parties, as they may contain sensitive information about your system.
 ==========================
 ```
 
@@ -325,6 +300,10 @@ This tool encourages users to use DNS servers run by the Google corporation. Thi
     bash dns_helper.sh
 
 And follow the instructions on the screen carefully.
+
+### Something in OS X broke!
+
+A few users have observed that features like screen saver activation with hot corners stopped working after applying configuration fixes. These problems have so far been remedied simply by restarting the system.
 
 ## Contributing
 
