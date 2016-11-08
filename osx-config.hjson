@@ -1046,7 +1046,7 @@
             {
                 type: "regex match"
                 command: "git --version"
-                command_pass: ".*(command not found|2\\.9\\.3).*"
+                command_pass: ".*(command not found|2\\.9\\.3|2\\.\\d\\d+\\.\\d+).*"
                 case_sensitive: "false"
             }
         ]
