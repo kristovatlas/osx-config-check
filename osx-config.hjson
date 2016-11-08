@@ -504,7 +504,7 @@
             {
                 type: "exact match"
                 command: "openssl version"
-                command_pass: "OpenSSL 1.0.2h  3 May 2016"
+                command_pass: "OpenSSL 1.0.2j  26 Sep 2016"
                 case_sensitive: "false"
             }
         ]
