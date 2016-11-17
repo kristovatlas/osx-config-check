@@ -137,8 +137,8 @@
         [
             {
                 type: "exact match"
-                command: "ps ax | grep -c '/Applications/System Preferences.app/Contents/MacOS/System Preferences'"
-                command_pass: "2" //a value of "3" means it's running -- the other 2 are `/bin/sh` and the `grep` command.
+                command: "ps ax | grep -c '/Applications/System Preferences.app/Contents/MacOS/[S]ystem Preferences'"
+                command_pass: "0" //a value of "1" or higher means it's running
                 case_sensitive: "false"
             }
         ]
@@ -1249,8 +1249,8 @@
         [
             {
                 type: "exact match"
-                command: "ps ax | grep -c '/Applications/Safari.app/Contents/MacOS/Safari'"
-                command_pass: "2" //a value of "3" means it's running -- the other 2 are `/bin/sh` and the `grep` command.
+                command: "ps ax | grep -c '/Applications/Safari.app/Contents/MacOS/[S]afari'"
+                command_pass: "0" //a value of "1" means it's running
                 case_sensitive: "false"
             }
         ]
@@ -1784,8 +1784,8 @@
         [
             {
                 type: "exact match"
-                command: "ps ax | grep -c '/Applications/Mail.app/Contents/MacOS/Mail'"
-                command_pass: 2 //a value of "3" means it's running -- the other 2 are `/bin/sh` and the `grep` command.
+                command: "ps ax | grep -c '/Applications/Mail.app/Contents/MacOS/[M]ail'"
+                command_pass: 0 //a value of "1" means it's running
                 case_sensitive: false
             }
         ]
@@ -2021,8 +2021,8 @@
             },
             {
                 type: "exact match"
-                command: "ps ax | grep -c 'Google Chrome.app'"
-                command_pass: 2 //a value of "3" or higher means it's running -- the first 2 are `/bin/sh` and the `grep` command.
+                command: "ps ax | grep -c '[G]oogle Chrome.app'"
+                command_pass: 0 //a value of "1" or higher means it's running
                 case_sensitive: false
             }
         ]
