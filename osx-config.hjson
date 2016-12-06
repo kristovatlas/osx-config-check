@@ -110,9 +110,10 @@
             {
                 //Past test if the latest version available via `brew cask install java` is installed
                 type: "exact match"
-                command: java -version 2>&1 >/dev/null | grep 'java version'
-                command_pass:
-                    java version "1.8.0_102"
+                #java version "1.8.0_102"
+                command: java -version 2>&1 >/dev/null | grep 'java version' | python ./scripts/semver_check.py --prefix 'java version "' '>=1.8.0_102'
+                command_pass: 1
+                command_fail: 0
                 case_sensitive: false
             }
         ]
@@ -502,10 +503,12 @@
         tests:
         [
             {
-                type: "exact match"
-                command: "openssl version"
-                command_pass: "OpenSSL 1.0.2j  26 Sep 2016"
-                case_sensitive: "false"
+                type: exact match
+                # $ openssl version
+                # OpenSSL 1.0.2j  26 Sep 2016
+                command: openssl version | python ./scripts/semver_check.py --prefix "OpenSSL " ">=1.0.2h"
+                command_pass: 1
+                case_sensitive: false
             }
         ]
         fix:
@@ -1045,9 +1048,12 @@
         [
             {
                 type: "regex match"
-                command: "git --version"
-                command_pass: ".*(command not found|2\\.9\\.3|2\\.\\d\\d+\\.\\d+).*"
-                case_sensitive: "false"
+                # $ git --version
+                # git version 2.10.2
+                command: git --version | python ./scripts/semver_check.py --prefix "git version " ">=2.10.2"
+                command_pass: 1
+                command_fail: 0
+                case_sensitive: false
             }
         ]
         fix:
@@ -1121,18 +1127,18 @@
         tests:
         [
             {
-                type: "regex match"
-                command: "curl --version"
-                command_pass: ".*(command not found|7\\.50\\.1).*"
+                type: regex match
+                command: curl --version | python ./scripts/semver_check.py --prefix "curl " ">=7.51.0"
+                command_pass: 1
+                command_fail: 0
                 case_sensitive: "false"
             }
         ]
         fix:
         {
             command:
-                brew update ; brew install curl ; brew upgrade curl ; python ./scripts/set_path_precedence.py "/usr/local/bin" "/usr/bin"
+                brew update ; brew install curl ; brew upgrade curl ; bash ./scripts/set_curl_latest_path.sh
         }
-        undo: "brew unlink curl"
     },
     {
         description: "FileVault file system encryption is enabled."
