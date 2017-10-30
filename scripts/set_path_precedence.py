@@ -63,7 +63,7 @@ def _is_path_set_in_line(line, dir_1):
 def dprint(data):
     """Print debug data, if enabled."""
     if ENABLE_DEBUG_PRINT:
-        print "DEBUG: %s" % data
+        print("DEBUG: %s" % data)
 
 if __name__ == '__main__':
     _main()

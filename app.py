@@ -354,7 +354,7 @@ def _execute_check(command, comparison_type, case_sensitive, command_pass=None,
     process = Popen(command, stdout=PIPE, stderr=STDOUT, shell=True)
     stdout, _ = process.communicate()
 
-    stdout = stdout.strip()
+    stdout = stdout.strip().decode(encoding='UTF-8')
 
     write_str("Command executed to check config: '%s'" % str(command),
               debug=True)
@@ -617,14 +617,14 @@ def write_str(msg, debug=False):
                 const.WRITE_TO_LOG_FILE):
             log_to_file("DEBUG: %s" % msg)
     else:
-        print "%s" % msg
+        print("%s" % msg)
         if const.WRITE_TO_LOG_FILE:
             log_to_file(msg)
 
 def dprint(msg):
     """Print debug statements."""
     if const.ENABLE_DEBUG_PRINT:
-        print "DEBUG: %s" % msg
+        print("DEBUG: %s" % msg)
 
 def is_match(regex, string, ignore_case=False):
     """Check if regex matches string."""
@@ -748,7 +748,7 @@ def get_sys_args():
         elif flag == '-h' or flag == '--help':
             print_usage()
         else:
-            print "ERROR: Unrecognized option '%s'" % flag
+            print("ERROR: Unrecognized option '%s'" % flag)
             print_usage()
 
     return args
