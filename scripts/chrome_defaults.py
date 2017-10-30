@@ -92,6 +92,12 @@ import shutil
 from copy import deepcopy
 import re
 
+try:
+    unicode
+except NameError:
+    # In Python 3 unicode no longer exists (it's just str)
+    unicode = str
+
 UNDERLINE = '\033[4m'
 ENDC = '\033[0m'
 
@@ -103,14 +109,14 @@ def _main():
     preferences_json = _get_json(args['preferences_filename'])
     if args['action'] == 'read':
         if args['chrome_property'] is None:
-            print "%s" % json.dumps(preferences_json, indent=4)
+            print("%s" % json.dumps(preferences_json, indent=4))
             sys.exit()
         else:
             try:
                 args['value'] = get_json_field(
                     preferences_json, args['chrome_property'],
                     args['preferences_filename'])
-                print "%s" % normalize(args['value'])
+                print("%s" % normalize(args['value']))
             except KeyError:
                 print("The attribute '%s' does not exist in '%s'." %
                       (args['chrome_property'], args['preferences_filename']))
@@ -484,10 +490,10 @@ def _get_value_and_handle_errors(value, type_arg):
     try:
         return _get_value(value, type_arg)
     except ValueError as err:
-        print re.sub('"', '', str(err))
+        print(re.sub('"', '', str(err)))
         print_usage()
     except TypeError as err:
-        print re.sub('"', '', str(err))
+        print(re.sub('"', '', str(err)))
         print_usage()
 
 def _get_value(value, type_arg):
@@ -557,7 +563,7 @@ def _make_backup(filename):
 def dprint(data):
     """Print debug information."""
     if DEBUG_PRINT:
-        print "DEBUG: %s" % str(data)
+        print("DEBUG: %s" % str(data))
 
 if __name__ == "__main__":
     _main()

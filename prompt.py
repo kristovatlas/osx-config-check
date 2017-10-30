@@ -5,6 +5,15 @@ http://stackoverflow.com/questions/3041986/python-command-line-yes-no-input
 
 import sys
 
+try:
+    input = raw_input
+except NameError:
+    # In Python 2 there is raw_input() that takes a string from stdin and
+    # input() that takes a string from stdin and evaluates it. That last
+    # function is not very useful and has been removed in Python 3, while
+    # raw_input() has been renamed to input()
+    pass
+
 def query_yes_no(question, default="yes"):
     """Ask a yes/no question via raw_input() and return their answer.
 
@@ -29,7 +38,7 @@ def query_yes_no(question, default="yes"):
 
     while True:
         sys.stdout.write(question + prompt)
-        choice = raw_input().lower()
+        choice = input().lower()
         if default is not None and choice == '':
             return valid[default]
         elif choice in valid:
