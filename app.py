@@ -354,7 +354,7 @@ def _execute_check(command, comparison_type, case_sensitive, command_pass=None,
     process = Popen(command, stdout=PIPE, stderr=STDOUT, shell=True)
     stdout, _ = process.communicate()
 
-    stdout = stdout.strip()
+    stdout = stdout.strip().decode(encoding='UTF-8')
 
     write_str("Command executed to check config: '%s'" % str(command),
               debug=True)
