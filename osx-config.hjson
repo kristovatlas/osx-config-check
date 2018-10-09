@@ -58,7 +58,7 @@
                 Homebrew is a useful tool for installing and updating programs from the command line.
                 There are various things that can go wrong when attempting to install Homebrew.
                 Please review their installation guide here:
-                https://github.com/Homebrew/brew/blob/master/share/doc/homebrew/Installation.md
+                https://github.com/Homebrew/brew/blob/master/docs/Installation.md
                 '''
         }
     }
