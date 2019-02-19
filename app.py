@@ -280,11 +280,11 @@ def run_check(config_check, last_attempt=False, quiet_fail=False):
                                     command_pass=command_pass,
                                     command_fail=command_fail)
             if result == CheckResult.explicit_pass:
-                write_str("Test passed exlicitly for '%s'" % test['command'],
+                write_str("Test passed explicitly for '%s'" % test['command'],
                           debug=True)
                 break
             elif result == CheckResult.explicit_fail:
-                write_str("Test failed exlicitly for '%s'" % test['command'],
+                write_str("Test failed explicitly for '%s'" % test['command'],
                           debug=True)
                 break
             elif result == CheckResult.no_pass:
